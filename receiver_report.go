@@ -3,8 +3,6 @@ package rtcp
 import (
 	"encoding/binary"
 	"fmt"
-
-	"github.com/pions/webrtc/internal/util"
 )
 
 // A ReceiverReport (RR) packet provides reception quality feedback for an RTP stream
@@ -169,7 +167,7 @@ func (r *ReceiverReport) Header() Header {
 	return Header{
 		Count:  uint8(len(r.Reports)),
 		Type:   TypeReceiverReport,
-		Length: uint16((r.len()/4)-1) + uint16(util.GetPadding(len(r.ProfileExtensions))),
+		Length: uint16((r.len()/4)-1) + uint16(getPadding(len(r.ProfileExtensions))),
 	}
 }
 

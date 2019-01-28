@@ -2,8 +2,6 @@ package rtcp
 
 import (
 	"encoding/binary"
-
-	"github.com/pions/webrtc/internal/util"
 )
 
 // SDESType is the item type used in the RTCP SDES control packet.
@@ -204,7 +202,7 @@ func (s SourceDescriptionChunk) Marshal() ([]byte, error) {
 	rawPacket = append(rawPacket, uint8(SDESEnd))
 
 	// additional null octets MUST be included if needed to pad until the next 32-bit boundary
-	rawPacket = append(rawPacket, make([]byte, util.GetPadding(len(rawPacket)))...)
+	rawPacket = append(rawPacket, make([]byte, getPadding(len(rawPacket)))...)
 
 	return rawPacket, nil
 }
@@ -250,7 +248,7 @@ func (s SourceDescriptionChunk) len() int {
 	len += sdesTypeLen // for terminating null octet
 
 	// align to 32-bit boundary
-	len += util.GetPadding(len)
+	len += getPadding(len)
 
 	return len
 }

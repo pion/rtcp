@@ -2,8 +2,6 @@ package rtcp
 
 import (
 	"encoding/binary"
-
-	"github.com/pions/webrtc/internal/util"
 )
 
 // The Goodbye packet indicates that one or more sources are no longer active.
@@ -87,7 +85,7 @@ func (g *Goodbye) Unmarshal(rawPacket []byte) error {
 		return errWrongType
 	}
 
-	if util.GetPadding(len(rawPacket)) != 0 {
+	if getPadding(len(rawPacket)) != 0 {
 		return errPacketTooShort
 	}
 
@@ -136,7 +134,7 @@ func (g *Goodbye) len() int {
 	l := headerLength + srcsLength + reasonLength
 
 	// align to 32-bit boundary
-	return l + util.GetPadding(l)
+	return l + getPadding(l)
 }
 
 // DestinationSSRC returns an array of SSRC values that this packet refers to.
