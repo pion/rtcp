@@ -34,12 +34,7 @@ func (p PictureLossIndication) Marshal() ([]byte, error) {
 	binary.BigEndian.PutUint32(packetBody, p.SenderSSRC)
 	binary.BigEndian.PutUint32(packetBody[4:], p.MediaSSRC)
 
-	h := Header{
-		Count:  FormatPLI,
-		Type:   TypePayloadSpecificFeedback,
-		Length: pliLength,
-	}
-	hData, err := h.Marshal()
+	hData, err := p.header.Marshal()
 	if err != nil {
 		return nil, err
 	}
@@ -54,12 +49,11 @@ func (p *PictureLossIndication) Unmarshal(rawPacket []byte) error {
 		return errPacketTooShort
 	}
 
-	var h Header
-	if err := h.Unmarshal(rawPacket); err != nil {
+	if err := p.header.Unmarshal(rawPacket); err != nil {
 		return err
 	}
 
-	if h.Type != TypePayloadSpecificFeedback || h.Count != FormatPLI {
+	if p.header.Type != TypePayloadSpecificFeedback || p.header.Count != FormatPLI {
 		return errWrongType
 	}
 
