@@ -12,8 +12,6 @@ type PictureLossIndication struct {
 
 	// SSRC where the loss was experienced
 	MediaSSRC uint32
-
-	header Header
 }
 
 const (
@@ -70,7 +68,11 @@ func (p *PictureLossIndication) Unmarshal(rawPacket []byte) error {
 
 // Header returns the Header associated with this packet.
 func (p *PictureLossIndication) Header() Header {
-	return p.header
+	return Header{
+		Count:  FormatPLI,
+		Type:   TypePayloadSpecificFeedback,
+		Length: pliLength,
+	}
 }
 
 func (p *PictureLossIndication) len() int {
