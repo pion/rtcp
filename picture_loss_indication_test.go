@@ -122,3 +122,42 @@ func TestPictureLossIndicationRoundTrip(t *testing.T) {
 		}
 	}
 }
+
+func TestPictureLossIndicationUnmarshalHeader(t *testing.T) {
+	for _, test := range []struct {
+		Name      string
+		Data      []byte
+		Want      Header
+		WantError error
+	}{
+		{
+			Name: "valid header",
+			Data: []byte{
+				// v=2, p=0, FMT=1, PSFB, len=1
+				0x81, 0xce, 0x00, 0x02,
+				// ssrc=0x0
+				0x00, 0x00, 0x00, 0x00,
+				// ssrc=0x4bc4fcb4
+				0x4b, 0xc4, 0xfc, 0xb4,
+			},
+			Want: Header{
+				Count:  FormatPLI,
+				Type:   TypePayloadSpecificFeedback,
+				Length: pliLength,
+			},
+		},
+	} {
+		var pli PictureLossIndication
+		err := pli.Unmarshal(test.Data)
+		if got, want := err, test.WantError; got != want {
+			t.Fatalf("Unmarshal header %q rr: err = %v, want %v", test.Name, got, want)
+		}
+		if err != nil {
+			continue
+		}
+
+		if got, want := pli.Header(), test.Want; !reflect.DeepEqual(got, want) {
+			t.Fatalf("Unmarshal header %q rr: got %v, want %v", test.Name, got, want)
+		}
+	}
+}
