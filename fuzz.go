@@ -37,7 +37,7 @@ func Fuzz(data []byte) int {
 			return 0
 		}
 
-		packet, _, err := Unmarshal(data)
+		packet, err := Unmarshal(data)
 		if err != nil {
 			return 0
 		}

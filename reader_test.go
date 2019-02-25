@@ -80,7 +80,7 @@ func TestUnmarshal(t *testing.T) {
 		t.Fatalf("Read rr: %v", err)
 	}
 	var parsed Packet
-	if parsed, _, err = Unmarshal(packet); err != nil {
+	if parsed, err = Unmarshal(packet); err != nil {
 		t.Errorf("Unmarshal parsed: %v", err)
 	}
 	assert.IsType(t, parsed, (*ReceiverReport)(nil), "Unmarshalled to incorrect type")
@@ -108,7 +108,7 @@ func TestUnmarshal(t *testing.T) {
 		t.Fatalf("Read sdes: %v", err)
 	}
 
-	if parsed, _, err = Unmarshal(packet); err != nil {
+	if parsed, err = Unmarshal(packet); err != nil {
 		t.Errorf("Unmarshal parsed: %v", err)
 	}
 	assert.IsType(t, parsed, (*SourceDescription)(nil), "Unmarshalled to incorrect type")
@@ -137,7 +137,7 @@ func TestUnmarshal(t *testing.T) {
 		t.Fatalf("Read bye: %v", err)
 	}
 
-	if parsed, _, err = Unmarshal(packet); err != nil {
+	if parsed, err = Unmarshal(packet); err != nil {
 		t.Errorf("Unmarshal parsed: %v", err)
 	}
 
@@ -156,7 +156,7 @@ func TestUnmarshal(t *testing.T) {
 		t.Fatalf("Read pli: %v", err)
 	}
 
-	if parsed, _, err = Unmarshal(packet); err != nil {
+	if parsed, err = Unmarshal(packet); err != nil {
 		t.Errorf("Unmarshal parsed: %v", err)
 	}
 
@@ -176,7 +176,7 @@ func TestUnmarshal(t *testing.T) {
 		t.Fatalf("Read rrr: %v", err)
 	}
 
-	if parsed, _, err = Unmarshal(packet); err != nil {
+	if parsed, err = Unmarshal(packet); err != nil {
 		t.Errorf("Unmarshal parsed: %v", err)
 	}
 
