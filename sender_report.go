@@ -1,6 +1,8 @@
 package rtcp
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+)
 
 // A SenderReport (SR) packet provides reception quality feedback for an RTP stream
 type SenderReport struct {
@@ -31,6 +33,9 @@ type SenderReport struct {
 	// block conveys statistics on the reception of RTP packets from a
 	// single synchronization source.
 	Reports []ReceptionReport
+	// ProfileExtensions contains additional, payload-specific information that needs to
+	// be reported regularly about the sender.
+	ProfileExtensions []byte
 }
 
 var (
@@ -96,18 +101,21 @@ func (r SenderReport) Marshal() ([]byte, error) {
 	binary.BigEndian.PutUint32(packetBody[srPacketCountOffset:], r.PacketCount)
 	binary.BigEndian.PutUint32(packetBody[srOctetCountOffset:], r.OctetCount)
 
-	for i, rp := range r.Reports {
+	offset := srHeaderLength
+	for _, rp := range r.Reports {
 		data, err := rp.Marshal()
 		if err != nil {
 			return nil, err
 		}
-		offset := srHeaderLength + receptionReportLength*i
 		copy(packetBody[offset:], data)
+		offset += receptionReportLength
 	}
 
 	if len(r.Reports) > countMax {
 		return nil, errTooManyReports
 	}
+
+	copy(packetBody[offset:], r.ProfileExtensions)
 
 	hData, err := r.Header().Marshal()
 	if err != nil {
@@ -179,12 +187,24 @@ func (r *SenderReport) Unmarshal(rawPacket []byte) error {
 	r.PacketCount = binary.BigEndian.Uint32(packetBody[srPacketCountOffset:])
 	r.OctetCount = binary.BigEndian.Uint32(packetBody[srOctetCountOffset:])
 
-	for i := srReportOffset; i < len(packetBody); i += receptionReportLength {
+	offset := srReportOffset
+	for i := 0; i < int(h.Count); i++ {
+		rrEnd := offset + receptionReportLength
+		if rrEnd > len(packetBody) {
+			return errPacketTooShort
+		}
+		rrBody := packetBody[offset : offset+receptionReportLength]
+		offset = rrEnd
+
 		var rr ReceptionReport
-		if err := rr.Unmarshal(packetBody[i:]); err != nil {
+		if err := rr.Unmarshal(rrBody); err != nil {
 			return err
 		}
 		r.Reports = append(r.Reports, rr)
+	}
+
+	if offset < len(packetBody) {
+		r.ProfileExtensions = packetBody[offset:]
 	}
 
 	if uint8(len(r.Reports)) != h.Count {
@@ -208,7 +228,7 @@ func (r *SenderReport) len() int {
 	for _, rep := range r.Reports {
 		repsLength += rep.len()
 	}
-	return headerLength + srHeaderLength + repsLength
+	return headerLength + srHeaderLength + repsLength + len(r.ProfileExtensions)
 }
 
 // Header returns the Header associated with this packet.
