@@ -14,7 +14,8 @@ type ReceiverReport struct {
 	// block conveys statistics on the reception of RTP packets from a
 	// single synchronization source.
 	Reports []ReceptionReport
-	// extra data from the end of the packet; the application can parse this if needed.
+	// Extension contains additional, payload-specific information that needs to
+	// be reported regularly about the receiver.
 	ProfileExtensions []byte
 }
 
