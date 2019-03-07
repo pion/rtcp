@@ -11,13 +11,13 @@ type Packet interface {
 }
 
 // Unmarshal is a factory a polymorphic RTCP packet, and its header,
-func Unmarshal(rawPacket []byte) (Packet, error) {
+func Unmarshal(rawPacket []byte) (Packet, Header, error) {
 	var h Header
 	var p Packet
 
 	err := h.Unmarshal(rawPacket)
 	if err != nil {
-		return nil, err
+		return nil, h, err
 	}
 
 	switch h.Type {
@@ -58,5 +58,5 @@ func Unmarshal(rawPacket []byte) (Packet, error) {
 	}
 
 	err = p.Unmarshal(rawPacket)
-	return p, err
+	return p, h, err
 }
