@@ -49,6 +49,8 @@ func Unmarshal(rawPacket []byte) (Packet, error) {
 			p = new(PictureLossIndication)
 		case FormatSLI:
 			p = new(SliceLossIndication)
+		case FormatREMB:
+			p = new(ReceiverEstimatedMaximumBitrate)
 		default:
 			p = new(RawPacket)
 		}

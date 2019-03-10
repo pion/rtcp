@@ -37,6 +37,7 @@ Check out the **[contributing wiki](https://github.com/pions/webrtc/wiki/Contrib
 * [Woodrow Douglass](https://github.com/wdouglass) *RTCP, RTP improvements, G.722 support, Bugfixes*
 * [Sean DuBois](https://github.com/Sean-Der) - *Linter fixes*
 * [adwpc](https://github.com/adwpc) - *Fix PictureLossIndication Unmarshal error*
+* [Luke Curley](https://github.com/kixelated)
 
 ### License
 MIT License - see [LICENSE](LICENSE) for full text

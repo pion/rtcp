@@ -38,7 +38,7 @@ type SenderReport struct {
 	ProfileExtensions []byte
 }
 
-var (
+const (
 	srHeaderLength      = 24
 	srSSRCOffset        = 0
 	srNTPOffset         = srSSRCOffset + ssrcLength
