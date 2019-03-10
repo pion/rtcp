@@ -34,7 +34,7 @@ type ReceptionReport struct {
 	Delay uint32
 }
 
-var (
+const (
 	receptionReportLength = 24
 	fractionLostOffset    = 4
 	totalLostOffset       = 5
