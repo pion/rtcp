@@ -180,3 +180,15 @@ func TestReadEOF(t *testing.T) {
 		t.Fatalf("read short header: got err = %v, want %v", got, want)
 	}
 }
+
+func TestConcatinated(t *testing.T) {
+	packets, err := Unmarshal(realPacket)
+	if err != nil {
+		t.Errorf("Error Unmarshalling concatinated packet: %s\n", err)
+	}
+	//we only need to check length here, the actual content is tested in
+	//TestUnmarshal above
+	if len(packets) != 5 {
+		t.Errorf("Expected 5 packets, got %d\n", len(packets))
+	}
+}
