@@ -37,11 +37,11 @@ func (r *Decoder) DecodePacket() (Packet, error) {
 	}
 	data := append(headerBuf, bodyBuf...)
 
-	p, err := Unmarshal(data)
+	p, _, err := Unmarshal(data)
 
 	if err == nil {
 		//because of the length check above, the length of p should be exactly 1.
-		return p[0], err
+		return p, err
 	}
 
 	return nil, err

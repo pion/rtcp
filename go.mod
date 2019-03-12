@@ -1,5 +1,5 @@
 module github.com/pions/rtcp
 
-go 1.12
+go 1.11
 
 require github.com/stretchr/testify v1.3.0
