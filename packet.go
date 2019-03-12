@@ -10,6 +10,9 @@ type Packet interface {
 	Unmarshal(rawPacket []byte) error
 }
 
+// CompoundPacket is a slice of packets. It's defined so that we can create members that use it as a receiver.
+type CompoundPacket []Packet
+
 // unmarshal is a factory which pulls the first RTCP packet from a bytestream,
 // and returns it's parsed representation, and the amount of data that was processed.
 func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
@@ -69,8 +72,8 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 
 // Unmarshal takes an entire udp datagram (which may consist of multiple RTCP packets) and returns
 // an unmarshalled array of packets.
-func Unmarshal(rawData []byte) ([]Packet, error) {
-	var out []Packet
+func Unmarshal(rawData []byte) (CompoundPacket, error) {
+	var out CompoundPacket
 
 	for len(rawData) != 0 {
 		p, processed, err := unmarshal(rawData)

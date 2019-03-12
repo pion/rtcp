@@ -1,6 +1,7 @@
 package rtcp
 
 import (
+	"bytes"
 	"reflect"
 	"testing"
 
@@ -70,6 +71,7 @@ var realPacket = []byte{
 }
 
 func TestUnmarshal(t *testing.T) {
+	decoder := NewDecoder(bytes.NewReader(realPacket))
 	packets, err := Unmarshal(realPacket)
 
 	if err != nil {
@@ -82,6 +84,8 @@ func TestUnmarshal(t *testing.T) {
 
 	// ReceiverReport
 	packet := packets[0]
+	decoded, err := decoder.DecodePacket()
+	assert.NoError(t, err)
 	assert.IsType(t, packet, (*ReceiverReport)(nil), "Unmarshalled to incorrect type")
 
 	wantRR := &ReceiverReport{
@@ -97,12 +101,17 @@ func TestUnmarshal(t *testing.T) {
 		}},
 		ProfileExtensions: []byte{},
 	}
-	if got, want := wantRR, packet; !reflect.DeepEqual(got, want) {
+	if want, got := wantRR, packet; !reflect.DeepEqual(got, want) {
+		t.Errorf("Unmarshal rr: got %#v, want %#v", got, want)
+	}
+	if want, got := wantRR, decoded; !reflect.DeepEqual(got, want) {
 		t.Errorf("Unmarshal rr: got %#v, want %#v", got, want)
 	}
 
 	// SourceDescription
 	packet = packets[1]
+	decoded, err = decoder.DecodePacket()
+	assert.NoError(t, err)
 	assert.IsType(t, packet, (*SourceDescription)(nil), "Unmarshalled to incorrect type")
 
 	wantSdes := &SourceDescription{
@@ -122,9 +131,14 @@ func TestUnmarshal(t *testing.T) {
 	if got, want := packet, wantSdes; !reflect.DeepEqual(got, want) {
 		t.Errorf("Unmarshal sdes: got %#v, want %#v", got, want)
 	}
+	if got, want := decoded, wantSdes; !reflect.DeepEqual(got, want) {
+		t.Errorf("Unmarshal sdes: got %#v, want %#v", got, want)
+	}
 
 	// Goodbye
 	packet = packets[2]
+	decoded, err = decoder.DecodePacket()
+	assert.NoError(t, err)
 	assert.IsType(t, packet, (*Goodbye)(nil), "Unmarshalled to incorrect type")
 
 	wantBye := &Goodbye{
@@ -133,9 +147,14 @@ func TestUnmarshal(t *testing.T) {
 	if got, want := packet, wantBye; !reflect.DeepEqual(got, want) {
 		t.Errorf("Unmarshal bye: got %#v, want %#v", got, want)
 	}
+	if got, want := decoded, wantBye; !reflect.DeepEqual(got, want) {
+		t.Errorf("Unmarshal bye: got %#v, want %#v", got, want)
+	}
 
 	// PictureLossIndication
 	packet = packets[3]
+	decoded, err = decoder.DecodePacket()
+	assert.NoError(t, err)
 	assert.IsType(t, packet, (*PictureLossIndication)(nil), "Unmarshalled to incorrect type")
 
 	wantPli := &PictureLossIndication{
@@ -145,9 +164,14 @@ func TestUnmarshal(t *testing.T) {
 	if got, want := packet, wantPli; !reflect.DeepEqual(got, want) {
 		t.Errorf("Unmarshal pli: got %#v, want %#v", got, want)
 	}
+	if got, want := decoded, wantPli; !reflect.DeepEqual(got, want) {
+		t.Errorf("Unmarshal pli: got %#v, want %#v", got, want)
+	}
 
 	// RapidResynchronizationRequest
 	packet = packets[4]
+	decoded, err = decoder.DecodePacket()
+	assert.NoError(t, err)
 	assert.IsType(t, packet, (*RapidResynchronizationRequest)(nil), "Unmarshalled to incorrect type")
 
 	wantRrr := &RapidResynchronizationRequest{
@@ -155,6 +179,9 @@ func TestUnmarshal(t *testing.T) {
 		MediaSSRC:  0x902f9e2e,
 	}
 	if got, want := packet, wantRrr; !reflect.DeepEqual(got, want) {
+		t.Errorf("Unmarshal rrr: got %#v, want %#v", got, want)
+	}
+	if got, want := decoded, wantRrr; !reflect.DeepEqual(got, want) {
 		t.Errorf("Unmarshal rrr: got %#v, want %#v", got, want)
 	}
 }
