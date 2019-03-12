@@ -1,8 +1,6 @@
 package rtcp
 
 import (
-	"bytes"
-	"io"
 	"reflect"
 	"testing"
 
@@ -72,13 +70,18 @@ var realPacket = []byte{
 }
 
 func TestUnmarshal(t *testing.T) {
-	d := NewDecoder(bytes.NewReader(realPacket))
+	packets, err := Unmarshal(realPacket)
+
+	if err != nil {
+		t.Fatalf("Error unmarshalling packets: %s", err)
+	}
+
+	if len(packets) != 5 {
+		t.Fatalf("Read the wrong number of packets from input array")
+	}
 
 	// ReceiverReport
-	packet, err := d.DecodePacket()
-	if err != nil {
-		t.Fatalf("Read rr: %v", err)
-	}
+	packet := packets[0]
 	assert.IsType(t, packet, (*ReceiverReport)(nil), "Unmarshalled to incorrect type")
 
 	wantRR := &ReceiverReport{
@@ -99,10 +102,7 @@ func TestUnmarshal(t *testing.T) {
 	}
 
 	// SourceDescription
-	packet, err = d.DecodePacket()
-	if err != nil {
-		t.Fatalf("Read sdes: %v", err)
-	}
+	packet = packets[1]
 	assert.IsType(t, packet, (*SourceDescription)(nil), "Unmarshalled to incorrect type")
 
 	wantSdes := &SourceDescription{
@@ -124,10 +124,7 @@ func TestUnmarshal(t *testing.T) {
 	}
 
 	// Goodbye
-	packet, err = d.DecodePacket()
-	if err != nil {
-		t.Fatalf("Read bye: %v", err)
-	}
+	packet = packets[2]
 	assert.IsType(t, packet, (*Goodbye)(nil), "Unmarshalled to incorrect type")
 
 	wantBye := &Goodbye{
@@ -138,11 +135,7 @@ func TestUnmarshal(t *testing.T) {
 	}
 
 	// PictureLossIndication
-	packet, err = d.DecodePacket()
-	if err != nil {
-		t.Fatalf("Read pli: %v", err)
-	}
-
+	packet = packets[3]
 	assert.IsType(t, packet, (*PictureLossIndication)(nil), "Unmarshalled to incorrect type")
 
 	wantPli := &PictureLossIndication{
@@ -154,10 +147,7 @@ func TestUnmarshal(t *testing.T) {
 	}
 
 	// RapidResynchronizationRequest
-	packet, err = d.DecodePacket()
-	if err != nil {
-		t.Fatalf("Read rrr: %v", err)
-	}
+	packet = packets[4]
 	assert.IsType(t, packet, (*RapidResynchronizationRequest)(nil), "Unmarshalled to incorrect type")
 
 	wantRrr := &RapidResynchronizationRequest{
@@ -174,21 +164,8 @@ func TestReadEOF(t *testing.T) {
 		0x81, 0xc9, // missing type & len
 	}
 
-	d := NewDecoder(bytes.NewReader(shortHeader))
-	_, err := d.DecodePacket()
-	if got, want := err, io.ErrUnexpectedEOF; got != want {
+	_, err := Unmarshal(shortHeader)
+	if got, want := err, errPacketTooShort; got != want {
 		t.Fatalf("read short header: got err = %v, want %v", got, want)
-	}
-}
-
-func TestConcatinated(t *testing.T) {
-	packets, err := UnmarshalDatagram(realPacket)
-	if err != nil {
-		t.Errorf("Error Unmarshalling concatinated packet: %s\n", err)
-	}
-	//we only need to check length here, the actual content is tested in
-	//TestUnmarshal above
-	if len(packets) != 5 {
-		t.Errorf("Expected 5 packets, got %d\n", len(packets))
 	}
 }

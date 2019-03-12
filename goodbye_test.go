@@ -102,7 +102,7 @@ func TestGoodbyeUnmarshal(t *testing.T) {
 		{
 			Name:      "nil",
 			Data:      nil,
-			WantError: errInvalidHeader,
+			WantError: errPacketTooShort,
 		},
 	} {
 		var bye Goodbye

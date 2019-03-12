@@ -15,7 +15,7 @@ func TestSourceDescriptionUnmarshal(t *testing.T) {
 		{
 			Name:      "nil",
 			Data:      nil,
-			WantError: errInvalidHeader,
+			WantError: errPacketTooShort,
 		},
 		{
 			Name: "no chunks",
