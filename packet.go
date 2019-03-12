@@ -10,72 +10,71 @@ type Packet interface {
 	Unmarshal(rawPacket []byte) error
 }
 
-// Unmarshal is a factory which pulls the first RTCP packet from a bytestream,
+// unmarshal is a factory which pulls the first RTCP packet from a bytestream,
 // and returns it's parsed representation, and the amount of data that was processed.
-func Unmarshal(rawData []byte) (Packet, int, error) {
-	var err error
+func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 	var h Header
-	var p Packet
 
 	err = h.Unmarshal(rawData)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	plen := (h.Length + 1) * 4
-	inPacket := rawData[:plen]
+	bytesprocessed = int(h.Length+1) * 4
+	inPacket := rawData[:bytesprocessed]
 
 	switch h.Type {
 	case TypeSenderReport:
-		p = new(SenderReport)
+		packet = new(SenderReport)
 
 	case TypeReceiverReport:
-		p = new(ReceiverReport)
+		packet = new(ReceiverReport)
 
 	case TypeSourceDescription:
-		p = new(SourceDescription)
+		packet = new(SourceDescription)
 
 	case TypeGoodbye:
-		p = new(Goodbye)
+		packet = new(Goodbye)
 
 	case TypeTransportSpecificFeedback:
 		switch h.Count {
 		case FormatTLN:
-			p = new(TransportLayerNack)
+			packet = new(TransportLayerNack)
 		case FormatRRR:
-			p = new(RapidResynchronizationRequest)
+			packet = new(RapidResynchronizationRequest)
 		default:
-			p = new(RawPacket)
+			packet = new(RawPacket)
 		}
 
 	case TypePayloadSpecificFeedback:
 		switch h.Count {
 		case FormatPLI:
-			p = new(PictureLossIndication)
+			packet = new(PictureLossIndication)
 		case FormatSLI:
-			p = new(SliceLossIndication)
+			packet = new(SliceLossIndication)
 		case FormatREMB:
-			p = new(ReceiverEstimatedMaximumBitrate)
+			packet = new(ReceiverEstimatedMaximumBitrate)
 		default:
-			p = new(RawPacket)
+			packet = new(RawPacket)
 		}
 
 	default:
-		p = new(RawPacket)
+		packet = new(RawPacket)
 	}
 
-	err = p.Unmarshal(inPacket)
+	err = packet.Unmarshal(inPacket)
 
-	return p, int(plen), err
+	return packet, bytesprocessed, err
 }
 
-// UnmarshalDatagram takes an entire udp datagram (which may consist of multiple RTCP packets) and returns
+// Unmarshal takes an entire udp datagram (which may consist of multiple RTCP packets) and returns
 // an unmarshalled array of packets.
-func UnmarshalDatagram(rawData []byte) ([]Packet, error) {
+func Unmarshal(rawData []byte) ([]Packet, error) {
 	var out []Packet
 
 	for len(rawData) != 0 {
-		p, processed, err := Unmarshal(rawData)
+		p, processed, err := unmarshal(rawData)
+
 		if err != nil {
 			return nil, err
 		}
