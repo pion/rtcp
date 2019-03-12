@@ -182,7 +182,7 @@ func TestReadEOF(t *testing.T) {
 }
 
 func TestConcatinated(t *testing.T) {
-	packets, err := Unmarshal(realPacket)
+	packets, err := UnmarshalDatagram(realPacket)
 	if err != nil {
 		t.Errorf("Error Unmarshalling concatinated packet: %s\n", err)
 	}
