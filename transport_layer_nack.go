@@ -118,14 +118,14 @@ func (p *TransportLayerNack) Header() Header {
 	}
 }
 
-func (p *TransportLayerNack) String() string {
-	o := "Packets Lost:\n"
-	for _, n := range p.Nacks {
-		for _, m := range n.PacketList() {
-			o += fmt.Sprintf("\t%d\n", m)
-		}
+func (p TransportLayerNack) String() string {
+	out := fmt.Sprintf("TransportLayerNack from %x\n", p.SenderSSRC)
+	out += fmt.Sprintf("\tMedia Ssrc %x\n", p.MediaSSRC)
+	out += fmt.Sprintf("\tID\tLostPackets\n")
+	for _, i := range p.Nacks {
+		out += fmt.Sprintf("\t%d\t%b\n", i.PacketID, i.LostPackets)
 	}
-	return o
+	return out
 }
 
 // DestinationSSRC returns an array of SSRC values that this packet refers to.
