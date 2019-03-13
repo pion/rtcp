@@ -2,6 +2,7 @@ package rtcp
 
 import (
 	"encoding/binary"
+	"fmt"
 )
 
 // A SenderReport (SR) packet provides reception quality feedback for an RTP stream
@@ -238,4 +239,19 @@ func (r *SenderReport) Header() Header {
 		Type:   TypeSenderReport,
 		Length: uint16((r.len() / 4) - 1),
 	}
+}
+
+func (r SenderReport) String() string {
+	out := fmt.Sprintf("SenderReport from %x\n", r.SSRC)
+	out += fmt.Sprintf("\tNTPTime:\t%d\n", r.NTPTime)
+	out += fmt.Sprintf("\tRTPTIme:\t%d\n", r.RTPTime)
+	out += fmt.Sprintf("\tPacketCount:\t%d\n", r.PacketCount)
+	out += fmt.Sprintf("\tOctetCount:\t%d\n", r.OctetCount)
+
+	out += fmt.Sprintf("\tSSRC    \tLost\tLastSequence\n")
+	for _, i := range r.Reports {
+		out += fmt.Sprintf("\t%x\t%d/%d\t%d\n", i.SSRC, i.FractionLost, i.TotalLost, i.LastSequenceNumber)
+	}
+	out += fmt.Sprintf("\tProfile Extension Data: %v\n", r.ProfileExtensions)
+	return out
 }
