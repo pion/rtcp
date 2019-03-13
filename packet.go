@@ -85,5 +85,22 @@ func Unmarshal(rawData []byte) (CompoundPacket, error) {
 		out = append(out, p)
 		rawData = rawData[processed:]
 	}
-	return out, nil
+
+	var err error
+
+	//some extra validity checks for compound packets
+	//(if they fail, return the (now successfully parsed) packets, but an error too)
+	if len(out) > 1 {
+		if out[0].Header().Padding {
+			//padding isn't allowed in the first packet in a compound datagram
+			err = errInvalidHeader
+		} else if (out[0].Header().Type != TypeSenderReport) &&
+			(out[0].Header().Type != TypeReceiverReport) {
+			//SenderReport and ReceiverReport are the only types that
+			//are allowed to be the first packet in a compound datagram
+			err = errInvalidHeader
+		}
+	}
+
+	return out, err
 }
