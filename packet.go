@@ -10,7 +10,18 @@ type Packet interface {
 	Unmarshal(rawPacket []byte) error
 }
 
-// CompoundPacket is a slice of packets. It's defined so that we can create members that use it as a receiver.
+// A CompoundPacket is a collection of RTCP packets transmitted as a single packet with
+// the underlying protocol (for example UDP).
+//
+// To maximize the resolution of receiption statistics, the first Packet in a CompoundPacket
+// must always be either a SenderReport or a ReceiverReport.  This is true even if no data
+// has been sent or received, in which case an empty ReceiverReport must be sent, and even
+// if the only other RTCP packet in the compound packet is a Goodbye.
+//
+// Next, a SourceDescription containing a CNAME item must be included in each CompoundPacket
+// to identify the source and to begin associating media for purposes such as lip-sync.
+//
+// Other RTCP packet types may follow in any order. Packet types may appear more than once.
 type CompoundPacket []Packet
 
 // unmarshal is a factory which pulls the first RTCP packet from a bytestream,
