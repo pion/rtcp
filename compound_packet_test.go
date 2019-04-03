@@ -45,3 +45,89 @@ func TestBadCompound(t *testing.T) {
 	assert.Equal(t, packets[0].Header().Type, TypeGoodbye)
 	assert.Equal(t, packets[1].Header().Type, TypePayloadSpecificFeedback)
 }
+
+func TestValidPacket(t *testing.T) {
+	cname := &SourceDescription{
+		Chunks: []SourceDescriptionChunk{{
+			Source: 1234,
+			Items: []SourceDescriptionItem{{
+				Type: SDESCNAME,
+				Text: "cname",
+			}},
+		}},
+	}
+
+	for _, test := range []struct {
+		Name   string
+		Packet CompoundPacket
+		Valid  bool
+	}{
+		{
+			Name:   "empty",
+			Packet: CompoundPacket{},
+			Valid:  false,
+		},
+		{
+			Name: "no cname",
+			Packet: CompoundPacket{
+				&SenderReport{},
+			},
+			Valid: false,
+		},
+		{
+			Name: "SDES / no cname",
+			Packet: CompoundPacket{
+				&SenderReport{},
+				&SourceDescription{},
+			},
+			Valid: false,
+		},
+		{
+			Name: "just SR",
+			Packet: CompoundPacket{
+				&SenderReport{},
+				cname,
+			},
+			Valid: true,
+		},
+		{
+			Name: "multiple SRs",
+			Packet: CompoundPacket{
+				&SenderReport{},
+				&SenderReport{},
+				cname,
+			},
+			Valid: false,
+		},
+		{
+			Name: "just RR",
+			Packet: CompoundPacket{
+				&ReceiverReport{},
+				cname,
+			},
+			Valid: true,
+		},
+		{
+			Name: "multiple RRs",
+			Packet: CompoundPacket{
+				&ReceiverReport{},
+				&ReceiverReport{},
+				cname,
+			},
+			Valid: true,
+		},
+		{
+			Name: "goodbye",
+			Packet: CompoundPacket{
+				&ReceiverReport{},
+				cname,
+				&Goodbye{},
+			},
+			Valid: true,
+		},
+	} {
+		if got, want := test.Packet.Valid(), test.Valid; got != want {
+			t.Fatalf("Valid(%s) = %v, want %v", test.Name, got, want)
+		}
+	}
+}
