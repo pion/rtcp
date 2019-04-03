@@ -14,6 +14,7 @@ package rtcp
 // Other RTCP packet types may follow in any order. Packet types may appear more than once.
 type CompoundPacket []Packet
 
+// Valid returns true if this is an RFC-compliant CompoundPacket.
 func (c CompoundPacket) Valid() bool {
 	if len(c) == 0 {
 		return false
@@ -33,7 +34,7 @@ func (c CompoundPacket) Valid() bool {
 
 	for _, pkt := range c[1:] {
 		switch p := pkt.(type) {
-		// If the number of RecetpionReports exceeds 31 additonal ReceiverReports
+		// If the number of RecetpionReports exceeds 31 additional ReceiverReports
 		// can be included here.
 		case *ReceiverReport:
 			continue
@@ -66,12 +67,13 @@ func (c CompoundPacket) Valid() bool {
 	return false
 }
 
+// Marshal encodes the CompoundPacket as binary.
 func (c CompoundPacket) Marshal() ([]byte, error) {
 	if !c.Valid() {
 		return nil, errInvalidCompound
 	}
 
-	var out []byte
+	out := make([]byte, 0)
 	for _, p := range c {
 		data, err := p.Marshal()
 		if err != nil {
