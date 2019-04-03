@@ -2,6 +2,7 @@ package rtcp
 
 import (
 	"bytes"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -128,6 +129,64 @@ func TestValidPacket(t *testing.T) {
 	} {
 		if got, want := test.Packet.Valid(), test.Valid; got != want {
 			t.Fatalf("Valid(%s) = %v, want %v", test.Name, got, want)
+		}
+	}
+}
+
+func TestCompoundPacketRoundTrip(t *testing.T) {
+	cname := &SourceDescription{
+		Chunks: []SourceDescriptionChunk{{
+			Source: 1234,
+			Items: []SourceDescriptionItem{{
+				Type: SDESCNAME,
+				Text: "cname",
+			}},
+		}},
+	}
+
+	for _, test := range []struct {
+		Name   string
+		Packet CompoundPacket
+		Err    error
+	}{
+		{
+			Name: "bye",
+			Packet: CompoundPacket{
+				&ReceiverReport{},
+				cname,
+				&Goodbye{
+					Sources: []uint32{1234},
+				},
+			},
+		},
+		{
+			Name: "no cname",
+			Packet: CompoundPacket{
+				&ReceiverReport{},
+			},
+			Err: errInvalidCompound,
+		},
+	} {
+		data, err := test.Packet.Marshal()
+		if got, want := err, test.Err; got != want {
+			t.Fatalf("Marshal(%v) err = %v, want nil", test.Name, err)
+		}
+		if err != nil {
+			continue
+		}
+
+		result, err := Unmarshal(data)
+		if err != nil {
+			t.Fatalf("Unmarshal(%v) err = %v, want nil", test.Name, err)
+		}
+
+		data2, err := result.Marshal()
+		if err != nil {
+			t.Fatalf("Marshal(%v) err = %v, want nil", test.Name, err)
+		}
+
+		if got, want := data, data2; !reflect.DeepEqual(got, want) {
+			t.Fatalf("Unmarshal(Marshal(%v)) = %v, want %v", test.Name, got, want)
 		}
 	}
 }

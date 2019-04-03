@@ -5,6 +5,7 @@ import "errors"
 var (
 	errInvalidTotalLost = errors.New("rtcp: invalid total lost count")
 	errInvalidHeader    = errors.New("rtcp: invalid header")
+	errInvalidCompound  = errors.New("rtcp: invalid compound packet")
 	errTooManyReports   = errors.New("rtcp: too many reports")
 	errTooManyChunks    = errors.New("rtcp: too many chunks")
 	errTooManySources   = errors.New("rtcp: too many sources")

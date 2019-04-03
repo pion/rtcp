@@ -66,6 +66,22 @@ func (c CompoundPacket) Valid() bool {
 	return false
 }
 
+func (c CompoundPacket) Marshal() ([]byte, error) {
+	if !c.Valid() {
+		return nil, errInvalidCompound
+	}
+
+	var out []byte
+	for _, p := range c {
+		data, err := p.Marshal()
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, data...)
+	}
+	return out, nil
+}
+
 // Unmarshal takes an entire udp datagram (which may consist of multiple RTCP packets) and returns
 // an unmarshalled array of packets.
 func Unmarshal(rawData []byte) (CompoundPacket, error) {
