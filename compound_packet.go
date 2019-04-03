@@ -14,6 +14,58 @@ package rtcp
 // Other RTCP packet types may follow in any order. Packet types may appear more than once.
 type CompoundPacket []Packet
 
+func (c CompoundPacket) Valid() bool {
+	if len(c) == 0 {
+		return false
+	}
+
+	firstHdr := c[0].Header()
+
+	// padding isn't allowed in the first packet in a compound datagram
+	if firstHdr.Padding {
+		return false
+	}
+	// SenderReport and ReceiverReport are the only types that
+	// are allowed to be the first packet in a compound datagram
+	if (firstHdr.Type != TypeSenderReport) && (firstHdr.Type != TypeReceiverReport) {
+		return false
+	}
+
+	for _, pkt := range c[1:] {
+		switch p := pkt.(type) {
+		// If the number of RecetpionReports exceeds 31 additonal ReceiverReports
+		// can be included here.
+		case *ReceiverReport:
+			continue
+
+		// A SourceDescription containing a CNAME must be included in every
+		// CompoundPacket.
+		case *SourceDescription:
+			var hasCNAME bool
+			for _, c := range p.Chunks {
+				for _, it := range c.Items {
+					if it.Type == SDESCNAME {
+						hasCNAME = true
+					}
+				}
+			}
+
+			if !hasCNAME {
+				return false
+			}
+
+			return true
+
+		// Other packets are not permitted before the CNAME
+		default:
+			return false
+		}
+	}
+
+	// CNAME never reached
+	return false
+}
+
 // Unmarshal takes an entire udp datagram (which may consist of multiple RTCP packets) and returns
 // an unmarshalled array of packets.
 func Unmarshal(rawData []byte) (CompoundPacket, error) {
@@ -30,24 +82,9 @@ func Unmarshal(rawData []byte) (CompoundPacket, error) {
 		rawData = rawData[processed:]
 	}
 
-	var err error
-
-	// some extra validity checks for compound packets
-	// (if they fail, return the (now successfully parsed) packets, but an error too)
-	if len(out) == 0 {
+	if !out.Valid() {
 		return out, errInvalidHeader
 	}
 
-	firstHdr := out[0].Header()
-	if firstHdr.Padding {
-		// padding isn't allowed in the first packet in a compound datagram
-		return out, errInvalidHeader
-	} else if (firstHdr.Type != TypeSenderReport) &&
-		(firstHdr.Type != TypeReceiverReport) {
-		// SenderReport and ReceiverReport are the only types that
-		// are allowed to be the first packet in a compound datagram
-		return out, errInvalidHeader
-	}
-
-	return out, err
+	return out, nil
 }
