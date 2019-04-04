@@ -14,8 +14,7 @@ package rtcp
 // Other RTCP packet types may follow in any order. Packet types may appear more than once.
 type CompoundPacket []Packet
 
-// Validate returns an error if this is not an RFC-compliant CompoundPacket.
-func (c CompoundPacket) Validate() error {
+func (c CompoundPacket) validateFirstPacket() error {
 	if len(c) == 0 {
 		return errEmptyCompound
 	}
@@ -30,6 +29,15 @@ func (c CompoundPacket) Validate() error {
 	// are allowed to be the first packet in a compound datagram
 	if (firstHdr.Type != TypeSenderReport) && (firstHdr.Type != TypeReceiverReport) {
 		return errBadFirstPacket
+	}
+
+	return nil
+}
+
+// Validate returns an error if this is not an RFC-compliant CompoundPacket.
+func (c CompoundPacket) Validate() error {
+	if err := c.validateFirstPacket(); err != nil {
+		return err
 	}
 
 	for _, pkt := range c[1:] {
@@ -100,7 +108,7 @@ func Unmarshal(rawData []byte) (CompoundPacket, error) {
 		rawData = rawData[processed:]
 	}
 
-	if err := out.Validate(); err != nil {
+	if err := out.validateFirstPacket(); err != nil {
 		return out, err
 	}
 
