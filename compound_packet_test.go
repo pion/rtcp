@@ -24,7 +24,7 @@ func TestReadEOF(t *testing.T) {
 
 func TestUnmarshalNil(t *testing.T) {
 	_, err := Unmarshal(nil)
-	if got, want := err, errInvalidHeader; got != want {
+	if got, want := err, errEmptyCompound; got != want {
 		t.Fatalf("Unmarshal(nil) err = %v, want %v", got, want)
 	}
 }
@@ -61,19 +61,26 @@ func TestValidPacket(t *testing.T) {
 	for _, test := range []struct {
 		Name   string
 		Packet CompoundPacket
-		Valid  bool
+		Err    error
 	}{
 		{
 			Name:   "empty",
 			Packet: CompoundPacket{},
-			Valid:  false,
+			Err:    errEmptyCompound,
 		},
 		{
 			Name: "no cname",
 			Packet: CompoundPacket{
 				&SenderReport{},
 			},
-			Valid: false,
+			Err: errMissingCNAME,
+		},
+		{
+			Name: "just BYE",
+			Packet: CompoundPacket{
+				&Goodbye{},
+			},
+			Err: errBadFirstPacket,
 		},
 		{
 			Name: "SDES / no cname",
@@ -81,7 +88,7 @@ func TestValidPacket(t *testing.T) {
 				&SenderReport{},
 				&SourceDescription{},
 			},
-			Valid: false,
+			Err: errMissingCNAME,
 		},
 		{
 			Name: "just SR",
@@ -89,7 +96,7 @@ func TestValidPacket(t *testing.T) {
 				&SenderReport{},
 				cname,
 			},
-			Valid: true,
+			Err: nil,
 		},
 		{
 			Name: "multiple SRs",
@@ -98,7 +105,7 @@ func TestValidPacket(t *testing.T) {
 				&SenderReport{},
 				cname,
 			},
-			Valid: false,
+			Err: errPacketBeforeCNAME,
 		},
 		{
 			Name: "just RR",
@@ -106,7 +113,7 @@ func TestValidPacket(t *testing.T) {
 				&ReceiverReport{},
 				cname,
 			},
-			Valid: true,
+			Err: nil,
 		},
 		{
 			Name: "multiple RRs",
@@ -115,7 +122,7 @@ func TestValidPacket(t *testing.T) {
 				&ReceiverReport{},
 				cname,
 			},
-			Valid: true,
+			Err: nil,
 		},
 		{
 			Name: "goodbye",
@@ -124,10 +131,10 @@ func TestValidPacket(t *testing.T) {
 				cname,
 				&Goodbye{},
 			},
-			Valid: true,
+			Err: nil,
 		},
 	} {
-		if got, want := test.Packet.Valid(), test.Valid; got != want {
+		if got, want := test.Packet.Validate(), test.Err; got != want {
 			t.Fatalf("Valid(%s) = %v, want %v", test.Name, got, want)
 		}
 	}
@@ -164,7 +171,7 @@ func TestCompoundPacketRoundTrip(t *testing.T) {
 			Packet: CompoundPacket{
 				&ReceiverReport{},
 			},
-			Err: errInvalidCompound,
+			Err: errMissingCNAME,
 		},
 	} {
 		data, err := test.Packet.Marshal()
