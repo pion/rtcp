@@ -14,22 +14,22 @@ package rtcp
 // Other RTCP packet types may follow in any order. Packet types may appear more than once.
 type CompoundPacket []Packet
 
-// Valid returns true if this is an RFC-compliant CompoundPacket.
-func (c CompoundPacket) Valid() bool {
+// Validate returns an error if this is not an RFC-compliant CompoundPacket.
+func (c CompoundPacket) Validate() error {
 	if len(c) == 0 {
-		return false
+		return errEmptyCompound
 	}
 
 	firstHdr := c[0].Header()
 
 	// padding isn't allowed in the first packet in a compound datagram
 	if firstHdr.Padding {
-		return false
+		return errInvalidPadding
 	}
 	// SenderReport and ReceiverReport are the only types that
 	// are allowed to be the first packet in a compound datagram
 	if (firstHdr.Type != TypeSenderReport) && (firstHdr.Type != TypeReceiverReport) {
-		return false
+		return errBadFirstPacket
 	}
 
 	for _, pkt := range c[1:] {
@@ -52,25 +52,25 @@ func (c CompoundPacket) Valid() bool {
 			}
 
 			if !hasCNAME {
-				return false
+				return errMissingCNAME
 			}
 
-			return true
+			return nil
 
 		// Other packets are not permitted before the CNAME
 		default:
-			return false
+			return errPacketBeforeCNAME
 		}
 	}
 
 	// CNAME never reached
-	return false
+	return errMissingCNAME
 }
 
 // Marshal encodes the CompoundPacket as binary.
 func (c CompoundPacket) Marshal() ([]byte, error) {
-	if !c.Valid() {
-		return nil, errInvalidCompound
+	if err := c.Validate(); err != nil {
+		return nil, err
 	}
 
 	out := make([]byte, 0)
@@ -100,8 +100,8 @@ func Unmarshal(rawData []byte) (CompoundPacket, error) {
 		rawData = rawData[processed:]
 	}
 
-	if !out.Valid() {
-		return out, errInvalidHeader
+	if err := out.Validate(); err != nil {
+		return out, err
 	}
 
 	return out, nil
