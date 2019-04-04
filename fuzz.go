@@ -14,7 +14,7 @@ import (
 // `go get github.com/dvyukov/go-fuzz/...`
 //
 // Then build the testing package:
-// `go-fuzz-build github.com/pions/webrtc`
+// `go-fuzz-build github.com/pion/webrtc`
 //
 // And run the fuzzer on the corpus:
 // ```
