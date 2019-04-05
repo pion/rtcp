@@ -20,11 +20,11 @@ Decoding RTCP packets:
 	for _, pkt := range packets {
 		switch p := pkt.(type) {
 		case *rtcp.ReceptionReport:
-			fmt.Println("RR", p)
+			...
 		case *rtcp.SenderReport:
-			fmt.Println("SR", p)
+			...
 		default:
-			fmt.Println(p)
+			...
 		}
 	}
 
