@@ -6,7 +6,6 @@ var (
 	errInvalidTotalLost  = errors.New("rtcp: invalid total lost count")
 	errInvalidHeader     = errors.New("rtcp: invalid header")
 	errEmptyCompound     = errors.New("rtcp: empty compound packet")
-	errInvalidPadding    = errors.New("rtcp: invalid padding on first packet")
 	errBadFirstPacket    = errors.New("rtcp: first packet in compound must be SR or RR")
 	errMissingCNAME      = errors.New("rtcp: compound missing SourceDescription with CNAME")
 	errPacketBeforeCNAME = errors.New("rtcp: feedback packet seen before CNAME")
