@@ -14,6 +14,8 @@ package rtcp
 // Other RTCP packet types may follow in any order. Packet types may appear more than once.
 type CompoundPacket []Packet
 
+var _ Packet = (*CompoundPacket)(nil) // assert is a Packet
+
 func (c CompoundPacket) validateFirstPacket() error {
 	if len(c) == 0 {
 		return errEmptyCompound
@@ -87,25 +89,34 @@ func (c CompoundPacket) Marshal() ([]byte, error) {
 	return out, nil
 }
 
-// Unmarshal takes an entire udp datagram (which may consist of multiple RTCP packets) and returns
-// an unmarshalled array of packets.
-func Unmarshal(rawData []byte) (CompoundPacket, error) {
-	var out CompoundPacket
-
+// Unmarshal decodes a CompoundPacket from binary.
+func (c *CompoundPacket) Unmarshal(rawData []byte) error {
+	out := make(CompoundPacket, 0)
 	for len(rawData) != 0 {
 		p, processed, err := unmarshal(rawData)
 
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		out = append(out, p)
 		rawData = rawData[processed:]
 	}
+	*c = out
 
-	if err := out.validateFirstPacket(); err != nil {
-		return out, err
+	if err := c.validateFirstPacket(); err != nil {
+		return err
 	}
 
-	return out, nil
+	return nil
+}
+
+// DestinationSSRC returns the synchronization sources associated with this
+// CompoundPacket's reception report.
+func (c CompoundPacket) DestinationSSRC() []uint32 {
+	if len(c) == 0 {
+		return nil
+	}
+
+	return c[0].DestinationSSRC()
 }
