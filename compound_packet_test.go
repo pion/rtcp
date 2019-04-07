@@ -41,7 +41,9 @@ func TestBadCompound(t *testing.T) {
 	//it violates the "must start with RR or SR" rule
 	badcompound = realPacket[84:104]
 	packets, err = Unmarshal(badcompound)
-	assert.Error(t, err)
+	if got, want := err, errBadFirstPacket; got != want {
+		t.Fatalf("Unmarshal(badcompound) err=%v, want %v", got, want)
+	}
 	if got, want := len(packets), 2; got != want {
 		t.Fatalf("Unmarshal(badcompound) len=%d, want %d", got, want)
 	}

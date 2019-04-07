@@ -9,6 +9,18 @@ type Packet interface {
 	Unmarshal(rawPacket []byte) error
 }
 
+// Unmarshal takes an entire udp datagram (which may consist of multiple RTCP packets) and returns
+// an unmarshalled array of packets.
+func Unmarshal(rawData []byte) (CompoundPacket, error) {
+	var out CompoundPacket
+
+	if err := out.Unmarshal(rawData); err != nil {
+		return out, err
+	}
+
+	return out, nil
+}
+
 // unmarshal is a factory which pulls the first RTCP packet from a bytestream,
 // and returns it's parsed representation, and the amount of data that was processed.
 func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
