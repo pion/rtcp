@@ -21,6 +21,8 @@ type ReceiverEstimatedMaximumBitrate struct {
 	SSRCs []uint32
 }
 
+var _ Packet = (*ReceiverEstimatedMaximumBitrate)(nil) // assert is a Packet
+
 // Marshal serializes the packet and returns a byte slice.
 func (p ReceiverEstimatedMaximumBitrate) Marshal() (buf []byte, err error) {
 	// Allocate a buffer of the exact output size.

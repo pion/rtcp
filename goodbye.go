@@ -12,6 +12,8 @@ type Goodbye struct {
 	Reason string
 }
 
+var _ Packet = (*Goodbye)(nil) // assert is a Packet
+
 // Marshal encodes the Goodbye packet in binary
 func (g Goodbye) Marshal() ([]byte, error) {
 	/*

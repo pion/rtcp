@@ -14,6 +14,8 @@ type RapidResynchronizationRequest struct {
 	MediaSSRC uint32
 }
 
+var _ Packet = (*RapidResynchronizationRequest)(nil) // assert is a Packet
+
 const (
 	rrrLength       = 2
 	rrrHeaderLength = ssrcLength * 2

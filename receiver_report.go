@@ -19,6 +19,8 @@ type ReceiverReport struct {
 	ProfileExtensions []byte
 }
 
+var _ Packet = (*ReceiverReport)(nil) // assert is a Packet
+
 const (
 	ssrcLength     = 4
 	rrSSRCOffset   = headerLength

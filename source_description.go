@@ -61,6 +61,8 @@ type SourceDescription struct {
 	Chunks []SourceDescriptionChunk
 }
 
+var _ Packet = (*SourceDescription)(nil) // assert is a Packet
+
 // Marshal encodes the SourceDescription in binary
 func (s SourceDescription) Marshal() ([]byte, error) {
 	/*
