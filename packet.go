@@ -9,8 +9,12 @@ type Packet interface {
 	Unmarshal(rawPacket []byte) error
 }
 
-// Unmarshal takes an entire udp datagram (which may consist of multiple RTCP packets) and returns
-// an unmarshalled array of packets.
+// Unmarshal takes an entire udp datagram (which may consist of multiple RTCP packets) and
+// returns the unmarshaled packets it contains.
+//
+// If this is a reduced-size RTCP packet a feedback packet (Goodbye, SliceLossIndication, etc)
+// will be returned. Otherwise, the underlying type of the returned packet will be
+// CompoundPacket.
 func Unmarshal(rawData []byte) (Packet, error) {
 	var packets []Packet
 	for len(rawData) != 0 {
