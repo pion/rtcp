@@ -1,5 +1,5 @@
 /*
-Package rtcp implements encoding and decoding of RTCP packets according to RFC 3550.
+Package rtcp implements encoding and decoding of RTCP packets according to RFCs 3550 and 5506.
 
 RTCP is a sister protocol of the Real-time Transport Protocol (RTP). Its basic functionality
 and packet structure is defined in RFC 3550. RTCP provides out-of-band statistics and control
@@ -14,18 +14,16 @@ service parameters, perhaps by limiting flow, or using a different codec.
 
 Decoding RTCP packets:
 
-	packets, err := rtcp.Unmarshal(rtcpData)
+	pkt, err := rtcp.Unmarshal(rtcpData)
 	// ...
 
-	for _, pkt := range packets {
-		switch p := pkt.(type) {
-		case *rtcp.ReceptionReport:
-			...
-		case *rtcp.SenderReport:
-			...
-		default:
-			...
-		}
+	switch p := pkt.(type) {
+	case *rtcp.CompoundPacket:
+		...
+	case *rtcp.PictureLossIndication:
+		...
+	default:
+		...
 	}
 
 Encoding RTCP packets:
