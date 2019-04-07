@@ -72,18 +72,22 @@ var realPacket = []byte{
 
 func TestUnmarshal(t *testing.T) {
 	decoder := NewDecoder(bytes.NewReader(realPacket))
-	packets, err := Unmarshal(realPacket)
 
+	packets, err := Unmarshal(realPacket)
 	if err != nil {
 		t.Fatalf("Error unmarshalling packets: %s", err)
 	}
 
-	if len(packets) != 5 {
+	compound, ok := packets.(*CompoundPacket)
+	if !ok {
+		t.Fatalf("Unmarshal(): got %#v, want CompoundPacket", compound)
+	}
+	if len(*compound) != 5 {
 		t.Fatalf("Read the wrong number of packets from input array")
 	}
 
 	// ReceiverReport
-	packet := packets[0]
+	packet := (*compound)[0]
 	decoded, err := decoder.DecodePacket()
 	assert.NoError(t, err)
 	assert.IsType(t, packet, (*ReceiverReport)(nil), "Unmarshalled to incorrect type")
@@ -109,7 +113,7 @@ func TestUnmarshal(t *testing.T) {
 	}
 
 	// SourceDescription
-	packet = packets[1]
+	packet = (*compound)[1]
 	decoded, err = decoder.DecodePacket()
 	assert.NoError(t, err)
 	assert.IsType(t, packet, (*SourceDescription)(nil), "Unmarshalled to incorrect type")
@@ -136,7 +140,7 @@ func TestUnmarshal(t *testing.T) {
 	}
 
 	// Goodbye
-	packet = packets[2]
+	packet = (*compound)[2]
 	decoded, err = decoder.DecodePacket()
 	assert.NoError(t, err)
 	assert.IsType(t, packet, (*Goodbye)(nil), "Unmarshalled to incorrect type")
@@ -152,7 +156,7 @@ func TestUnmarshal(t *testing.T) {
 	}
 
 	// PictureLossIndication
-	packet = packets[3]
+	packet = (*compound)[3]
 	decoded, err = decoder.DecodePacket()
 	assert.NoError(t, err)
 	assert.IsType(t, packet, (*PictureLossIndication)(nil), "Unmarshalled to incorrect type")
@@ -169,7 +173,7 @@ func TestUnmarshal(t *testing.T) {
 	}
 
 	// RapidResynchronizationRequest
-	packet = packets[4]
+	packet = (*compound)[4]
 	decoded, err = decoder.DecodePacket()
 	assert.NoError(t, err)
 	assert.IsType(t, packet, (*RapidResynchronizationRequest)(nil), "Unmarshalled to incorrect type")
