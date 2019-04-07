@@ -21,10 +21,6 @@ func (c CompoundPacket) validateFirstPacket() error {
 
 	firstHdr := c[0].Header()
 
-	// padding isn't allowed in the first packet in a compound datagram
-	if firstHdr.Padding {
-		return errInvalidPadding
-	}
 	// SenderReport and ReceiverReport are the only types that
 	// are allowed to be the first packet in a compound datagram
 	if (firstHdr.Type != TypeSenderReport) && (firstHdr.Type != TypeReceiverReport) {
