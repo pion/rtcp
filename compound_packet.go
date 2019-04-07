@@ -19,15 +19,14 @@ func (c CompoundPacket) validateFirstPacket() error {
 		return errEmptyCompound
 	}
 
-	firstHdr := c[0].Header()
-
 	// SenderReport and ReceiverReport are the only types that
 	// are allowed to be the first packet in a compound datagram
-	if (firstHdr.Type != TypeSenderReport) && (firstHdr.Type != TypeReceiverReport) {
+	switch c[0].(type) {
+	case *SenderReport, *ReceiverReport:
+		return nil
+	default:
 		return errBadFirstPacket
 	}
-
-	return nil
 }
 
 // Validate returns an error if this is not an RFC-compliant CompoundPacket.
