@@ -190,7 +190,7 @@ func TestCompoundPacketRoundTrip(t *testing.T) {
 		}
 
 		var c CompoundPacket
-		if err := c.Unmarshal(data); err != nil {
+		if err = c.Unmarshal(data); err != nil {
 			t.Fatalf("Unmarshal(%v) err = %v, want nil", test.Name, err)
 		}
 
