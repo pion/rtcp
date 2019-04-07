@@ -33,6 +33,8 @@ type TransportLayerNack struct {
 	Nacks []NackPair
 }
 
+var _ Packet = (*TransportLayerNack)(nil) // assert is a Packet
+
 // PacketList returns a list of Nack'd packets that's referenced by a NackPair
 func (n *NackPair) PacketList() []uint16 {
 	out := make([]uint16, 1, 17)
