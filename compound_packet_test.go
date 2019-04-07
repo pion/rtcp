@@ -42,9 +42,15 @@ func TestBadCompound(t *testing.T) {
 	badcompound = realPacket[84:104]
 	packets, err = Unmarshal(badcompound)
 	assert.Error(t, err)
-	assert.Equal(t, len(packets), 2)
-	assert.Equal(t, packets[0].Header().Type, TypeGoodbye)
-	assert.Equal(t, packets[1].Header().Type, TypePayloadSpecificFeedback)
+	if got, want := len(packets), 2; got != want {
+		t.Fatalf("Unmarshal(badcompound) len=%d, want %d", got, want)
+	}
+	if _, ok := packets[0].(*Goodbye); !ok {
+		t.Fatalf("Unmarshal(badcompound); first packet = %#v, want Goodbye", packets[0])
+	}
+	if _, ok := packets[1].(*PictureLossIndication); !ok {
+		t.Fatalf("Unmarshal(badcompound); second packet = %#v, want PictureLossIndication", packets[1])
+	}
 }
 
 func TestValidPacket(t *testing.T) {

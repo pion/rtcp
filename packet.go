@@ -2,7 +2,6 @@ package rtcp
 
 // Packet represents an RTCP packet, a protocol used for out-of-band statistics and control information for an RTP session
 type Packet interface {
-	Header() Header
 	// DestinationSSRC returns an array of SSRC values that this packet refers to.
 	DestinationSSRC() []uint32
 
