@@ -16,7 +16,8 @@ type CompoundPacket []Packet
 
 var _ Packet = (*CompoundPacket)(nil) // assert is a Packet
 
-func (c CompoundPacket) validateFirstPacket() error {
+// Validate returns an error if this is not an RFC-compliant CompoundPacket.
+func (c CompoundPacket) Validate() error {
 	if len(c) == 0 {
 		return errEmptyCompound
 	}
@@ -25,16 +26,9 @@ func (c CompoundPacket) validateFirstPacket() error {
 	// are allowed to be the first packet in a compound datagram
 	switch c[0].(type) {
 	case *SenderReport, *ReceiverReport:
-		return nil
+		// ok
 	default:
 		return errBadFirstPacket
-	}
-}
-
-// Validate returns an error if this is not an RFC-compliant CompoundPacket.
-func (c CompoundPacket) Validate() error {
-	if err := c.validateFirstPacket(); err != nil {
-		return err
 	}
 
 	for _, pkt := range c[1:] {
@@ -104,7 +98,7 @@ func (c *CompoundPacket) Unmarshal(rawData []byte) error {
 	}
 	*c = out
 
-	if err := c.validateFirstPacket(); err != nil {
+	if err := c.Validate(); err != nil {
 		return err
 	}
 
