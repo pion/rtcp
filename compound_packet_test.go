@@ -1,7 +1,6 @@
 package rtcp
 
 import (
-	"bytes"
 	"reflect"
 	"testing"
 
@@ -14,11 +13,6 @@ func TestReadEOF(t *testing.T) {
 	}
 
 	_, err := Unmarshal(shortHeader)
-	assert.Error(t, err)
-
-	d := NewDecoder(bytes.NewReader(shortHeader))
-	_, err = d.DecodePacket()
-
 	assert.Error(t, err)
 }
 
