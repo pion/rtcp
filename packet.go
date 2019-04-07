@@ -11,14 +11,34 @@ type Packet interface {
 
 // Unmarshal takes an entire udp datagram (which may consist of multiple RTCP packets) and returns
 // an unmarshalled array of packets.
-func Unmarshal(rawData []byte) (CompoundPacket, error) {
-	var out CompoundPacket
+func Unmarshal(rawData []byte) (Packet, error) {
+	var packets []Packet
+	for len(rawData) != 0 {
+		p, processed, err := unmarshal(rawData)
 
-	if err := out.Unmarshal(rawData); err != nil {
-		return out, err
+		if err != nil {
+			return nil, err
+		}
+
+		packets = append(packets, p)
+		rawData = rawData[processed:]
 	}
 
-	return out, nil
+	switch len(packets) {
+	// Empty packet
+	case 0:
+		return nil, errInvalidHeader
+	// Reduced-size RTCP (RFC 5506)
+	case 1:
+		return packets[0], nil
+	// CompoundPacket
+	default:
+		p := CompoundPacket(packets)
+		if err := p.Validate(); err != nil {
+			return &p, err
+		}
+		return &p, nil
+	}
 }
 
 // unmarshal is a factory which pulls the first RTCP packet from a bytestream,

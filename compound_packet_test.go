@@ -22,13 +22,6 @@ func TestReadEOF(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestUnmarshalNil(t *testing.T) {
-	_, err := Unmarshal(nil)
-	if got, want := err, errEmptyCompound; got != want {
-		t.Fatalf("Unmarshal(nil) err = %v, want %v", got, want)
-	}
-}
-
 func TestBadCompound(t *testing.T) {
 	//trailing data!
 	badcompound := realPacket[:34]
@@ -40,18 +33,24 @@ func TestBadCompound(t *testing.T) {
 	//illegal start -- this should return an error, but also 2 parsed packets
 	//it violates the "must start with RR or SR" rule
 	badcompound = realPacket[84:104]
+
 	packets, err = Unmarshal(badcompound)
 	if got, want := err, errBadFirstPacket; got != want {
 		t.Fatalf("Unmarshal(badcompound) err=%v, want %v", got, want)
 	}
-	if got, want := len(packets), 2; got != want {
+	compound, ok := packets.(*CompoundPacket)
+	if !ok {
+		t.Fatalf("Unmarshal(badcompound) result=%#v, want CompoundPacket", packets)
+	}
+
+	if got, want := len(*compound), 2; got != want {
 		t.Fatalf("Unmarshal(badcompound) len=%d, want %d", got, want)
 	}
-	if _, ok := packets[0].(*Goodbye); !ok {
-		t.Fatalf("Unmarshal(badcompound); first packet = %#v, want Goodbye", packets[0])
+	if _, ok := (*compound)[0].(*Goodbye); !ok {
+		t.Fatalf("Unmarshal(badcompound); first packet = %#v, want Goodbye", (*compound)[0])
 	}
-	if _, ok := packets[1].(*PictureLossIndication); !ok {
-		t.Fatalf("Unmarshal(badcompound); second packet = %#v, want PictureLossIndication", packets[1])
+	if _, ok := (*compound)[1].(*PictureLossIndication); !ok {
+		t.Fatalf("Unmarshal(badcompound); second packet = %#v, want PictureLossIndication", (*compound)[1])
 	}
 }
 
