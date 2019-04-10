@@ -15,7 +15,7 @@ type Packet interface {
 // If this is a reduced-size RTCP packet a feedback packet (Goodbye, SliceLossIndication, etc)
 // will be returned. Otherwise, the underlying type of the returned packet will be
 // CompoundPacket.
-func Unmarshal(rawData []byte) (Packet, error) {
+func Unmarshal(rawData []byte) ([]Packet, error) {
 	var packets []Packet
 	for len(rawData) != 0 {
 		p, processed, err := unmarshal(rawData)
@@ -32,16 +32,9 @@ func Unmarshal(rawData []byte) (Packet, error) {
 	// Empty packet
 	case 0:
 		return nil, errInvalidHeader
-	// Reduced-size RTCP (RFC 5506)
-	case 1:
-		return packets[0], nil
-	// CompoundPacket
+	// Multiple Packets
 	default:
-		p := CompoundPacket(packets)
-		if err := p.Validate(); err != nil {
-			return &p, err
-		}
-		return &p, nil
+		return packets, nil
 	}
 }
 

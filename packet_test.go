@@ -74,7 +74,7 @@ func TestUnmarshal(t *testing.T) {
 		t.Fatalf("Error unmarshalling packets: %s", err)
 	}
 
-	expected := &CompoundPacket{
+	expected := []Packet{
 		&ReceiverReport{
 			SSRC: 0x902f9e2e,
 			Reports: []ReceptionReport{{

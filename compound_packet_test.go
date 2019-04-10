@@ -29,22 +29,25 @@ func TestBadCompound(t *testing.T) {
 	badcompound = realPacket[84:104]
 
 	packets, err = Unmarshal(badcompound)
+	assert.NoError(t, err)
+
+	compound := CompoundPacket(packets)
+
+	//This shouldn't validate correctly...
+	err = compound.Validate()
+
 	if got, want := err, errBadFirstPacket; got != want {
 		t.Fatalf("Unmarshal(badcompound) err=%v, want %v", got, want)
 	}
-	compound, ok := packets.(*CompoundPacket)
-	if !ok {
-		t.Fatalf("Unmarshal(badcompound) result=%#v, want CompoundPacket", packets)
-	}
 
-	if got, want := len(*compound), 2; got != want {
+	if got, want := len(compound), 2; got != want {
 		t.Fatalf("Unmarshal(badcompound) len=%d, want %d", got, want)
 	}
-	if _, ok := (*compound)[0].(*Goodbye); !ok {
-		t.Fatalf("Unmarshal(badcompound); first packet = %#v, want Goodbye", (*compound)[0])
+	if _, ok := compound[0].(*Goodbye); !ok {
+		t.Fatalf("Unmarshal(badcompound); first packet = %#v, want Goodbye", compound[0])
 	}
-	if _, ok := (*compound)[1].(*PictureLossIndication); !ok {
-		t.Fatalf("Unmarshal(badcompound); second packet = %#v, want PictureLossIndication", (*compound)[1])
+	if _, ok := compound[1].(*PictureLossIndication); !ok {
+		t.Fatalf("Unmarshal(badcompound); second packet = %#v, want PictureLossIndication", compound[1])
 	}
 }
 

@@ -66,6 +66,27 @@ func (c CompoundPacket) Validate() error {
 	return errMissingCNAME
 }
 
+//CNAME returns the CNAME that *must* be present in every CompoundPacket
+func (c CompoundPacket) CNAME() (string, error) {
+	if len(c) < 1 {
+		return "", errEmptyCompound
+	}
+
+	for _, pkt := range c[1:] {
+		sdes, ok := pkt.(*SourceDescription)
+		if ok {
+			for _, c := range sdes.Chunks {
+				for _, it := range c.Items {
+					if it.Type == SDESCNAME {
+						return it.Text, nil
+					}
+				}
+			}
+		}
+	}
+	return "", errMissingCNAME
+}
+
 // Marshal encodes the CompoundPacket as binary.
 func (c CompoundPacket) Marshal() ([]byte, error) {
 	if err := c.Validate(); err != nil {
