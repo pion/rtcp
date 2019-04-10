@@ -38,6 +38,20 @@ func Unmarshal(rawData []byte) ([]Packet, error) {
 	}
 }
 
+//Marshal takes an array of Packets and serializes them to a single buffer
+func Marshal(packets []Packet) ([]byte, error) {
+	out := make([]byte, 0)
+	for _, p := range packets {
+		data, err := p.Marshal()
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, data...)
+	}
+	return out, nil
+
+}
+
 // unmarshal is a factory which pulls the first RTCP packet from a bytestream,
 // and returns it's parsed representation, and the amount of data that was processed.
 func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
