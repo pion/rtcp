@@ -100,15 +100,8 @@ func (c CompoundPacket) Marshal() ([]byte, error) {
 		return nil, err
 	}
 
-	out := make([]byte, 0)
-	for _, p := range c {
-		data, err := p.Marshal()
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, data...)
-	}
-	return out, nil
+	p := []Packet(c)
+	return Marshal(p)
 }
 
 // Unmarshal decodes a CompoundPacket from binary.
