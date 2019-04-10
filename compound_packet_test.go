@@ -24,8 +24,6 @@ func TestBadCompound(t *testing.T) {
 
 	assert.Nil(t, packets)
 
-	//illegal start -- this should return an error, but also 2 parsed packets
-	//it violates the "must start with RR or SR" rule
 	badcompound = realPacket[84:104]
 
 	packets, err = Unmarshal(badcompound)
@@ -33,7 +31,8 @@ func TestBadCompound(t *testing.T) {
 
 	compound := CompoundPacket(packets)
 
-	//This shouldn't validate correctly...
+	//this should return an error,
+	//it violates the "must start with RR or SR" rule
 	err = compound.Validate()
 
 	if got, want := err, errBadFirstPacket; got != want {
@@ -140,6 +139,100 @@ func TestValidPacket(t *testing.T) {
 	} {
 		if got, want := test.Packet.Validate(), test.Err; got != want {
 			t.Fatalf("Valid(%s) = %v, want %v", test.Name, got, want)
+		}
+	}
+}
+
+func TestCNAME(t *testing.T) {
+	cname := &SourceDescription{
+		Chunks: []SourceDescriptionChunk{{
+			Source: 1234,
+			Items: []SourceDescriptionItem{{
+				Type: SDESCNAME,
+				Text: "cname",
+			}},
+		}},
+	}
+
+	for _, test := range []struct {
+		Name   string
+		Packet CompoundPacket
+		Err    error
+		Text   string
+	}{
+		{
+			Name: "no cname",
+			Packet: CompoundPacket{
+				&SenderReport{},
+			},
+			Err: errMissingCNAME,
+		},
+		{
+			Name: "SDES / no cname",
+			Packet: CompoundPacket{
+				&SenderReport{},
+				&SourceDescription{},
+			},
+			Err: errMissingCNAME,
+		},
+		{
+			Name: "just SR",
+			Packet: CompoundPacket{
+				&SenderReport{},
+				cname,
+			},
+			Err:  nil,
+			Text: "cname",
+		},
+		{
+			Name: "multiple SRs",
+			Packet: CompoundPacket{
+				&SenderReport{},
+				&SenderReport{},
+				cname,
+			},
+			Err:  errPacketBeforeCNAME,
+			Text: "cname",
+		},
+		{
+			Name: "just RR",
+			Packet: CompoundPacket{
+				&ReceiverReport{},
+				cname,
+			},
+			Err:  nil,
+			Text: "cname",
+		},
+		{
+			Name: "multiple RRs",
+			Packet: CompoundPacket{
+				&ReceiverReport{},
+				&ReceiverReport{},
+				cname,
+			},
+			Err:  nil,
+			Text: "cname",
+		},
+		{
+			Name: "goodbye",
+			Packet: CompoundPacket{
+				&ReceiverReport{},
+				cname,
+				&Goodbye{},
+			},
+			Err:  nil,
+			Text: "cname",
+		},
+	} {
+		if got, want := test.Packet.Validate(), test.Err; got != want {
+			t.Fatalf("Valid(%s) = %v, want %v", test.Name, got, want)
+		}
+		name, err := test.Packet.CNAME()
+		if got, want := err, test.Err; got != want {
+			t.Fatalf("CNAME(%s) = %v, want %v", test.Name, got, want)
+		}
+		if got, want := name, test.Text; got != want {
+			t.Fatalf("CNAME(%s) = %v, want %v", test.Name, got, want)
 		}
 	}
 }

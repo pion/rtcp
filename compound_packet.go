@@ -68,6 +68,8 @@ func (c CompoundPacket) Validate() error {
 
 //CNAME returns the CNAME that *must* be present in every CompoundPacket
 func (c CompoundPacket) CNAME() (string, error) {
+	var err error
+
 	if len(c) < 1 {
 		return "", errEmptyCompound
 	}
@@ -78,9 +80,14 @@ func (c CompoundPacket) CNAME() (string, error) {
 			for _, c := range sdes.Chunks {
 				for _, it := range c.Items {
 					if it.Type == SDESCNAME {
-						return it.Text, nil
+						return it.Text, err
 					}
 				}
+			}
+		} else {
+			_, ok := pkt.(*ReceiverReport)
+			if !ok {
+				err = errPacketBeforeCNAME
 			}
 		}
 	}
