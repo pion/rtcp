@@ -123,3 +123,16 @@ func TestUnmarshalNil(t *testing.T) {
 		t.Fatalf("Unmarshal(nil) err = %v, want %v", got, want)
 	}
 }
+
+func TestInvalidHeaderLength(t *testing.T) {
+	var invalidPacket = []byte{
+		// Receiver Report (offset=0)
+		// v=2, p=0, count=1, RR, len=100
+		0x81, 0xc9, 0x0, 0x64,
+	}
+
+	_, err := Unmarshal(invalidPacket)
+	if got, want := err, errPacketTooShort; got != want {
+		t.Fatalf("Unmarshal(nil) err = %v, want %v", got, want)
+	}
+}
