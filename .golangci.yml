@@ -13,6 +13,7 @@ linters:
     - gochecknoglobals
     - maligned
     - gochecknoinits
+    - funlen
 
 issues:
   exclude-use-default: false
