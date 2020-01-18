@@ -39,7 +39,6 @@ const (
 
 // Marshal encodes the SliceLossIndication in binary
 func (p SliceLossIndication) Marshal() ([]byte, error) {
-
 	if len(p.SLI)+sliLength > math.MaxUint8 {
 		return nil, errTooManyReports
 	}

@@ -49,7 +49,6 @@ func Marshal(packets []Packet) ([]byte, error) {
 		out = append(out, data...)
 	}
 	return out, nil
-
 }
 
 // unmarshal is a factory which pulls the first RTCP packet from a bytestream,
