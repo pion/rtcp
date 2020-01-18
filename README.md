@@ -38,6 +38,7 @@ Check out the **[contributing wiki](https://github.com/pion/webrtc/wiki/Contribu
 * [adwpc](https://github.com/adwpc) - *Fix PictureLossIndication Unmarshal error*
 * [Luke Curley](https://github.com/kixelated)
 * [Hugo Arregui](https://github.com/hugoArregui)
+* [Atsushi Watanabe](https://github.com/at-wat)
 
 ### License
 MIT License - see [LICENSE](LICENSE) for full text

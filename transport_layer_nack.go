@@ -56,7 +56,6 @@ const (
 
 // Marshal encodes the TransportLayerNack in binary
 func (p TransportLayerNack) Marshal() ([]byte, error) {
-
 	if len(p.Nacks)+tlnLength > math.MaxUint8 {
 		return nil, errTooManyReports
 	}
