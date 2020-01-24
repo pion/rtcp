@@ -26,6 +26,9 @@ const (
 	FormatTLN  uint8 = 1
 	FormatRRR  uint8 = 5
 	FormatREMB uint8 = 15
+
+	//https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-5
+	FormatTCC uint8 = 15
 )
 
 func (p PacketType) String() string {
