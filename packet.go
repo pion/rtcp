@@ -86,6 +86,8 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 			packet = new(TransportLayerNack)
 		case FormatRRR:
 			packet = new(RapidResynchronizationRequest)
+		case FormatTCC:
+			packet = new(TransportLayerCC)
 		default:
 			packet = new(RawPacket)
 		}
