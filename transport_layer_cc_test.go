@@ -15,7 +15,7 @@ func TestTransportLayerCC_RunLengthChunkUnmarshal(t *testing.T) {
 		{
 			//3.1.3 example1: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
 			Name: "example1",
-			Data: []byte{0b00000000, 0b11011101},
+			Data: []byte{0, 0xDD},
 			Want: RunLengthChunk{
 				Type:               typeRunLengthChunk,
 				PacketStatusSymbol: typePacketNotReceived,
@@ -26,7 +26,7 @@ func TestTransportLayerCC_RunLengthChunkUnmarshal(t *testing.T) {
 		{
 			//3.1.3 example2: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
 			Name: "example2",
-			Data: []byte{0b01100000, 0b00011000},
+			Data: []byte{0x60, 0x18},
 			Want: RunLengthChunk{
 				Type:               typeRunLengthChunk,
 				PacketStatusSymbol: typePacketReceivedWithoutDelta,
@@ -61,7 +61,7 @@ func TestTransportLayerCC_RunLengthChunkMarshal(t *testing.T) {
 				PacketStatusSymbol: typePacketNotReceived,
 				RunLength:          221,
 			},
-			Want:      []byte{0b00000000, 0b11011101},
+			Want:      []byte{0, 0xDD},
 			WantError: nil,
 		},
 		{
@@ -72,7 +72,7 @@ func TestTransportLayerCC_RunLengthChunkMarshal(t *testing.T) {
 				PacketStatusSymbol: typePacketReceivedWithoutDelta,
 				RunLength:          24,
 			},
-			Want:      []byte{0b01100000, 0b00011000},
+			Want:      []byte{0x60, 0x18},
 			WantError: nil,
 		},
 	} {
@@ -94,7 +94,7 @@ func TestTransportLayerCC_StatusVectorChunkUnmarshal(t *testing.T) {
 		{
 			//3.1.4 example1: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
 			Name: "example1",
-			Data: []byte{0b10011111, 0b00011100},
+			Data: []byte{0x9F, 0x1C},
 			Want: StatusVectorChunk{
 				Type:       typeStatusVectorChunk,
 				SymbolSize: typeSymbolSizeOneBit,
@@ -105,7 +105,7 @@ func TestTransportLayerCC_StatusVectorChunkUnmarshal(t *testing.T) {
 		{
 			//3.1.4 example2: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
 			Name: "example2",
-			Data: []byte{0b11001101, 0b01010000},
+			Data: []byte{0xCD, 0x50},
 			Want: StatusVectorChunk{
 				Type:       typeStatusVectorChunk,
 				SymbolSize: typeSymbolSizeTwoBit,
@@ -141,7 +141,7 @@ func TestTransportLayerCC_StatusVectorChunkMarshal(t *testing.T) {
 				SymbolSize: typeSymbolSizeOneBit,
 				SymbolList: []uint16{typeSymbolListPacketReceived, typeSymbolListPacketNotReceived, typeSymbolListPacketNotReceived, typeSymbolListPacketNotReceived, typeSymbolListPacketNotReceived, typeSymbolListPacketNotReceived, typeSymbolListPacketReceived, typeSymbolListPacketReceived, typeSymbolListPacketReceived, typeSymbolListPacketNotReceived, typeSymbolListPacketNotReceived, typeSymbolListPacketNotReceived, typeSymbolListPacketReceived, typeSymbolListPacketReceived},
 			},
-			Want:      []byte{0b10011111, 0b00011100},
+			Want:      []byte{0x9F, 0x1C},
 			WantError: nil,
 		},
 		{
@@ -152,7 +152,7 @@ func TestTransportLayerCC_StatusVectorChunkMarshal(t *testing.T) {
 				SymbolSize: typeSymbolSizeTwoBit,
 				SymbolList: []uint16{typePacketNotReceived, typePacketReceivedWithoutDelta, typePacketReceivedSmallDelta, typePacketReceivedSmallDelta, typePacketReceivedSmallDelta, typePacketNotReceived, typePacketNotReceived},
 			},
-			Want:      []byte{0b11001101, 0b01010000},
+			Want:      []byte{0xCD, 0x50},
 			WantError: nil,
 		},
 	} {
@@ -173,7 +173,7 @@ func TestTransportLayerCC_RecvDeltaUnmarshal(t *testing.T) {
 	}{
 		{
 			Name: "small delta 63.75ms",
-			Data: []byte{0b11111111},
+			Data: []byte{0xFF},
 			Want: RecvDelta{
 				Type:  typePacketReceivedSmallDelta,
 				Delta: 63750,
@@ -182,7 +182,7 @@ func TestTransportLayerCC_RecvDeltaUnmarshal(t *testing.T) {
 		},
 		{
 			Name: "big delta 8191.75ms",
-			Data: []byte{0b01111111, 0b11111111},
+			Data: []byte{0x7F, 0xFF},
 			Want: RecvDelta{
 				Type:  typePacketReceivedLargeDelta,
 				Delta: 8191750,
@@ -215,7 +215,7 @@ func TestTransportLayerCC_RecvDeltaMarshal(t *testing.T) {
 				Type:  typePacketReceivedSmallDelta,
 				Delta: 63750,
 			},
-			Want:      []byte{0b11111111},
+			Want:      []byte{0xFF},
 			WantError: nil,
 		},
 		{
@@ -224,7 +224,7 @@ func TestTransportLayerCC_RecvDeltaMarshal(t *testing.T) {
 				Type:  typePacketReceivedLargeDelta,
 				Delta: 8191750,
 			},
-			Want:      []byte{0b01111111, 0b11111111},
+			Want:      []byte{0x7F, 0xFF},
 			WantError: nil,
 		},
 	} {
@@ -267,12 +267,12 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 		{
 			Name: "example1",
 			Data: []byte{
-				0b10101111, 0b11001101, 0b00000000, 0b00000101,
-				0b11111010, 0b00010111, 0b11111010, 0b00010111,
-				0b01000011, 0b00000011, 0b00101111, 0b10100000,
-				0b00000000, 0b10011001, 0b00000000, 0b00000001,
-				0b00111101, 0b11101000, 0b00000010, 0b00010111,
-				0b00100000, 0b00000001, 0b10010100, 0b00000001,
+				0xaf, 0xcd, 0x0, 0x5,
+				0xfa, 0x17, 0xfa, 0x17,
+				0x43, 0x3, 0x2f, 0xa0,
+				0x0, 0x99, 0x0, 0x1,
+				0x3d, 0xe8, 0x2, 0x17,
+				0x20, 0x1, 0x94, 0x1,
 			},
 			Want: TransportLayerCC{
 				Header: Header{
@@ -308,13 +308,13 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 		{
 			Name: "example2",
 			Data: []byte{
-				0b10101111, 0b11001101, 0b00000000, 0b00000110,
-				0b11111010, 0b00010111, 0b11111010, 0b00010111,
-				0b00011001, 0b00111101, 0b11011000, 0b10111011,
-				0b00000001, 0b01110100, 0b00000000, 0b00000010,
-				0b01000101, 0b10110001, 0b01011010, 0b01000000,
-				0b11011000, 0b00000000, 0b11110000, 0b11111111,
-				0b11010000, 0b00000000, 0b00000000, 0b00000011,
+				0xaf, 0xcd, 0x0, 0x6,
+				0xfa, 0x17, 0xfa, 0x17,
+				0x19, 0x3d, 0xd8, 0xbb,
+				0x1, 0x74, 0x0, 0x2,
+				0x45, 0xb1, 0x5a, 0x40,
+				0xd8, 0x0, 0xf0, 0xff,
+				0xd0, 0x0, 0x0, 0x3,
 			},
 			Want: TransportLayerCC{
 				Header: Header{
@@ -406,13 +406,13 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 				},
 			},
 			Want: []byte{
-				0b10101111, 0b11001101, 0b00000000, 0b00000101,
-				0b11111010, 0b00010111, 0b11111010, 0b00010111,
-				0b01000011, 0b00000011, 0b00101111, 0b10100000,
-				0b00000000, 0b10011001, 0b00000000, 0b00000001,
-				0b00111101, 0b11101000, 0b00000010, 0b00010111,
+				0xaf, 0xcd, 0x0, 0x5,
+				0xfa, 0x17, 0xfa, 0x17,
+				0x43, 0x3, 0x2f, 0xa0,
+				0x0, 0x99, 0x0, 0x1,
+				0x3d, 0xe8, 0x2, 0x17,
 				// change last byte '0b00000001' to '0b00000000', make ci pass
-				0b00100000, 0b00000001, 0b10010100, 0b00000000,
+				0x20, 0x1, 0x94, 0x0,
 				// 0b00100000, 0b00000001, 0b10010100, 0b00000001,
 				// the 'Want []byte' came from chrome, and
 				// the padding byte is '0b00000001', but i think should be '0b00000000' when i read the RFC, what's wrong?
@@ -460,15 +460,14 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 				},
 			},
 			Want: []byte{
-				0b10101111, 0b11001101, 0b00000000, 0b00000110,
-				0b11111010, 0b00010111, 0b11111010, 0b00010111,
-				0b00011001, 0b00111101, 0b11011000, 0b10111011,
-				0b00000001, 0b01110100, 0b00000000, 0b00000010,
-				0b01000101, 0b10110001, 0b01011010, 0b01000000,
-				0b11011000, 0b00000000, 0b11110000, 0b11111111,
+				0xaf, 0xcd, 0x0, 0x6,
+				0xfa, 0x17, 0xfa, 0x17,
+				0x19, 0x3d, 0xd8, 0xbb,
+				0x1, 0x74, 0x0, 0x2,
+				0x45, 0xb1, 0x5a, 0x40,
+				0xd8, 0x0, 0xf0, 0xff,
 				// change last byte '0b00000011' to '0b00000000', make ci pass
-				0b11010000, 0b00000000, 0b00000000, 0b00000000,
-
+				0xd0, 0x0, 0x0, 0x0,
 				// 0b11010000, 0b00000000, 0b00000000, 0b00000011,
 				// the 'Want []byte' came from chrome, and
 				// the padding byte is '0b00000011', but i think should be '0b00000000' when i read the RFC
