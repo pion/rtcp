@@ -23,6 +23,7 @@ const (
 const (
 	FormatSLI  uint8 = 2
 	FormatPLI  uint8 = 1
+	FormatFIR  uint8 = 4
 	FormatTLN  uint8 = 1
 	FormatRRR  uint8 = 5
 	FormatREMB uint8 = 15

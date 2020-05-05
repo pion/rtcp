@@ -100,6 +100,8 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 			packet = new(SliceLossIndication)
 		case FormatREMB:
 			packet = new(ReceiverEstimatedMaximumBitrate)
+		case FormatFIR:
+			packet = new(FullIntraRequest)
 		default:
 			packet = new(RawPacket)
 		}
