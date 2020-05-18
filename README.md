@@ -40,6 +40,7 @@ Check out the **[contributing wiki](https://github.com/pion/webrtc/wiki/Contribu
 * [Hugo Arregui](https://github.com/hugoArregui)
 * [Atsushi Watanabe](https://github.com/at-wat)
 * [Juliusz Chroboczek](https://github.com/jech)
+* [Gabor Pongracz](https://github.com/pongraczgabor87)
 
 ### License
 MIT License - see [LICENSE](LICENSE) for full text
