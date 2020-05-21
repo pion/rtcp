@@ -175,7 +175,8 @@ func TestTransportLayerCC_RecvDeltaUnmarshal(t *testing.T) {
 			Name: "small delta 63.75ms",
 			Data: []byte{0xFF},
 			Want: RecvDelta{
-				Type:  TypeTCCPacketReceivedSmallDelta,
+				Type: TypeTCCPacketReceivedSmallDelta,
+				// 255 * 250
 				Delta: 63750,
 			},
 			WantError: nil,
@@ -184,8 +185,19 @@ func TestTransportLayerCC_RecvDeltaUnmarshal(t *testing.T) {
 			Name: "big delta 8191.75ms",
 			Data: []byte{0x7F, 0xFF},
 			Want: RecvDelta{
-				Type:  TypeTCCPacketReceivedLargeDelta,
+				Type: TypeTCCPacketReceivedLargeDelta,
+				// 32767 * 250
 				Delta: 8191750,
+			},
+			WantError: nil,
+		},
+		{
+			Name: "big delta -8192ms",
+			Data: []byte{0x80, 0x00},
+			Want: RecvDelta{
+				Type: TypeTCCPacketReceivedLargeDelta,
+				// -32768 * 250
+				Delta: -8192000,
 			},
 			WantError: nil,
 		},
@@ -212,7 +224,8 @@ func TestTransportLayerCC_RecvDeltaMarshal(t *testing.T) {
 		{
 			Name: "small delta 63.75ms",
 			Data: RecvDelta{
-				Type:  TypeTCCPacketReceivedSmallDelta,
+				Type: TypeTCCPacketReceivedSmallDelta,
+				// 255 * 250
 				Delta: 63750,
 			},
 			Want:      []byte{0xFF},
@@ -221,10 +234,21 @@ func TestTransportLayerCC_RecvDeltaMarshal(t *testing.T) {
 		{
 			Name: "big delta 8191.75ms",
 			Data: RecvDelta{
-				Type:  TypeTCCPacketReceivedLargeDelta,
+				Type: TypeTCCPacketReceivedLargeDelta,
+				// 32767 * 250
 				Delta: 8191750,
 			},
 			Want:      []byte{0x7F, 0xFF},
+			WantError: nil,
+		},
+		{
+			Name: "big delta -8192ms",
+			Data: RecvDelta{
+				Type: TypeTCCPacketReceivedLargeDelta,
+				// -32768 * 250
+				Delta: -8192000,
+			},
+			Want:      []byte{0x80, 0x00},
 			WantError: nil,
 		},
 	} {

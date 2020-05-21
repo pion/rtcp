@@ -41,6 +41,7 @@ Check out the **[contributing wiki](https://github.com/pion/webrtc/wiki/Contribu
 * [Atsushi Watanabe](https://github.com/at-wat)
 * [Juliusz Chroboczek](https://github.com/jech)
 * [Gabor Pongracz](https://github.com/pongraczgabor87)
+* [Simone Gotti](https://github.com/sgotti)
 
 ### License
 MIT License - see [LICENSE](LICENSE) for full text
