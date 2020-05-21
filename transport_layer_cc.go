@@ -273,7 +273,7 @@ func (r *RecvDelta) Unmarshal(rawPacket []byte) error {
 	}
 
 	r.Type = TypeTCCPacketReceivedLargeDelta
-	r.Delta = TypeTCCDeltaScaleFactor * int64(binary.BigEndian.Uint16(rawPacket))
+	r.Delta = TypeTCCDeltaScaleFactor * int64(int16(binary.BigEndian.Uint16(rawPacket)))
 	return nil
 }
 
