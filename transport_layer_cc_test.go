@@ -618,12 +618,7 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 				0x43, 0x3, 0x2f, 0xa0,
 				0x0, 0x99, 0x0, 0x1,
 				0x3d, 0xe8, 0x2, 0x17,
-				// change last byte '0b00000001' to '0b00000000', make ci pass
-				0x20, 0x1, 0x94, 0x0,
-				// 0b00100000, 0b00000001, 0b10010100, 0b00000001,
-				// the 'Want []byte' came from chrome, and
-				// the padding byte is '0b00000001', but i think should be '0b00000000' when i read the RFC, what's wrong?
-				// webrtc code: https://webrtc.googlesource.com/src/webrtc/+/f54860e9ef0b68e182a01edc994626d21961bc4b/modules/rtp_rtcp/source/rtcp_packet/transport_feedback.cc
+				0x20, 0x1, 0x94, 0x1,
 			},
 			WantError: nil,
 		},
@@ -673,12 +668,7 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 				0x1, 0x74, 0x0, 0x2,
 				0x45, 0xb1, 0x5a, 0x40,
 				0xd8, 0x0, 0xf0, 0xff,
-				// change last byte '0b00000011' to '0b00000000', make ci pass
-				0xd0, 0x0, 0x0, 0x0,
-				// 0b11010000, 0b00000000, 0b00000000, 0b00000011,
-				// the 'Want []byte' came from chrome, and
-				// the padding byte is '0b00000011', but i think should be '0b00000000' when i read the RFC
-				// webrtc code: https://webrtc.googlesource.com/src/webrtc/+/f54860e9ef0b68e182a01edc994626d21961bc4b/modules/rtp_rtcp/source/rtcp_packet/transport_feedback.cc
+				0xd0, 0x0, 0x0, 0x2,
 			},
 			WantError: nil,
 		},
@@ -809,7 +799,7 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 				0x10, 0x63, 0x6e, 0x1,
 				0x20, 0x7, 0x4c, 0x24,
 				0x24, 0x10, 0xc, 0xc,
-				0x10, 0x0, 0x0, 0x0,
+				0x10, 0x0, 0x0, 0x3,
 			},
 			WantError: nil,
 		},
@@ -861,7 +851,7 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 				0x0, 0x1, 0x0, 0xe,
 				0x10, 0x63, 0x6d, 0x0,
 				0xba, 0x0, 0x10, 0xc,
-				0xc, 0x10, 0x0, 0x0,
+				0xc, 0x10, 0x0, 0x2,
 			},
 			WantError: nil,
 		},
