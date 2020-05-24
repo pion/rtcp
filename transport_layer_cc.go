@@ -329,8 +329,7 @@ type TransportLayerCC struct {
 // }
 // }
 
-// Len return total bytes with padding
-func (t *TransportLayerCC) Len() uint16 {
+func (t *TransportLayerCC) packetLen() uint16 {
 	n := uint16(headerLength + packetChunkOffset + len(t.PacketChunks)*2)
 	for _, d := range t.RecvDeltas {
 		delta := d.Delta / TypeTCCDeltaScaleFactor
@@ -342,7 +341,12 @@ func (t *TransportLayerCC) Len() uint16 {
 			n += 2
 		}
 	}
+	return n
+}
 
+// Len return total bytes with padding
+func (t *TransportLayerCC) Len() uint16 {
+	n := t.packetLen()
 	// has padding
 	if n%4 != 0 {
 		n = (n/4 + 1) * 4
@@ -377,6 +381,7 @@ func (t TransportLayerCC) Marshal() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	payload := make([]byte, t.Len()-headerLength)
 	binary.BigEndian.PutUint32(payload, t.SenderSSRC)
 	binary.BigEndian.PutUint32(payload[4:], t.MediaSSRC)
@@ -385,14 +390,13 @@ func (t TransportLayerCC) Marshal() ([]byte, error) {
 	ReferenceTimeAndFbPktCount := appendNBitsToUint32(0, 24, t.ReferenceTime)
 	ReferenceTimeAndFbPktCount = appendNBitsToUint32(ReferenceTimeAndFbPktCount, 8, uint32(t.FbPktCount))
 	binary.BigEndian.PutUint32(payload[referenceTimeOffset:], ReferenceTimeAndFbPktCount)
-	dumpBinary(payload)
+
 	for i, chunk := range t.PacketChunks {
 		b, err := chunk.Marshal()
 		if err == nil {
 			copy(payload[packetChunkOffset+i*2:], b)
 		}
 	}
-	// dumpBinary(payload)
 
 	recvDeltaOffset := packetChunkOffset + len(t.PacketChunks)*2
 	var i int
@@ -406,7 +410,10 @@ func (t TransportLayerCC) Marshal() ([]byte, error) {
 			}
 		}
 	}
-	// dumpBinary(payload)
+
+	if t.Header.Padding {
+		payload[len(payload)-1] = uint8(t.Len() - t.packetLen())
+	}
 
 	return append(header, payload...), nil
 }
