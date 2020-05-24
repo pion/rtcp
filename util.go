@@ -1,7 +1,5 @@
 package rtcp
 
-import "fmt"
-
 // getPadding Returns the padding required to make the length a multiple of 4
 func getPadding(len int) int {
 	if len%4 == 0 {
@@ -30,16 +28,4 @@ func getNBitsFromByte(b byte, begin, n uint16) uint16 {
 // get24BitFromBytes get 24bits from `[3]byte` slice
 func get24BitsFromBytes(b []byte) uint32 {
 	return uint32(b[0])<<16 + uint32(b[1])<<8 + uint32(b[2])
-}
-
-// dumpBinary dump []byte to string
-func dumpBinary(b []byte) string {
-	out := ""
-	for i, v := range b {
-		out += fmt.Sprintf("0b%08b,", v)
-		if (i+1)%4 == 0 {
-			out += "\n"
-		}
-	}
-	return out
 }
