@@ -407,12 +407,12 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 				PacketChunks: []PacketStatusChunk{
 					&RunLengthChunk{
 						Type:               TypeTCCRunLengthChunk,
-						PacketStatusSymbol: 2,
+						PacketStatusSymbol: TypeTCCPacketReceivedLargeDelta,
 						RunLength:          2,
 					},
 					&RunLengthChunk{
 						Type:               TypeTCCRunLengthChunk,
-						PacketStatusSymbol: 1,
+						PacketStatusSymbol: TypeTCCPacketReceivedSmallDelta,
 						RunLength:          4,
 					},
 				},
@@ -473,7 +473,7 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 				PacketChunks: []PacketStatusChunk{
 					&RunLengthChunk{
 						Type:               TypeTCCRunLengthChunk,
-						PacketStatusSymbol: 1,
+						PacketStatusSymbol: TypeTCCPacketReceivedSmallDelta,
 						RunLength:          7,
 					},
 				},
@@ -562,15 +562,84 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 			},
 			WantError: nil,
 		},
+		{
+			Name: "example6",
+			Data: []byte{
+				0xaf, 0xcd, 0x0, 0x7,
+				0x9b, 0x74, 0xf6, 0x1f,
+				0x93, 0x71, 0xdc, 0xbc,
+				0x85, 0x3c, 0x0, 0x9,
+				0x63, 0xf9, 0x16, 0xb3,
+				0xd5, 0x52, 0x0, 0x30,
+				0x9b, 0xaa, 0x6a, 0xaa,
+				0x7b, 0x1, 0x9, 0x1,
+			},
+			Want: TransportLayerCC{
+				Header: Header{
+					Padding: true,
+					Count:   FormatTCC,
+					Type:    TypeTransportSpecificFeedback,
+					Length:  7,
+				},
+				SenderSSRC:         2608133663,
+				MediaSSRC:          2473712828,
+				BaseSequenceNumber: 34108,
+				PacketStatusCount:  9,
+				ReferenceTime:      6551830,
+				FbPktCount:         179,
+				PacketChunks: []PacketStatusChunk{
+					&StatusVectorChunk{
+						Type:       TypeTCCStatusVectorChunk,
+						SymbolSize: TypeTCCSymbolSizeTwoBit,
+						SymbolList: []uint16{TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketReceivedLargeDelta},
+					},
+					&RunLengthChunk{
+						Type:               TypeTCCRunLengthChunk,
+						PacketStatusSymbol: TypeTCCPacketNotReceived,
+						RunLength:          48,
+					},
+				},
+				RecvDeltas: []*RecvDelta{
+					{
+						Type:  TypeTCCPacketReceivedSmallDelta,
+						Delta: 38750,
+					},
+					{
+						Type:  TypeTCCPacketReceivedSmallDelta,
+						Delta: 42500,
+					},
+					{
+						Type:  TypeTCCPacketReceivedSmallDelta,
+						Delta: 26500,
+					},
+					{
+						Type:  TypeTCCPacketReceivedSmallDelta,
+						Delta: 42500,
+					},
+					{
+						Type:  TypeTCCPacketReceivedSmallDelta,
+						Delta: 30750,
+					},
+					{
+						Type:  TypeTCCPacketReceivedLargeDelta,
+						Delta: 66250,
+					},
+				},
+			},
+			WantError: nil,
+		},
 	} {
-		var chunk TransportLayerCC
-		err := chunk.Unmarshal(test.Data)
-		if err != nil {
-			t.Fatalf("Unmarshal err: %v", err)
-		}
-		if got, want := chunk, test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Unmarshal %q : got = %v, want %v", test.Name, got, want)
-		}
+		test := test
+		t.Run(test.Name, func(t *testing.T) {
+			var chunk TransportLayerCC
+			err := chunk.Unmarshal(test.Data)
+			if err != nil {
+				t.Fatalf("Unmarshal err: %v", err)
+			}
+			if got, want := chunk, test.Want; !reflect.DeepEqual(got, want) {
+				t.Fatalf("Unmarshal %q : got = %v, want %v", test.Name, got, want)
+			}
+		})
 	}
 }
 
@@ -690,12 +759,12 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 				PacketChunks: []PacketStatusChunk{
 					&RunLengthChunk{
 						Type:               TypeTCCRunLengthChunk,
-						PacketStatusSymbol: 2,
+						PacketStatusSymbol: TypeTCCPacketReceivedLargeDelta,
 						RunLength:          2,
 					},
 					&RunLengthChunk{
 						Type:               TypeTCCRunLengthChunk,
-						PacketStatusSymbol: 1,
+						PacketStatusSymbol: TypeTCCPacketReceivedSmallDelta,
 						RunLength:          4,
 					},
 				},
@@ -756,7 +825,7 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 				PacketChunks: []PacketStatusChunk{
 					&RunLengthChunk{
 						Type:               TypeTCCRunLengthChunk,
-						PacketStatusSymbol: 1,
+						PacketStatusSymbol: TypeTCCPacketReceivedSmallDelta,
 						RunLength:          7,
 					},
 				},
@@ -821,7 +890,7 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 				PacketChunks: []PacketStatusChunk{
 					&StatusVectorChunk{
 						Type:       TypeTCCStatusVectorChunk,
-						SymbolSize: 0,
+						SymbolSize: TypeTCCSymbolSizeOneBit,
 						SymbolList: []uint16{TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived},
 					},
 				},
@@ -855,14 +924,82 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 			},
 			WantError: nil,
 		},
+		{
+			Name: "example6",
+			Data: TransportLayerCC{
+				Header: Header{
+					Padding: true,
+					Count:   FormatTCC,
+					Type:    TypeTransportSpecificFeedback,
+					Length:  7,
+				},
+				SenderSSRC:         4195875351,
+				MediaSSRC:          1124282272,
+				BaseSequenceNumber: 39956,
+				PacketStatusCount:  12,
+				ReferenceTime:      7701536,
+				FbPktCount:         0,
+				PacketChunks: []PacketStatusChunk{
+					&StatusVectorChunk{
+						Type:       TypeTCCStatusVectorChunk,
+						SymbolSize: TypeTCCSymbolSizeOneBit,
+						SymbolList: []uint16{TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived},
+					},
+				},
+				RecvDeltas: []*RecvDelta{
+					{
+						Type:  TypeTCCPacketReceivedSmallDelta,
+						Delta: 48250,
+					},
+					{
+						Type:  TypeTCCPacketReceivedSmallDelta,
+						Delta: 15750,
+					},
+					{
+						Type:  TypeTCCPacketReceivedSmallDelta,
+						Delta: 14750,
+					},
+					{
+						Type:  TypeTCCPacketReceivedSmallDelta,
+						Delta: 15750,
+					},
+					{
+						Type:  TypeTCCPacketReceivedSmallDelta,
+						Delta: 20750,
+					},
+					{
+						Type:  TypeTCCPacketReceivedSmallDelta,
+						Delta: 36000,
+					},
+					{
+						Type:  TypeTCCPacketReceivedSmallDelta,
+						Delta: 14750,
+					},
+				},
+			},
+			Want: []byte{
+				0xaf, 0xcd, 0x0, 0x7,
+				0xfa, 0x17, 0xfa, 0x17,
+				0x43, 0x3, 0x2f, 0xa0,
+				0x9c, 0x14, 0x0, 0xc,
+				0x75, 0x84, 0x20, 0x0,
+
+				0xbe, 0xc0, 0xc1, 0x3f,
+				0x3b, 0x3f, 0x53, 0x90,
+				0x3b, 0x0, 0x0, 0x3,
+			},
+			WantError: nil,
+		},
 	} {
-		transportCC := test.Data
-		bin, err := transportCC.Marshal()
-		if err != nil {
-			t.Fatalf("Marshal err: %v", err)
-		}
-		if got, want := bin, test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Marshal %q : got = %v, want %v", test.Name, got, want)
-		}
+		test := test
+		t.Run(test.Name, func(t *testing.T) {
+			bin, err := test.Data.Marshal()
+			if err != nil {
+				t.Fatalf("Marshal err: %v", err)
+			}
+			if got, want := bin, test.Want; !reflect.DeepEqual(got, want) {
+				t.Fatalf("Marshal %q : got = %v, want %v", test.Name, got, want)
+			}
+		})
 	}
 }
