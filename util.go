@@ -16,7 +16,10 @@ func setNBitsOfUint16(src, size, startIndex, val uint16) (uint16, error) {
 		return 0, errors.New("invalid size or startIndex")
 	}
 
-	return src | ((val & (0xFFFF >> (16 - size))) << (16 - size - startIndex)), nil
+	// truncate val to size bits
+	val &= (1 << size) - 1
+
+	return src | (val << (16 - size - startIndex)), nil
 }
 
 // appendBit32 will left-shift and append n bits of val

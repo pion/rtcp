@@ -63,13 +63,15 @@ const (
 	TypeTCCSymbolSizeOneBit = 0
 	TypeTCCSymbolSizeTwoBit = 1
 
-	statusVectorLengthOneBit = 14
-	statusVectorLengthTwoBit = 7
-
 	// Notice: RFC is wrong: "packet received" (0) and "packet not received" (1)
 	// if S == TypeTCCSymbolSizeOneBit, symbol list will be: TypeTCCPacketNotReceived TypeTCCPacketReceivedSmallDelta
 	// if S == TypeTCCSymbolSizeTwoBit, symbol list will be same as above:
 )
+
+var numOfBitsOfSymbolSize = map[uint16]uint16{
+	TypeTCCSymbolSizeOneBit: 1,
+	TypeTCCSymbolSizeTwoBit: 2,
+}
 
 var _ Packet = (*TransportLayerCC)(nil) // assert is a Packet
 
@@ -187,10 +189,11 @@ func (r StatusVectorChunk) Marshal() ([]byte, error) {
 		return nil, err
 	}
 
+	numOfBits := numOfBitsOfSymbolSize[r.SymbolSize]
 	// append 14 bit SymbolList
 	for i, s := range r.SymbolList {
-		index := (r.SymbolSize+1)*uint16(i) + 2
-		dst, err = setNBitsOfUint16(dst, r.SymbolSize+1, index, s)
+		index := numOfBits*uint16(i) + 2
+		dst, err = setNBitsOfUint16(dst, numOfBits, index, s)
 		if err != nil {
 			return nil, err
 		}
