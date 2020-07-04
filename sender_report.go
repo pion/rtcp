@@ -219,10 +219,11 @@ func (r *SenderReport) Unmarshal(rawPacket []byte) error {
 
 // DestinationSSRC returns an array of SSRC values that this packet refers to.
 func (r *SenderReport) DestinationSSRC() []uint32 {
-	out := make([]uint32, len(r.Reports))
+	out := make([]uint32, len(r.Reports)+1)
 	for i, v := range r.Reports {
 		out[i] = v.SSRC
 	}
+	out[len(r.Reports)] = r.SSRC
 	return out
 }
 

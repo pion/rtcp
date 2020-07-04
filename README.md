@@ -43,6 +43,7 @@ Check out the **[contributing wiki](https://github.com/pion/webrtc/wiki/Contribu
 * [Gabor Pongracz](https://github.com/pongraczgabor87)
 * [Simone Gotti](https://github.com/sgotti)
 * [lllf](https://github.com/LittleLightLittleFire)
+* [cnderrauber](https://github.com/cnderrauber)
 
 ### License
 MIT License - see [LICENSE](LICENSE) for full text
