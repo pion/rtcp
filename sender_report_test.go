@@ -181,6 +181,19 @@ func TestSenderReportUnmarshal(t *testing.T) {
 		if got, want := sr, test.Want; !reflect.DeepEqual(got, want) {
 			t.Fatalf("Unmarshal %q sr: got %v, want %v", test.Name, got, want)
 		}
+
+		var ssrcFound bool
+		dstSsrc := sr.DestinationSSRC()
+		for _, v := range dstSsrc {
+			if v == sr.SSRC {
+				ssrcFound = true
+				break
+			}
+		}
+
+		if !ssrcFound {
+			t.Fatalf("Unmarshal %q sr: sr's DestinationSSRC should include it's SSRC field", test.Name)
+		}
 	}
 }
 
