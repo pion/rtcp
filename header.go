@@ -16,7 +16,7 @@ const (
 	TypeApplicationDefined        PacketType = 204 // RFC 3550, 6.7 (unimplemented)
 	TypeTransportSpecificFeedback PacketType = 205 // RFC 4585, 6051
 	TypePayloadSpecificFeedback   PacketType = 206 // RFC 4585, 6.3
-
+	TypeExtendedReports           PacketType = 207 // RFC 3611, 6.1
 )
 
 // Transport and Payload specific feedback messages overload the count field to act as a message type. those are listed here
@@ -48,6 +48,8 @@ func (p PacketType) String() string {
 		return "TSFB"
 	case TypePayloadSpecificFeedback:
 		return "PSFB"
+	case TypeExtendedReports:
+		return "XR"
 	default:
 		return string(p)
 	}

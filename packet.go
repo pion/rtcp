@@ -80,6 +80,9 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 	case TypeGoodbye:
 		packet = new(Goodbye)
 
+	case TypeExtendedReports:
+		packet = new(ExtendedReports)
+
 	case TypeTransportSpecificFeedback:
 		switch h.Count {
 		case FormatTLN:
@@ -110,7 +113,7 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 		packet = new(RawPacket)
 	}
 
-	err = packet.Unmarshal(inPacket)
+	err = packet.Unmarshal(inPacket) // this Unmarshal is called for each packet type
 
 	return packet, bytesprocessed, err
 }
