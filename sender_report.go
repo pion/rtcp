@@ -251,7 +251,7 @@ func (r SenderReport) String() string {
 	out += fmt.Sprintf("\tPacketCount:\t%d\n", r.PacketCount)
 	out += fmt.Sprintf("\tOctetCount:\t%d\n", r.OctetCount)
 
-	out += fmt.Sprintf("\tSSRC    \tLost\tLastSequence\n")
+	out += "\tSSRC    \tLost\tLastSequence\n"
 	for _, i := range r.Reports {
 		out += fmt.Sprintf("\t%x\t%d/%d\t%d\n", i.SSRC, i.FractionLost, i.TotalLost, i.LastSequenceNumber)
 	}

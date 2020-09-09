@@ -122,7 +122,7 @@ func (p *TransportLayerNack) Header() Header {
 func (p TransportLayerNack) String() string {
 	out := fmt.Sprintf("TransportLayerNack from %x\n", p.SenderSSRC)
 	out += fmt.Sprintf("\tMedia Ssrc %x\n", p.MediaSSRC)
-	out += fmt.Sprintf("\tID\tLostPackets\n")
+	out += "\tID\tLostPackets\n"
 	for _, i := range p.Nacks {
 		out += fmt.Sprintf("\t%d\t%b\n", i.PacketID, i.LostPackets)
 	}

@@ -185,7 +185,7 @@ func (r *ReceiverReport) DestinationSSRC() []uint32 {
 
 func (r ReceiverReport) String() string {
 	out := fmt.Sprintf("ReceiverReport from %x\n", r.SSRC)
-	out += fmt.Sprintf("\tSSRC    \tLost\tLastSequence\n")
+	out += "\tSSRC    \tLost\tLastSequence\n"
 	for _, i := range r.Reports {
 		out += fmt.Sprintf("\t%x\t%d/%d\t%d\n", i.SSRC, i.FractionLost, i.TotalLost, i.LastSequenceNumber)
 	}
