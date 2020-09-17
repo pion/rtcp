@@ -1,6 +1,7 @@
 package rtcp
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -225,7 +226,7 @@ func TestSourceDescriptionUnmarshal(t *testing.T) {
 	} {
 		var sdes SourceDescription
 		err := sdes.Unmarshal(test.Data)
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Unmarshal %q: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {
@@ -239,6 +240,17 @@ func TestSourceDescriptionUnmarshal(t *testing.T) {
 }
 
 func TestSourceDescriptionRoundTrip(t *testing.T) {
+	// a slice with enough SourceDescriptionChunks to overflow an 5-bit int
+	var tooManyChunks []SourceDescriptionChunk
+	var tooLongText string
+
+	for i := 0; i < (1 << 5); i++ {
+		tooManyChunks = append(tooManyChunks, SourceDescriptionChunk{})
+	}
+	for i := 0; i < (1 << 8); i++ {
+		tooLongText += "x"
+	}
+
 	for _, test := range []struct {
 		Name      string
 		Desc      SourceDescription
@@ -338,7 +350,7 @@ func TestSourceDescriptionRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Desc.Marshal()
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Marshal %q: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {
@@ -353,18 +365,5 @@ func TestSourceDescriptionRoundTrip(t *testing.T) {
 		if got, want := decoded, test.Desc; !reflect.DeepEqual(got, want) {
 			t.Fatalf("%q sdes round trip: got %#v, want %#v", test.Name, got, want)
 		}
-	}
-}
-
-// a slice with enough SourceDescriptionChunks to overflow an 5-bit int
-var tooManyChunks []SourceDescriptionChunk
-var tooLongText string
-
-func init() {
-	for i := 0; i < (1 << 5); i++ {
-		tooManyChunks = append(tooManyChunks, SourceDescriptionChunk{})
-	}
-	for i := 0; i < (1 << 8); i++ {
-		tooLongText += "x"
 	}
 }

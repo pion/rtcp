@@ -1,6 +1,7 @@
 package rtcp
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -107,7 +108,7 @@ func TestGoodbyeUnmarshal(t *testing.T) {
 	} {
 		var bye Goodbye
 		err := bye.Unmarshal(test.Data)
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Unmarshal %q bye: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {
@@ -119,7 +120,19 @@ func TestGoodbyeUnmarshal(t *testing.T) {
 		}
 	}
 }
+
 func TestGoodbyeRoundTrip(t *testing.T) {
+	// a slice with enough sources to overflow an 5-bit int
+	var tooManySources []uint32
+	var tooLongText string
+
+	for i := 0; i < (1 << 5); i++ {
+		tooManySources = append(tooManySources, 0x00)
+	}
+	for i := 0; i < (1 << 8); i++ {
+		tooLongText += "x"
+	}
+
 	for _, test := range []struct {
 		Name      string
 		Bye       Goodbye
@@ -179,7 +192,7 @@ func TestGoodbyeRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Bye.Marshal()
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Marshal %q: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {
@@ -194,14 +207,5 @@ func TestGoodbyeRoundTrip(t *testing.T) {
 		if got, want := bye, test.Bye; !reflect.DeepEqual(got, want) {
 			t.Fatalf("%q sdes round trip: got %#v, want %#v", test.Name, got, want)
 		}
-	}
-}
-
-// a slice with enough sources to overflow an 5-bit int
-var tooManySources []uint32
-
-func init() {
-	for i := 0; i < (1 << 5); i++ {
-		tooManySources = append(tooManySources, 0x00)
 	}
 }

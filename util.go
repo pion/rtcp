@@ -1,7 +1,5 @@
 package rtcp
 
-import "errors"
-
 // getPadding Returns the padding required to make the length a multiple of 4
 func getPadding(len int) int {
 	if len%4 == 0 {
@@ -13,7 +11,7 @@ func getPadding(len int) int {
 // setNBitsOfUint16 will truncate the value to size, left-shift to startIndex position and set
 func setNBitsOfUint16(src, size, startIndex, val uint16) (uint16, error) {
 	if startIndex+size > 16 {
-		return 0, errors.New("invalid size or startIndex")
+		return 0, errInvalidSizeOrStartIndex
 	}
 
 	// truncate val to size bits

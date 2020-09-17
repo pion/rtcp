@@ -1,6 +1,7 @@
 package rtcp
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -38,7 +39,7 @@ func TestRawPacketRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Packet.Marshal()
-		if got, want := err, test.WantMarshalError; got != want {
+		if got, want := err, test.WantMarshalError; !errors.Is(got, want) {
 			t.Fatalf("Marshal %q: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {
@@ -47,7 +48,7 @@ func TestRawPacketRoundTrip(t *testing.T) {
 
 		var decoded RawPacket
 		err = decoded.Unmarshal(data)
-		if got, want := err, test.WantUnmarshalError; got != want {
+		if got, want := err, test.WantUnmarshalError; !errors.Is(got, want) {
 			t.Fatalf("Unmarshal %q: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {

@@ -68,9 +68,11 @@ const (
 	// if S == TypeTCCSymbolSizeTwoBit, symbol list will be same as above:
 )
 
-var numOfBitsOfSymbolSize = map[uint16]uint16{
-	TypeTCCSymbolSizeOneBit: 1,
-	TypeTCCSymbolSizeTwoBit: 2,
+func numOfBitsOfSymbolSize() map[uint16]uint16 {
+	return map[uint16]uint16{
+		TypeTCCSymbolSizeOneBit: 1,
+		TypeTCCSymbolSizeTwoBit: 2,
+	}
 }
 
 var _ Packet = (*TransportLayerCC)(nil) // assert is a Packet
@@ -189,7 +191,7 @@ func (r StatusVectorChunk) Marshal() ([]byte, error) {
 		return nil, err
 	}
 
-	numOfBits := numOfBitsOfSymbolSize[r.SymbolSize]
+	numOfBits := numOfBitsOfSymbolSize()[r.SymbolSize]
 	// append 14 bit SymbolList
 	for i, s := range r.SymbolList {
 		index := numOfBits*uint16(i) + 2
@@ -238,7 +240,7 @@ func (r *StatusVectorChunk) Unmarshal(rawPacket []byte) error {
 }
 
 const (
-	//TypeTCCDeltaScaleFactor https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#section-3.1.5
+	// TypeTCCDeltaScaleFactor https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#section-3.1.5
 	TypeTCCDeltaScaleFactor = 250
 )
 
@@ -256,21 +258,21 @@ type RecvDelta struct {
 func (r RecvDelta) Marshal() ([]byte, error) {
 	delta := r.Delta / TypeTCCDeltaScaleFactor
 
-	//small delta
+	// small delta
 	if r.Type == TypeTCCPacketReceivedSmallDelta && delta >= 0 && delta <= math.MaxUint8 {
 		deltaChunk := make([]byte, 1)
 		deltaChunk[0] = byte(delta)
 		return deltaChunk, nil
 	}
 
-	//big delta
+	// big delta
 	if r.Type == TypeTCCPacketReceivedLargeDelta && delta >= math.MinInt16 && delta <= math.MaxInt16 {
 		deltaChunk := make([]byte, 2)
 		binary.BigEndian.PutUint16(deltaChunk, uint16(delta))
 		return deltaChunk, nil
 	}
 
-	//overflow
+	// overflow
 	return nil, errDeltaExceedLimit
 }
 
@@ -437,7 +439,7 @@ func (t TransportLayerCC) Marshal() ([]byte, error) {
 }
 
 // Unmarshal ..
-func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error {
+func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error { //nolint:gocognit
 	if len(rawPacket) < (headerLength + ssrcLength) {
 		return errPacketTooShort
 	}

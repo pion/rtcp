@@ -84,9 +84,10 @@ func (p *SliceLossIndication) Unmarshal(rawPacket []byte) error {
 	for i := headerLength + sliOffset; i < (headerLength + int(h.Length*4)); i += 4 {
 		sli := binary.BigEndian.Uint32(rawPacket[i:])
 		p.SLI = append(p.SLI, SLIEntry{
-			uint16((sli >> 19) & 0x1FFF),
-			uint16((sli >> 6) & 0x1FFF),
-			uint8(sli & 0x3F)})
+			First:   uint16((sli >> 19) & 0x1FFF),
+			Number:  uint16((sli >> 6) & 0x1FFF),
+			Picture: uint8(sli & 0x3F),
+		})
 	}
 	return nil
 }

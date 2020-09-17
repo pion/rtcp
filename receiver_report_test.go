@@ -1,6 +1,7 @@
 package rtcp
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -82,7 +83,8 @@ func TestReceiverReportUnmarshal(t *testing.T) {
 				}},
 				ProfileExtensions: []byte{
 					0x54, 0x45, 0x53, 0x54,
-					0x44, 0x41, 0x54, 0x41},
+					0x44, 0x41, 0x54, 0x41,
+				},
 			},
 		},
 		{
@@ -150,7 +152,7 @@ func TestReceiverReportUnmarshal(t *testing.T) {
 	} {
 		var rr ReceiverReport
 		err := rr.Unmarshal(test.Data)
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Unmarshal %q rr: err = %#v, want %#v", test.Name, got, want)
 		}
 		if err != nil {
@@ -161,6 +163,23 @@ func TestReceiverReportUnmarshal(t *testing.T) {
 			t.Fatalf("Unmarshal %q rr: got %#v, want %#v", test.Name, got, want)
 		}
 	}
+}
+
+func tooManyReports() []ReceptionReport {
+	// a slice with enough ReceptionReports to overflow an 5-bit int
+	var tooManyReports []ReceptionReport
+	for i := 0; i < (1 << 5); i++ {
+		tooManyReports = append(tooManyReports, ReceptionReport{
+			SSRC:               2,
+			FractionLost:       2,
+			TotalLost:          3,
+			LastSequenceNumber: 4,
+			Jitter:             5,
+			LastSenderReport:   6,
+			Delay:              7,
+		})
+	}
+	return tooManyReports
 }
 
 func TestReceiverReportRoundTrip(t *testing.T) {
@@ -222,13 +241,13 @@ func TestReceiverReportRoundTrip(t *testing.T) {
 			Name: "count overflow",
 			Report: ReceiverReport{
 				SSRC:    1,
-				Reports: tooManyReports,
+				Reports: tooManyReports(),
 			},
 			WantError: errTooManyReports,
 		},
 	} {
 		data, err := test.Report.Marshal()
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Marshal %q: err = %#v, want %#v", test.Name, got, want)
 		}
 		if err != nil {
@@ -243,22 +262,5 @@ func TestReceiverReportRoundTrip(t *testing.T) {
 		if got, want := decoded, test.Report; !reflect.DeepEqual(got, want) {
 			t.Fatalf("%q rr round trip: got %#v, want %#v", test.Name, got, want)
 		}
-	}
-}
-
-// a slice with enough ReceptionReports to overflow an 5-bit int
-var tooManyReports []ReceptionReport
-
-func init() {
-	for i := 0; i < (1 << 5); i++ {
-		tooManyReports = append(tooManyReports, ReceptionReport{
-			SSRC:               2,
-			FractionLost:       2,
-			TotalLost:          3,
-			LastSequenceNumber: 4,
-			Jitter:             5,
-			LastSenderReport:   6,
-			Delay:              7,
-		})
 	}
 }

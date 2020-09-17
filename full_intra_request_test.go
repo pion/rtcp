@@ -1,6 +1,7 @@
 package rtcp
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -123,7 +124,7 @@ func TestFullIntraRequestUnmarshal(t *testing.T) {
 	} {
 		var fir FullIntraRequest
 		err := fir.Unmarshal(test.Data)
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Unmarshal %q rr: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {
@@ -166,7 +167,7 @@ func TestFullIntraRequestRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Packet.Marshal()
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Marshal %q: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {
@@ -211,7 +212,7 @@ func TestFullIntraRequestUnmarshalHeader(t *testing.T) {
 	} {
 		var fir FullIntraRequest
 		err := fir.Unmarshal(test.Data)
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Unmarshal header %q rr: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {
