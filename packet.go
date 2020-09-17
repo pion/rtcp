@@ -19,7 +19,6 @@ func Unmarshal(rawData []byte) ([]Packet, error) {
 	var packets []Packet
 	for len(rawData) != 0 {
 		p, processed, err := unmarshal(rawData)
-
 		if err != nil {
 			return nil, err
 		}
@@ -38,7 +37,7 @@ func Unmarshal(rawData []byte) ([]Packet, error) {
 	}
 }
 
-//Marshal takes an array of Packets and serializes them to a single buffer
+// Marshal takes an array of Packets and serializes them to a single buffer
 func Marshal(packets []Packet) ([]byte, error) {
 	out := make([]byte, 0)
 	for _, p := range packets {

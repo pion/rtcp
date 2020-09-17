@@ -1,6 +1,7 @@
 package rtcp
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -49,7 +50,7 @@ func TestHeaderUnmarshal(t *testing.T) {
 	} {
 		var h Header
 		err := h.Unmarshal(test.Data)
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Unmarshal %q header: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {
@@ -61,6 +62,7 @@ func TestHeaderUnmarshal(t *testing.T) {
 		}
 	}
 }
+
 func TestHeaderRoundTrip(t *testing.T) {
 	for _, test := range []struct {
 		Name      string
@@ -94,7 +96,7 @@ func TestHeaderRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Header.Marshal()
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Errorf("Marshal %q: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {

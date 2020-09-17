@@ -1,6 +1,7 @@
 package rtcp
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -171,7 +172,7 @@ func TestSenderReportUnmarshal(t *testing.T) {
 	} {
 		var sr SenderReport
 		err := sr.Unmarshal(test.Data)
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Unmarshal %q sr: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {
@@ -266,13 +267,13 @@ func TestSenderReportRoundTrip(t *testing.T) {
 			Name: "count overflow",
 			Report: SenderReport{
 				SSRC:    1,
-				Reports: tooManyReports,
+				Reports: tooManyReports(),
 			},
 			WantError: errTooManyReports,
 		},
 	} {
 		data, err := test.Report.Marshal()
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Marshal %q: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {

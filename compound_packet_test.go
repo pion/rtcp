@@ -1,6 +1,7 @@
 package rtcp
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -17,25 +18,25 @@ func TestReadEOF(t *testing.T) {
 }
 
 func TestBadCompound(t *testing.T) {
-	//trailing data!
-	badcompound := realPacket[:34]
+	// trailing data!
+	badcompound := realPacket()[:34]
 	packets, err := Unmarshal(badcompound)
 	assert.Error(t, err)
 
 	assert.Nil(t, packets)
 
-	badcompound = realPacket[84:104]
+	badcompound = realPacket()[84:104]
 
 	packets, err = Unmarshal(badcompound)
 	assert.NoError(t, err)
 
 	compound := CompoundPacket(packets)
 
-	//this should return an error,
-	//it violates the "must start with RR or SR" rule
+	// this should return an error,
+	// it violates the "must start with RR or SR" rule
 	err = compound.Validate()
 
-	if got, want := err, errBadFirstPacket; got != want {
+	if got, want := err, errBadFirstPacket; !errors.Is(got, want) {
 		t.Fatalf("Unmarshal(badcompound) err=%v, want %v", got, want)
 	}
 
@@ -137,7 +138,7 @@ func TestValidPacket(t *testing.T) {
 			Err: nil,
 		},
 	} {
-		if got, want := test.Packet.Validate(), test.Err; got != want {
+		if got, want := test.Packet.Validate(), test.Err; !errors.Is(got, want) {
 			t.Fatalf("Valid(%s) = %v, want %v", test.Name, got, want)
 		}
 	}
@@ -224,11 +225,11 @@ func TestCNAME(t *testing.T) {
 			Text: "cname",
 		},
 	} {
-		if got, want := test.Packet.Validate(), test.Err; got != want {
+		if got, want := test.Packet.Validate(), test.Err; !errors.Is(got, want) {
 			t.Fatalf("Valid(%s) = %v, want %v", test.Name, got, want)
 		}
 		name, err := test.Packet.CNAME()
-		if got, want := err, test.Err; got != want {
+		if got, want := err, test.Err; !errors.Is(got, want) {
 			t.Fatalf("CNAME(%s) = %v, want %v", test.Name, got, want)
 		}
 		if got, want := name, test.Text; got != want {
@@ -272,7 +273,7 @@ func TestCompoundPacketRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Packet.Marshal()
-		if got, want := err, test.Err; got != want {
+		if got, want := err, test.Err; !errors.Is(got, want) {
 			t.Fatalf("Marshal(%v) err = %v, want nil", test.Name, err)
 		}
 		if err != nil {

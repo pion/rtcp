@@ -78,8 +78,8 @@ func (r ReceiverReport) Marshal() ([]byte, error) {
 	pe := make([]byte, len(r.ProfileExtensions))
 	copy(pe, r.ProfileExtensions)
 
-	//if the length of the profile extensions isn't devisible
-	//by 4, we need to pad the end.
+	// if the length of the profile extensions isn't devisible
+	// by 4, we need to pad the end.
 	for (len(pe) & 0x3) != 0 {
 		pe = append(pe, 0)
 	}
@@ -87,7 +87,6 @@ func (r ReceiverReport) Marshal() ([]byte, error) {
 	rawPacket = append(rawPacket, pe...)
 
 	hData, err := r.Header().Marshal()
-
 	if err != nil {
 		return nil, err
 	}

@@ -13,7 +13,7 @@ func TestTransportLayerCC_RunLengthChunkUnmarshal(t *testing.T) {
 		WantError error
 	}{
 		{
-			//3.1.3 example1: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
+			// 3.1.3 example1: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
 			Name: "example1",
 			Data: []byte{0, 0xDD},
 			Want: RunLengthChunk{
@@ -24,7 +24,7 @@ func TestTransportLayerCC_RunLengthChunkUnmarshal(t *testing.T) {
 			WantError: nil,
 		},
 		{
-			//3.1.3 example2: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
+			// 3.1.3 example2: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
 			Name: "example2",
 			Data: []byte{0x60, 0x18},
 			Want: RunLengthChunk{
@@ -54,7 +54,7 @@ func TestTransportLayerCC_RunLengthChunkMarshal(t *testing.T) {
 		WantError error
 	}{
 		{
-			//3.1.3 example1: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
+			// 3.1.3 example1: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
 			Name: "example1",
 			Data: RunLengthChunk{
 				Type:               TypeTCCRunLengthChunk,
@@ -65,7 +65,7 @@ func TestTransportLayerCC_RunLengthChunkMarshal(t *testing.T) {
 			WantError: nil,
 		},
 		{
-			//3.1.3 example2: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
+			// 3.1.3 example2: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
 			Name: "example2",
 			Data: RunLengthChunk{
 				Type:               TypeTCCRunLengthChunk,
@@ -92,7 +92,7 @@ func TestTransportLayerCC_StatusVectorChunkUnmarshal(t *testing.T) {
 		WantError error
 	}{
 		{
-			//3.1.4 example1: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
+			// 3.1.4 example1: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
 			Name: "example1",
 			Data: []byte{0x9F, 0x1C},
 			Want: StatusVectorChunk{
@@ -103,7 +103,7 @@ func TestTransportLayerCC_StatusVectorChunkUnmarshal(t *testing.T) {
 			WantError: nil,
 		},
 		{
-			//3.1.4 example2: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
+			// 3.1.4 example2: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
 			Name: "example2",
 			Data: []byte{0xCD, 0x50},
 			Want: StatusVectorChunk{
@@ -134,7 +134,7 @@ func TestTransportLayerCC_StatusVectorChunkMarshal(t *testing.T) {
 		WantError error
 	}{
 		{
-			//3.1.4 example1: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
+			// 3.1.4 example1: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
 			Name: "example1",
 			Data: StatusVectorChunk{
 				Type:       TypeTCCStatusVectorChunk,
@@ -145,7 +145,7 @@ func TestTransportLayerCC_StatusVectorChunkMarshal(t *testing.T) {
 			WantError: nil,
 		},
 		{
-			//3.1.4 example2: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
+			// 3.1.4 example2: https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-7
 			Name: "example2",
 			Data: StatusVectorChunk{
 				Type:       TypeTCCStatusVectorChunk,

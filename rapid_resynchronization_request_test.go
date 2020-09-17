@@ -1,6 +1,7 @@
 package rtcp
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -67,7 +68,7 @@ func TestRapidResynchronizationRequestUnmarshal(t *testing.T) {
 	} {
 		var rrr RapidResynchronizationRequest
 		err := rrr.Unmarshal(test.Data)
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Unmarshal %q rr: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {
@@ -95,7 +96,7 @@ func TestRapidResynchronizationRequestRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Report.Marshal()
-		if got, want := err, test.WantError; got != want {
+		if got, want := err, test.WantError; !errors.Is(got, want) {
 			t.Fatalf("Marshal %q: err = %v, want %v", test.Name, got, want)
 		}
 		if err != nil {
