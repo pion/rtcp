@@ -35,17 +35,33 @@ type TransportLayerNack struct {
 
 var _ Packet = (*TransportLayerNack)(nil) // assert is a Packet
 
-// PacketList returns a list of Nack'd packets that's referenced by a NackPair
-func (n *NackPair) PacketList() []uint16 {
-	out := make([]uint16, 1, 17)
-	out[0] = n.PacketID
+// Range calls f sequentially for each sequence number covered by n.
+// If f returns false, Range stops the iteration.
+func (n *NackPair) Range(f func(seqno uint16) bool) {
+	more := f(n.PacketID)
+	if !more {
+		return
+	}
+
 	b := n.LostPackets
 	for i := uint16(0); b != 0; i++ {
 		if (b & (1 << i)) != 0 {
 			b &^= (1 << i)
-			out = append(out, n.PacketID+i+1)
+			more = f(n.PacketID + i + 1)
+			if !more {
+				return
+			}
 		}
 	}
+}
+
+// PacketList returns a list of Nack'd packets that's referenced by a NackPair
+func (n *NackPair) PacketList() []uint16 {
+	out := make([]uint16, 0, 17)
+	n.Range(func(seqno uint16) bool {
+		out = append(out, seqno)
+		return true
+	})
 	return out
 }
 

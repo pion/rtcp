@@ -117,3 +117,40 @@ func TestTransportLayerNackRoundTrip(t *testing.T) {
 		}
 	}
 }
+
+func testNackPair(t *testing.T, s []uint16, n NackPair) {
+	l := n.PacketList()
+	if !reflect.DeepEqual(l, s) {
+		t.Errorf("%v: expected %v, got %v", n, s, l)
+	}
+}
+
+func TestNackPair(t *testing.T) {
+	testNackPair(t, []uint16{42}, NackPair{42, 0})
+	testNackPair(t, []uint16{42, 43}, NackPair{42, 1})
+	testNackPair(t, []uint16{42, 44}, NackPair{42, 2})
+	testNackPair(t, []uint16{42, 43, 44}, NackPair{42, 3})
+	testNackPair(t, []uint16{42, 42 + 16}, NackPair{42, 0x8000})
+}
+
+func TestNackPairRange(t *testing.T) {
+	n := NackPair{42, 2}
+
+	out := make([]uint16, 0)
+	n.Range(func(s uint16) bool {
+		out = append(out, s)
+		return true
+	})
+	if !reflect.DeepEqual(out, []uint16{42, 44}) {
+		t.Errorf("Got %v", out)
+	}
+
+	out = make([]uint16, 0)
+	n.Range(func(s uint16) bool {
+		out = append(out, s)
+		return false
+	})
+	if !reflect.DeepEqual(out, []uint16{42}) {
+		t.Errorf("Got %v", out)
+	}
+}
