@@ -154,3 +154,45 @@ func TestNackPairRange(t *testing.T) {
 		t.Errorf("Got %v", out)
 	}
 }
+
+func TestTransportLayerNackPairGeneration(t *testing.T) {
+	for _, test := range []struct {
+		Name            string
+		SequenceNumbers []uint16
+		Expected        []NackPair
+	}{
+		{
+			"No Sequence Numbers",
+			[]uint16{},
+			[]NackPair{},
+		},
+		{
+			"Single Sequence Number",
+			[]uint16{100},
+			[]NackPair{
+				{PacketID: 100, LostPackets: 0x0},
+			},
+		},
+		{
+			"Multiple in range, Single NACKPair",
+			[]uint16{100, 101, 105, 115},
+			[]NackPair{
+				{PacketID: 100, LostPackets: 0x4011},
+			},
+		},
+		{
+			"Multiple Ranges, Multiple NACKPair",
+			[]uint16{100, 117, 500, 501, 502},
+			[]NackPair{
+				{PacketID: 100, LostPackets: 0},
+				{PacketID: 117, LostPackets: 0},
+				{PacketID: 500, LostPackets: 0x3},
+			},
+		},
+	} {
+		actual := NackPairsFromSequenceNumbers(test.SequenceNumbers)
+		if !reflect.DeepEqual(actual, test.Expected) {
+			t.Fatalf("%q NackPair generation mismatch: got %#v, want %#v", test.Name, actual, test.Expected)
+		}
+	}
+}
