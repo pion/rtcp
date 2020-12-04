@@ -35,6 +35,29 @@ type TransportLayerNack struct {
 
 var _ Packet = (*TransportLayerNack)(nil) // assert is a Packet
 
+// NackPairsFromSequenceNumbers generates a slice of NackPair from a list of SequenceNumbers
+// This handles generating the proper values for PacketID/LostPackets
+func NackPairsFromSequenceNumbers(sequenceNumbers []uint16) (pairs []NackPair) {
+	if len(sequenceNumbers) == 0 {
+		return []NackPair{}
+	}
+
+	nackPair := &NackPair{PacketID: sequenceNumbers[0]}
+	for i := 1; i < len(sequenceNumbers); i++ {
+		m := sequenceNumbers[i]
+
+		if m-nackPair.PacketID > 16 {
+			pairs = append(pairs, *nackPair)
+			nackPair = &NackPair{PacketID: m}
+			continue
+		}
+
+		nackPair.LostPackets |= 1 << (m - nackPair.PacketID - 1)
+	}
+	pairs = append(pairs, *nackPair)
+	return
+}
+
 // Range calls f sequentially for each sequence number covered by n.
 // If f returns false, Range stops the iteration.
 func (n *NackPair) Range(f func(seqno uint16) bool) {
