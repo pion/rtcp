@@ -1,6 +1,7 @@
 package rtcp
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,7 @@ func TestReceiverEstimatedMaximumBitrateMarshal(t *testing.T) {
 
 	input := ReceiverEstimatedMaximumBitrate{
 		SenderSSRC: 1,
-		Bitrate:    8927168,
+		Bitrate:    8927168.0,
 		SSRCs:      []uint32{1215622422},
 	}
 
@@ -48,7 +49,7 @@ func TestReceiverEstimatedMaximumBitrateTruncate(t *testing.T) {
 
 	input := []byte{143, 206, 0, 5, 0, 0, 0, 1, 0, 0, 0, 0, 82, 69, 77, 66, 1, 26, 32, 223, 72, 116, 237, 22}
 
-	// Make sure that we're truncating the bitrate correctly.
+	// Make sure that we're interpreting the bitrate correctly.
 	// For the above example, we have:
 
 	// mantissa = 139487
@@ -58,7 +59,7 @@ func TestReceiverEstimatedMaximumBitrateTruncate(t *testing.T) {
 	packet := ReceiverEstimatedMaximumBitrate{}
 	err := packet.Unmarshal(input)
 	assert.NoError(err)
-	assert.Equal(uint64(8927168), packet.Bitrate)
+	assert.Equal(float32(8927168), packet.Bitrate)
 
 	// Just verify marshal produces the same input.
 	output, err := packet.Marshal()
@@ -83,7 +84,7 @@ func TestReceiverEstimatedMaximumBitrateTruncate(t *testing.T) {
 
 	err = packet.Unmarshal(output)
 	assert.NoError(err)
-	assert.Equal(uint64(8927104), packet.Bitrate)
+	assert.Equal(float32(8927104), packet.Bitrate)
 }
 
 func TestReceiverEstimatedMaximumBitrateOverflow(t *testing.T) {
@@ -91,41 +92,34 @@ func TestReceiverEstimatedMaximumBitrateOverflow(t *testing.T) {
 
 	// Marshal a packet with the maximum possible bitrate.
 	packet := ReceiverEstimatedMaximumBitrate{
-		Bitrate: 0xFFFFFFFFFFFFFFFF,
+		Bitrate: math.MaxFloat32,
 	}
 
-	// bitrate = 0xFFFFFFFFFFFFFFFF
 	// mantissa = 262143 = 0x3FFFF
-	// exp = 46
+	// exp = 63
 
-	expected := []byte{143, 206, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 82, 69, 77, 66, 0, 187, 255, 255}
+	expected := []byte{143, 206, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 82, 69, 77, 66, 0, 255, 255, 255}
 
 	output, err := packet.Marshal()
 	assert.NoError(err)
 	assert.Equal(expected, output)
 
 	// mantissa = 262143
-	// exp = 46
+	// exp = 63
 	// bitrate = 0xFFFFC00000000000
-
-	// We actually can't represent the full uint64.
-	// This is because the lower 46 bits are all 0s.
 
 	err = packet.Unmarshal(output)
 	assert.NoError(err)
-	assert.Equal(uint64(0xFFFFC00000000000), packet.Bitrate)
+	assert.Equal(math.Float32frombits(0x67FFFFC0), packet.Bitrate)
 
 	// Make sure we marshal to the same result again.
 	output, err = packet.Marshal()
 	assert.NoError(err)
 	assert.Equal(expected, output)
 
-	// Finally, try unmarshalling one number higher than we can handle
-	// It's debatable if the bitrate should have all lower 48 bits set.
-	// I think it's better because uint64 overflow is easier to notice/debug.
-	// And it's not like this class can actually ensure Marshal/Unmarshal are mirrored.
+	// Finally, try unmarshalling one number higher than we used to be able to handle.
 	input := []byte{143, 206, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 82, 69, 77, 66, 0, 188, 0, 0}
 	err = packet.Unmarshal(input)
 	assert.NoError(err)
-	assert.Equal(uint64(0xFFFFFFFFFFFFFFFF), packet.Bitrate)
+	assert.Equal(math.Float32frombits(0x62800000), packet.Bitrate)
 }
