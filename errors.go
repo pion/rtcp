@@ -27,4 +27,5 @@ var (
 	errMissingREMBidentifier    = errors.New("missing REMB identifier")
 	errSSRCNumAndLengthMismatch = errors.New("SSRC num and length do not match")
 	errInvalidSizeOrStartIndex  = errors.New("invalid size or startIndex")
+	errInvalidBitrate           = errors.New("invalid bitrate")
 )
