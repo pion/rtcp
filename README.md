@@ -44,6 +44,7 @@ Check out the **[contributing wiki](https://github.com/pion/webrtc/wiki/Contribu
 * [Simone Gotti](https://github.com/sgotti)
 * [lllf](https://github.com/LittleLightLittleFire)
 * [cnderrauber](https://github.com/cnderrauber)
+* [Jagger Yu](https://github.com/aggresss)
 
 ### License
 MIT License - see [LICENSE](LICENSE) for full text
