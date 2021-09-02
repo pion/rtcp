@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var _ Packet = (*CompoundPacket)(nil) // assert is a Packet
+
 func TestReadEOF(t *testing.T) {
 	shortHeader := []byte{
 		0x81, 0xc9, // missing type & len

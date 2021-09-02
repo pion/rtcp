@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+var _ Packet = (*SenderReport)(nil) // assert is a Packet
+
 func TestSenderReportUnmarshal(t *testing.T) {
 	for _, test := range []struct {
 		Name      string

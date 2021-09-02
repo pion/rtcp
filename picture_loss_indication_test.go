@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+var _ Packet = (*PictureLossIndication)(nil) // assert is a Packet
+
 func TestPictureLossIndicationUnmarshal(t *testing.T) {
 	for _, test := range []struct {
 		Name      string
