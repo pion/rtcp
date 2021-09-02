@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+var _ Packet = (*RapidResynchronizationRequest)(nil) // assert is a Packet
+
 func TestRapidResynchronizationRequestUnmarshal(t *testing.T) {
 	for _, test := range []struct {
 		Name      string

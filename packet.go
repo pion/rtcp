@@ -7,6 +7,7 @@ type Packet interface {
 
 	Marshal() ([]byte, error)
 	Unmarshal(rawPacket []byte) error
+	String() string
 }
 
 // Unmarshal takes an entire udp datagram (which may consist of multiple RTCP packets) and

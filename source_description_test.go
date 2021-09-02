@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+var _ Packet = (*SourceDescription)(nil) // assert is a Packet
+
 func TestSourceDescriptionUnmarshal(t *testing.T) {
 	for _, test := range []struct {
 		Name      string

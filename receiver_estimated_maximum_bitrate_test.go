@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var _ Packet = (*ReceiverEstimatedMaximumBitrate)(nil) // assert is a Packet
+
 func TestReceiverEstimatedMaximumBitrateMarshal(t *testing.T) {
 	assert := assert.New(t)
 

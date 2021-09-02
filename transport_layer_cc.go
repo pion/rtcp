@@ -75,8 +75,6 @@ func numOfBitsOfSymbolSize() map[uint16]uint16 {
 	}
 }
 
-var _ Packet = (*TransportLayerCC)(nil) // assert is a Packet
-
 var (
 	errPacketStatusChunkLength = errors.New("packet status chunk must be 2 bytes")
 	errDeltaExceedLimit        = errors.New("delta exceed limit")

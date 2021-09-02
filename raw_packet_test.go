@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+var _ Packet = (*RawPacket)(nil) // assert is a Packet
+
 func TestRawPacketRoundTrip(t *testing.T) {
 	for _, test := range []struct {
 		Name               string

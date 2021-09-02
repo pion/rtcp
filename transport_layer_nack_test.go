@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+var _ Packet = (*TransportLayerNack)(nil) // assert is a Packet
+
 func TestTransportLayerNackUnmarshal(t *testing.T) {
 	for _, test := range []struct {
 		Name      string
