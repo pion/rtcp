@@ -3,6 +3,7 @@
 #
 # This file is auto generated, using git to list all individuals contributors.
 # see `.github/generate-authors.sh` for the scripting
+Adam Roach <adam@caffeine.tv>
 adwpc <adwpc@hotmail.com>
 aggresss <aggresss@163.com>
 Atsushi Watanabe <atsushi.w@ieee.org>
