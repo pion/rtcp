@@ -16,6 +16,7 @@ const (
 	TypeApplicationDefined        PacketType = 204 // RFC 3550, 6.7 (unimplemented)
 	TypeTransportSpecificFeedback PacketType = 205 // RFC 4585, 6051
 	TypePayloadSpecificFeedback   PacketType = 206 // RFC 4585, 6.3
+	TypeExtendedReport            PacketType = 207 // RFC 3611
 
 )
 
@@ -28,7 +29,7 @@ const (
 	FormatRRR  uint8 = 5
 	FormatREMB uint8 = 15
 
-	//https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-5
+	// https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-5
 	FormatTCC uint8 = 15
 )
 
@@ -48,6 +49,8 @@ func (p PacketType) String() string {
 		return "TSFB"
 	case TypePayloadSpecificFeedback:
 		return "PSFB"
+	case TypeExtendedReport:
+		return "XR"
 	default:
 		return string(p)
 	}
