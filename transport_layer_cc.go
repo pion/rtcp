@@ -349,10 +349,7 @@ type TransportLayerCC struct {
 func (t *TransportLayerCC) packetLen() uint16 {
 	n := uint16(headerLength + packetChunkOffset + len(t.PacketChunks)*2)
 	for _, d := range t.RecvDeltas {
-		delta := d.Delta / TypeTCCDeltaScaleFactor
-
-		// small delta
-		if delta >= 0 && delta <= math.MaxUint8 {
+		if d.Type == TypeTCCPacketReceivedSmallDelta {
 			n++
 		} else {
 			n += 2
