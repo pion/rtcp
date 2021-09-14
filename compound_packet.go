@@ -1,6 +1,7 @@
 package rtcp
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -140,7 +141,12 @@ func (c CompoundPacket) DestinationSSRC() []uint32 {
 func (c CompoundPacket) String() string {
 	out := "CompoundPacket\n"
 	for _, p := range c {
-		out += p.String()
+		stringer, canString := p.(fmt.Stringer)
+		if canString {
+			out += stringer.String()
+		} else {
+			out += stringify(p)
+		}
 	}
 	out = strings.TrimSuffix(strings.ReplaceAll(out, "\n", "\n\t"), "\t")
 	return out

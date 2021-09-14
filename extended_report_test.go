@@ -1,6 +1,7 @@
 package rtcp
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -255,7 +256,7 @@ func TestDecode(t *testing.T) {
 		t.Errorf("(deep equal) Decoded packet does not match expected packet")
 	}
 
-	if p.String() != expected.String() {
+	if p.String() != expected.(fmt.Stringer).String() {
 		t.Errorf("(string compare) Decoded packet does not match expected packet")
 	}
 }
