@@ -630,6 +630,31 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 			},
 			WantError: nil,
 		},
+		{
+			Name: "example3",
+			Data: []byte{
+				0x8f, 0xcd, 0x0, 0x4,
+				0x9a, 0xcb, 0x4, 0x42,
+				0x0, 0x0, 0x0, 0x0,
+				0x0, 0x0, 0x0, 0x0,
+				0x0, 0x0, 0x0, 0x0,
+			},
+			Want: TransportLayerCC{
+				Header: Header{
+					Padding: false,
+					Count:   FormatTCC,
+					Type:    TypeTransportSpecificFeedback,
+					Length:  4,
+				},
+				SenderSSRC:         2596996162,
+				MediaSSRC:          0,
+				BaseSequenceNumber: 0,
+				PacketStatusCount:  0,
+				ReferenceTime:      0,
+				FbPktCount:         0,
+			},
+			WantError: nil,
+		},
 	} {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {

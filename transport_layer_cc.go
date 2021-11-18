@@ -447,7 +447,7 @@ func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error { //nolint:gocognit
 	// header's length + payload's length
 	totalLength := 4 * (t.Header.Length + 1)
 
-	if totalLength <= headerLength+packetChunkOffset {
+	if totalLength < headerLength+packetChunkOffset {
 		return errPacketTooShort
 	}
 

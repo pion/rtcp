@@ -12,6 +12,7 @@ Gabor Pongracz <gabor.pongracz@proemergotech.com>
 Hugo Arregui <hugo.arregui@gmail.com>
 Hugo Arregui <hugo@decentraland.org>
 Juliusz Chroboczek <jch@irif.fr>
+Kevin Wang <kevmo314@gmail.com>
 lllf <littlelightlittlefire@gmail.com>
 Luke Curley <kixelated@gmail.com>
 Max Hawkins <maxhawkins@gmail.com>
