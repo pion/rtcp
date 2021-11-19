@@ -54,15 +54,7 @@ func TestBadCompound(t *testing.T) {
 }
 
 func TestValidPacket(t *testing.T) {
-	cname := &SourceDescription{
-		Chunks: []SourceDescriptionChunk{{
-			Source: 1234,
-			Items: []SourceDescriptionItem{{
-				Type: SDESCNAME,
-				Text: "cname",
-			}},
-		}},
-	}
+	cname := NewCNAMESourceDescription(1234, "cname")
 
 	for _, test := range []struct {
 		Name   string
@@ -147,15 +139,7 @@ func TestValidPacket(t *testing.T) {
 }
 
 func TestCNAME(t *testing.T) {
-	cname := &SourceDescription{
-		Chunks: []SourceDescriptionChunk{{
-			Source: 1234,
-			Items: []SourceDescriptionItem{{
-				Type: SDESCNAME,
-				Text: "cname",
-			}},
-		}},
-	}
+	cname := NewCNAMESourceDescription(1234, "cname")
 
 	for _, test := range []struct {
 		Name   string
@@ -241,15 +225,7 @@ func TestCNAME(t *testing.T) {
 }
 
 func TestCompoundPacketRoundTrip(t *testing.T) {
-	cname := &SourceDescription{
-		Chunks: []SourceDescriptionChunk{{
-			Source: 1234,
-			Items: []SourceDescriptionItem{{
-				Type: SDESCNAME,
-				Text: "cname",
-			}},
-		}},
-	}
+	cname := NewCNAMESourceDescription(1234, "cname")
 
 	for _, test := range []struct {
 		Name   string
