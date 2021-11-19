@@ -91,19 +91,7 @@ func TestUnmarshal(t *testing.T) {
 			}},
 			ProfileExtensions: []byte{},
 		},
-		&SourceDescription{
-			Chunks: []SourceDescriptionChunk{
-				{
-					Source: 0x902f9e2e,
-					Items: []SourceDescriptionItem{
-						{
-							Type: SDESCNAME,
-							Text: "{9c00eb92-1afb-9d49-a47d-91f64eee69f5}",
-						},
-					},
-				},
-			},
-		},
+		NewCNAMESourceDescription(0x902f9e2e, "{9c00eb92-1afb-9d49-a47d-91f64eee69f5}"),
 		&Goodbye{
 			Sources: []uint32{0x902f9e2e},
 		},

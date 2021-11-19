@@ -138,17 +138,7 @@ func TestSourceDescriptionUnmarshal(t *testing.T) {
 				// END + padding
 				0x00, 0x00,
 			},
-			Want: SourceDescription{
-				Chunks: []SourceDescriptionChunk{{
-					Source: 0x01020304,
-					Items: []SourceDescriptionItem{
-						{
-							Type: SDESCNAME,
-							Text: "",
-						},
-					},
-				}},
-			},
+			Want: *NewCNAMESourceDescription(0x01020304, ""),
 		},
 		{
 			Name: "two items",
@@ -321,15 +311,7 @@ func TestSourceDescriptionRoundTrip(t *testing.T) {
 		},
 		{
 			Name: "empty text",
-			Desc: SourceDescription{
-				Chunks: []SourceDescriptionChunk{{
-					Source: 1,
-					Items: []SourceDescriptionItem{{
-						Type: SDESCNAME,
-						Text: "",
-					}},
-				}},
-			},
+			Desc: *NewCNAMESourceDescription(1, ""),
 		},
 		{
 			Name: "text too long",
