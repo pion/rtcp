@@ -14,7 +14,10 @@ type ReceptionReport struct {
 	FractionLost uint8
 	// The total number of RTP data packets from source SSRC that have
 	// been lost since the beginning of reception.
-	TotalLost uint32
+	// https://www.ietf.org/rfc/rfc3550.txt Section 6.4 and appendix A.3
+	// The total number of packets lost is a signed number and can be
+	// negative
+	TotalLost int32
 	// The low 16 bits contain the highest sequence number received in an
 	// RTP data packet from source SSRC, and the most significant 16
 	// bits extend that sequence number with the corresponding count of
@@ -71,13 +74,17 @@ func (r ReceptionReport) Marshal() ([]byte, error) {
 	rawPacket[fractionLostOffset] = r.FractionLost
 
 	// pack TotalLost into 24 bits
-	if r.TotalLost >= (1 << 25) {
+	// we first convert signed integer to unsigned before using bit operators
+	uTotalLost := uint32(r.TotalLost)
+	if uTotalLost&0xff800000 != 0xff800000 && uTotalLost&0xff800000 != 0 {
 		return nil, errInvalidTotalLost
 	}
+	// Convert int32 to int24
+	uTotalLost = uTotalLost&0x80000000>>8 | uTotalLost&0x007fffff
 	tlBytes := rawPacket[totalLostOffset:]
-	tlBytes[0] = byte(r.TotalLost >> 16)
-	tlBytes[1] = byte(r.TotalLost >> 8)
-	tlBytes[2] = byte(r.TotalLost)
+	tlBytes[0] = byte(uTotalLost >> 16)
+	tlBytes[1] = byte(uTotalLost >> 8)
+	tlBytes[2] = byte(uTotalLost)
 
 	binary.BigEndian.PutUint32(rawPacket[lastSeqOffset:], r.LastSequenceNumber)
 	binary.BigEndian.PutUint32(rawPacket[jitterOffset:], r.Jitter)
@@ -115,7 +122,13 @@ func (r *ReceptionReport) Unmarshal(rawPacket []byte) error {
 	r.FractionLost = rawPacket[fractionLostOffset]
 
 	tlBytes := rawPacket[totalLostOffset:]
-	r.TotalLost = uint32(tlBytes[2]) | uint32(tlBytes[1])<<8 | uint32(tlBytes[0])<<16
+	uTotalLost := uint32(tlBytes[2]) | uint32(tlBytes[1])<<8 | uint32(tlBytes[0])<<16
+	// test sign
+	ua := uTotalLost & 0x007fffff
+	if uTotalLost&0x00800000 == 0x00800000 {
+		ua |= 0xff800000
+	}
+	r.TotalLost = int32(ua)
 
 	r.LastSequenceNumber = binary.BigEndian.Uint32(rawPacket[lastSeqOffset:])
 	r.Jitter = binary.BigEndian.Uint32(rawPacket[jitterOffset:])

@@ -19,5 +19,6 @@ Mathis Engelbart <mathis.engelbart@gmail.com>
 Max Hawkins <maxhawkins@gmail.com>
 Sean DuBois <seaduboi@amazon.com>
 Sean DuBois <sean@siobud.com>
+seb-dev <sebapetit@protonmail.com>
 Simone Gotti <simone.gotti@gmail.com>
 Woodrow Douglass <wdouglass@carnegierobotics.com>
