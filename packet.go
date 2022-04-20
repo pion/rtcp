@@ -5,7 +5,13 @@ type Packet interface {
 	// DestinationSSRC returns an array of SSRC values that this packet refers to.
 	DestinationSSRC() []uint32
 
+	// MarshalSize returns the size of the packet once marshaled.
+	MarshalSize() int
+
+	// Marshal serializes the packet into bytes.
 	Marshal() ([]byte, error)
+
+	// Unmarshal deserializes the packet from bytes.
 	Unmarshal(rawPacket []byte) error
 }
 

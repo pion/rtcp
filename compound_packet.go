@@ -97,6 +97,15 @@ func (c CompoundPacket) CNAME() (string, error) {
 	return "", errMissingCNAME
 }
 
+// MarshalSize returns the size of the packet once marshaled.
+func (c CompoundPacket) MarshalSize() int {
+	n := 0
+	for _, pkt := range c {
+		n += pkt.MarshalSize()
+	}
+	return n
+}
+
 // Marshal encodes the CompoundPacket as binary.
 func (c CompoundPacket) Marshal() ([]byte, error) {
 	if err := c.Validate(); err != nil {

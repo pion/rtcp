@@ -74,6 +74,15 @@ func NewCNAMESourceDescription(ssrc uint32, cname string) *SourceDescription {
 	}
 }
 
+// MarshalSize returns the size of the packet once marshaled.
+func (s SourceDescription) MarshalSize() int {
+	chunksLength := 0
+	for _, c := range s.Chunks {
+		chunksLength += c.len()
+	}
+	return headerLength + chunksLength
+}
+
 // Marshal encodes the SourceDescription in binary
 func (s SourceDescription) Marshal() ([]byte, error) {
 	/*
@@ -94,7 +103,7 @@ func (s SourceDescription) Marshal() ([]byte, error) {
 	 *        +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 	 */
 
-	rawPacket := make([]byte, s.len())
+	rawPacket := make([]byte, s.MarshalSize())
 	packetBody := rawPacket[headerLength:]
 
 	chunkOffset := 0
@@ -166,20 +175,12 @@ func (s *SourceDescription) Unmarshal(rawPacket []byte) error {
 	return nil
 }
 
-func (s *SourceDescription) len() int {
-	chunksLength := 0
-	for _, c := range s.Chunks {
-		chunksLength += c.len()
-	}
-	return headerLength + chunksLength
-}
-
 // Header returns the Header associated with this packet.
 func (s *SourceDescription) Header() Header {
 	return Header{
 		Count:  uint8(len(s.Chunks)),
 		Type:   TypeSourceDescription,
-		Length: uint16((s.len() / 4) - 1),
+		Length: uint16((s.MarshalSize() / 4) - 1),
 	}
 }
 

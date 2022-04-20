@@ -88,13 +88,13 @@ func (b CCFeedbackReport) DestinationSSRC() []uint32 {
 	return ssrcs
 }
 
-// Len returns the length of the report in bytes
-func (b *CCFeedbackReport) Len() uint16 {
+// MarshalSize returns the size of the packet once marshaled.
+func (b CCFeedbackReport) MarshalSize() int {
 	n := uint16(0)
 	for _, block := range b.ReportBlocks {
 		n += block.len()
 	}
-	return reportBlockOffset + n + reportTimestampLength
+	return int(reportBlockOffset + n + reportTimestampLength)
 }
 
 // Header returns the Header associated with this packet.
@@ -103,7 +103,7 @@ func (b *CCFeedbackReport) Header() Header {
 		Padding: false,
 		Count:   FormatCCFB,
 		Type:    TypeTransportSpecificFeedback,
-		Length:  b.Len()/4 - 1,
+		Length:  uint16(b.MarshalSize()/4 - 1),
 	}
 }
 
@@ -114,8 +114,7 @@ func (b CCFeedbackReport) Marshal() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	length := 4 * (header.Length + 1)
-	buf := make([]byte, length)
+	buf := make([]byte, b.MarshalSize())
 	copy(buf[:headerLength], headerBuf)
 	binary.BigEndian.PutUint32(buf[headerLength:], b.SenderSSRC)
 	offset := uint16(reportBlockOffset)

@@ -13,6 +13,17 @@ type Goodbye struct {
 	Reason string
 }
 
+// MarshalSize returns the size of the packet once marshaled.
+func (g Goodbye) MarshalSize() int {
+	srcsLength := len(g.Sources) * ssrcLength
+	reasonLength := len(g.Reason) + 1
+
+	l := headerLength + srcsLength + reasonLength
+
+	// align to 32-bit boundary
+	return l + getPadding(l)
+}
+
 // Marshal encodes the Goodbye packet in binary
 func (g Goodbye) Marshal() ([]byte, error) {
 	/*
@@ -29,7 +40,7 @@ func (g Goodbye) Marshal() ([]byte, error) {
 	 *       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	 */
 
-	rawPacket := make([]byte, g.len())
+	rawPacket := make([]byte, g.MarshalSize())
 	packetBody := rawPacket[headerLength:]
 
 	if len(g.Sources) > countMax {
@@ -123,18 +134,8 @@ func (g *Goodbye) Header() Header {
 		Padding: false,
 		Count:   uint8(len(g.Sources)),
 		Type:    TypeGoodbye,
-		Length:  uint16((g.len() / 4) - 1),
+		Length:  uint16((g.MarshalSize() / 4) - 1),
 	}
-}
-
-func (g *Goodbye) len() int {
-	srcsLength := len(g.Sources) * ssrcLength
-	reasonLength := len(g.Reason) + 1
-
-	l := headerLength + srcsLength + reasonLength
-
-	// align to 32-bit boundary
-	return l + getPadding(l)
 }
 
 // DestinationSSRC returns an array of SSRC values that this packet refers to.

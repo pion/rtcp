@@ -27,9 +27,14 @@ const (
 
 var _ Packet = (*FullIntraRequest)(nil)
 
+// MarshalSize returns the size of the packet once marshaled.
+func (p FullIntraRequest) MarshalSize() int {
+	return headerLength + firOffset + len(p.FIR)*8
+}
+
 // Marshal encodes the FullIntraRequest
 func (p FullIntraRequest) Marshal() ([]byte, error) {
-	rawPacket := make([]byte, firOffset+(len(p.FIR)*8))
+	rawPacket := make([]byte, p.MarshalSize()-headerLength)
 	binary.BigEndian.PutUint32(rawPacket, p.SenderSSRC)
 	binary.BigEndian.PutUint32(rawPacket[4:], p.MediaSSRC)
 	for i, fir := range p.FIR {
@@ -80,12 +85,8 @@ func (p *FullIntraRequest) Header() Header {
 	return Header{
 		Count:  FormatFIR,
 		Type:   TypePayloadSpecificFeedback,
-		Length: uint16((p.len() / 4) - 1),
+		Length: uint16((p.MarshalSize() / 4) - 1),
 	}
-}
-
-func (p *FullIntraRequest) len() int {
-	return headerLength + firOffset + len(p.FIR)*8
 }
 
 func (p *FullIntraRequest) String() string {

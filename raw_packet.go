@@ -6,6 +6,11 @@ import "fmt"
 // a packet with an unknown type is encountered.
 type RawPacket []byte
 
+// MarshalSize returns the size of the packet once marshaled.
+func (r RawPacket) MarshalSize() int {
+	return len(r)
+}
+
 // Marshal encodes the packet in binary.
 func (r RawPacket) Marshal() ([]byte, error) {
 	return r, nil

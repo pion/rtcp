@@ -39,8 +39,7 @@ func (p ReceiverEstimatedMaximumBitrate) Marshal() (buf []byte, err error) {
 	return buf, nil
 }
 
-// MarshalSize returns the size of the packet when marshaled.
-// This can be used in conjunction with `MarshalTo` to avoid allocations.
+// MarshalSize returns the size of the packet once marshaled.
 func (p ReceiverEstimatedMaximumBitrate) MarshalSize() (n int) {
 	return 20 + 4*len(p.SSRCs)
 }

@@ -91,13 +91,18 @@ const (
 	nackOffset = 8
 )
 
+// MarshalSize returns the size of the packet once marshaled.
+func (p TransportLayerNack) MarshalSize() int {
+	return headerLength + nackOffset + (len(p.Nacks) * 4)
+}
+
 // Marshal encodes the TransportLayerNack in binary
 func (p TransportLayerNack) Marshal() ([]byte, error) {
 	if len(p.Nacks)+tlnLength > math.MaxUint8 {
 		return nil, errTooManyReports
 	}
 
-	rawPacket := make([]byte, nackOffset+(len(p.Nacks)*4))
+	rawPacket := make([]byte, p.MarshalSize()-headerLength)
 	binary.BigEndian.PutUint32(rawPacket, p.SenderSSRC)
 	binary.BigEndian.PutUint32(rawPacket[4:], p.MediaSSRC)
 	for i := 0; i < len(p.Nacks); i++ {
@@ -143,16 +148,12 @@ func (p *TransportLayerNack) Unmarshal(rawPacket []byte) error {
 	return nil
 }
 
-func (p *TransportLayerNack) len() int {
-	return headerLength + nackOffset + (len(p.Nacks) * 4)
-}
-
 // Header returns the Header associated with this packet.
 func (p *TransportLayerNack) Header() Header {
 	return Header{
 		Count:  FormatTLN,
 		Type:   TypeTransportSpecificFeedback,
-		Length: uint16((p.len() / 4) - 1),
+		Length: uint16((p.MarshalSize() / 4) - 1),
 	}
 }
 

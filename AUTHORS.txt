@@ -6,6 +6,7 @@
 Adam Roach <adam@caffeine.tv>
 adwpc <adwpc@hotmail.com>
 aggresss <aggresss@163.com>
+Alessandro Ros <aler9.dev@gmail.com>
 Atsushi Watanabe <atsushi.w@ieee.org>
 cnderrauber <zengjie9004@gmail.com>
 Gabor Pongracz <gabor.pongracz@proemergotech.com>

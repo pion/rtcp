@@ -35,13 +35,18 @@ const (
 	sliOffset = 8
 )
 
+// MarshalSize returns the size of the packet once marshaled.
+func (p SliceLossIndication) MarshalSize() int {
+	return headerLength + sliOffset + (len(p.SLI) * 4)
+}
+
 // Marshal encodes the SliceLossIndication in binary
 func (p SliceLossIndication) Marshal() ([]byte, error) {
 	if len(p.SLI)+sliLength > math.MaxUint8 {
 		return nil, errTooManyReports
 	}
 
-	rawPacket := make([]byte, sliOffset+(len(p.SLI)*4))
+	rawPacket := make([]byte, p.MarshalSize()-headerLength)
 	binary.BigEndian.PutUint32(rawPacket, p.SenderSSRC)
 	binary.BigEndian.PutUint32(rawPacket[4:], p.MediaSSRC)
 	for i, s := range p.SLI {
@@ -90,16 +95,12 @@ func (p *SliceLossIndication) Unmarshal(rawPacket []byte) error {
 	return nil
 }
 
-func (p *SliceLossIndication) len() int {
-	return headerLength + sliOffset + (len(p.SLI) * 4)
-}
-
 // Header returns the Header associated with this packet.
 func (p *SliceLossIndication) Header() Header {
 	return Header{
 		Count:  FormatSLI,
 		Type:   TypeTransportSpecificFeedback,
-		Length: uint16((p.len() / 4) - 1),
+		Length: uint16((p.MarshalSize() / 4) - 1),
 	}
 }
 
