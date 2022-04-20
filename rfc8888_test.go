@@ -283,7 +283,6 @@ func TestCCFeedbackReportUnmarshalMarshal(t *testing.T) {
 				0x00, 0x00, 0x00, 0x01, // Report Timestamp=1
 			},
 			Want: CCFeedbackReport{
-				Header:          Header{Padding: false, Count: 11, Type: 205, Length: 2},
 				SenderSSRC:      1,
 				ReportBlocks:    []CCFeedbackReportBlock{},
 				ReportTimestamp: 1,
@@ -308,7 +307,6 @@ func TestCCFeedbackReportUnmarshalMarshal(t *testing.T) {
 				0x00, 0x00, 0x00, 0x01,
 			},
 			Want: CCFeedbackReport{
-				Header:     Header{Padding: false, Count: 11, Type: 205, Length: 10},
 				SenderSSRC: 1,
 				ReportBlocks: []CCFeedbackReportBlock{
 					{

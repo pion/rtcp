@@ -68,9 +68,6 @@ const (
 // CCFeedbackReport is a Congestion Control Feedback Report as defined in
 // https://www.rfc-editor.org/rfc/rfc8888.html#name-rtcp-congestion-control-fee
 type CCFeedbackReport struct {
-	// header
-	Header Header
-
 	// SSRC of sender
 	SenderSSRC uint32
 
@@ -94,19 +91,31 @@ func (b CCFeedbackReport) DestinationSSRC() []uint32 {
 func (b *CCFeedbackReport) Len() uint16 {
 	n := uint16(0)
 	for _, block := range b.ReportBlocks {
-		n += block.Len()
+		n += block.len()
 	}
 	return reportBlockOffset + n + reportTimestampLength
 }
 
+// Header returns the Header associated with this packet.
+func (b *CCFeedbackReport) Header() Header {
+	return Header{
+		Padding: false,
+		Count:   FormatCCFB,
+		Type:    TypeTransportSpecificFeedback,
+		Length:  b.Len()/4 - 1,
+	}
+}
+
 // Marshal encodes the Congestion Control Feedback Report in binary
 func (b CCFeedbackReport) Marshal() ([]byte, error) {
-	header, err := b.Header.Marshal()
+	header := b.Header()
+	headerBuf, err := header.Marshal()
 	if err != nil {
 		return nil, err
 	}
-	buf := make([]byte, b.Len())
-	copy(buf[:headerLength], header)
+	length := 4 * (header.Length + 1)
+	buf := make([]byte, length)
+	copy(buf[:headerLength], headerBuf)
 	binary.BigEndian.PutUint32(buf[headerLength:], b.SenderSSRC)
 	offset := uint16(reportBlockOffset)
 	for _, block := range b.ReportBlocks {
@@ -115,7 +124,7 @@ func (b CCFeedbackReport) Marshal() ([]byte, error) {
 			return nil, err
 		}
 		copy(buf[offset:], b)
-		offset += block.Len()
+		offset += block.len()
 	}
 
 	binary.BigEndian.PutUint32(buf[offset:], b.ReportTimestamp)
@@ -128,8 +137,12 @@ func (b *CCFeedbackReport) Unmarshal(rawPacket []byte) error {
 		return errPacketTooShort
 	}
 
-	if err := b.Header.Unmarshal(rawPacket); err != nil {
+	var h Header
+	if err := h.Unmarshal(rawPacket); err != nil {
 		return err
+	}
+	if h.Type != TypeTransportSpecificFeedback {
+		return errWrongType
 	}
 
 	b.SenderSSRC = binary.BigEndian.Uint32(rawPacket[headerLength:])
@@ -145,7 +158,7 @@ func (b *CCFeedbackReport) Unmarshal(rawPacket []byte) error {
 			return err
 		}
 		b.ReportBlocks = append(b.ReportBlocks, block)
-		offset += block.Len()
+		offset += block.len()
 	}
 
 	return nil
@@ -168,8 +181,8 @@ type CCFeedbackReportBlock struct {
 	MetricBlocks  []CCFeedbackMetricBlock
 }
 
-// Len returns the length of the report block in bytes
-func (b *CCFeedbackReportBlock) Len() uint16 {
+// len returns the length of the report block in bytes
+func (b *CCFeedbackReportBlock) len() uint16 {
 	n := len(b.MetricBlocks)
 	if n%2 != 0 {
 		n++
@@ -183,7 +196,7 @@ func (b CCFeedbackReportBlock) marshal() ([]byte, error) {
 		return nil, errTooManyReports
 	}
 
-	buf := make([]byte, b.Len())
+	buf := make([]byte, b.len())
 	binary.BigEndian.PutUint32(buf[ssrcOffset:], b.MediaSSRC)
 	binary.BigEndian.PutUint16(buf[beginSequenceOffset:], b.BeginSequence)
 	binary.BigEndian.PutUint16(buf[numReportsOffset:], uint16(len(b.MetricBlocks)))
