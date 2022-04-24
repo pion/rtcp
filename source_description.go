@@ -255,16 +255,16 @@ func (s *SourceDescriptionChunk) Unmarshal(rawPacket []byte) error {
 }
 
 func (s SourceDescriptionChunk) len() int {
-	len := sdesSourceLen
+	chunkLen := sdesSourceLen
 	for _, it := range s.Items {
-		len += it.len()
+		chunkLen += it.len()
 	}
-	len += sdesTypeLen // for terminating null octet
+	chunkLen += sdesTypeLen // for terminating null octet
 
 	// align to 32-bit boundary
-	len += getPadding(len)
+	chunkLen += getPadding(chunkLen)
 
-	return len
+	return chunkLen
 }
 
 // A SourceDescriptionItem is a part of a SourceDescription that describes a stream.
