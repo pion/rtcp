@@ -242,7 +242,12 @@ func TestDecode(t *testing.T) {
 
 	// We need to make sure the header has been set up correctly
 	// before we test for equality
-	for _, p := range expected.(*ExtendedReport).Reports {
+	extendedReports, ok := expected.(*ExtendedReport)
+	if !ok {
+		t.Fatal("Failed to cast")
+	}
+
+	for _, p := range extendedReports.Reports {
 		p.setupBlockHeader()
 	}
 
@@ -256,7 +261,12 @@ func TestDecode(t *testing.T) {
 		t.Errorf("(deep equal) Decoded packet does not match expected packet")
 	}
 
-	if p.String() != expected.(fmt.Stringer).String() {
+	pktStringer, ok := expected.(fmt.Stringer)
+	if !ok {
+		t.Fatal("Failed to cast")
+	}
+
+	if p.String() != pktStringer.String() {
 		t.Errorf("(string compare) Decoded packet does not match expected packet")
 	}
 }
