@@ -363,10 +363,16 @@ func TestCCFeedbackReportUnmarshalMarshal(t *testing.T) {
 	} {
 		test := test
 		t.Run(fmt.Sprintf("Unmarshal-%v", test.Name), func(t *testing.T) {
-			var block CCFeedbackReport
-			err := block.Unmarshal(test.Data)
+			pkts, err := Unmarshal(test.Data)
 			assert.NoError(t, err)
-			assert.Equal(t, test.Want, block)
+			assert.Len(t, pkts, 1)
+
+			var ok bool
+			var report *CCFeedbackReport
+			report, ok = pkts[0].(*CCFeedbackReport)
+			assert.True(t, ok)
+
+			assert.Equal(t, test.Want, *report)
 		})
 		t.Run(fmt.Sprintf("Marshal-%v", test.Name), func(t *testing.T) {
 			buf, err := test.Want.Marshal()
