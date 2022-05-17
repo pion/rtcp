@@ -3,6 +3,7 @@ package rtcp
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 )
 
 // https://www.rfc-editor.org/rfc/rfc8888.html#name-rtcp-congestion-control-fee
@@ -131,6 +132,18 @@ func (b CCFeedbackReport) Marshal() ([]byte, error) {
 	return buf, nil
 }
 
+func (b CCFeedbackReport) String() string {
+	out := fmt.Sprintf("CCFB:\n\tHeader %v\n", b.Header())
+	out += fmt.Sprintf("CCFB:\n\tSender SSRC %d\n", b.SenderSSRC)
+	out += fmt.Sprintf("\tReport Timestamp %d\n", b.ReportTimestamp)
+	out += "\tFeedback Reports \n"
+	for _, report := range b.ReportBlocks {
+		out += fmt.Sprintf("%v ", report)
+	}
+	out += "\n"
+	return out
+}
+
 // Unmarshal decodes the Congestion Control Feedback Report from binary
 func (b *CCFeedbackReport) Unmarshal(rawPacket []byte) error {
 	if len(rawPacket) < headerLength+ssrcLength+reportTimestampLength {
@@ -190,6 +203,17 @@ func (b *CCFeedbackReportBlock) len() uint16 {
 	return reportsOffset + 2*uint16(n)
 }
 
+func (b CCFeedbackReportBlock) String() string {
+	out := fmt.Sprintf("\tReport Block Media SSRC %d\n", b.MediaSSRC)
+	out += fmt.Sprintf("\tReport Begin Sequence Nr %d\n", b.BeginSequence)
+	out += fmt.Sprintf("\tReport length %d\n\t", len(b.MetricBlocks))
+	for i, block := range b.MetricBlocks {
+		out += fmt.Sprintf("{nr: %d, rx: %v, ts: %v} ", b.BeginSequence+uint16(i), block.Received, block.ArrivalTimeOffset)
+	}
+	out += "\n"
+	return out
+}
+
 // marshal encodes the Congestion Control Feedback Report Block in binary
 func (b CCFeedbackReportBlock) marshal() ([]byte, error) {
 	if len(b.MetricBlocks) > maxMetricBlocks {
@@ -199,7 +223,13 @@ func (b CCFeedbackReportBlock) marshal() ([]byte, error) {
 	buf := make([]byte, b.len())
 	binary.BigEndian.PutUint32(buf[ssrcOffset:], b.MediaSSRC)
 	binary.BigEndian.PutUint16(buf[beginSequenceOffset:], b.BeginSequence)
-	binary.BigEndian.PutUint16(buf[numReportsOffset:], uint16(len(b.MetricBlocks)))
+
+	length := uint16(len(b.MetricBlocks))
+	if length > 0 {
+		length--
+	}
+
+	binary.BigEndian.PutUint16(buf[numReportsOffset:], length)
 
 	for i, block := range b.MetricBlocks {
 		b, err := block.marshal()
@@ -219,7 +249,13 @@ func (b *CCFeedbackReportBlock) unmarshal(rawPacket []byte) error {
 	}
 	b.MediaSSRC = binary.BigEndian.Uint32(rawPacket[:beginSequenceOffset])
 	b.BeginSequence = binary.BigEndian.Uint16(rawPacket[beginSequenceOffset:numReportsOffset])
-	numReports := binary.BigEndian.Uint16(rawPacket[numReportsOffset:])
+	numReportsField := binary.BigEndian.Uint16(rawPacket[numReportsOffset:])
+	if numReportsField == 0 {
+		return nil
+	}
+	endSequence := b.BeginSequence + numReportsField
+	numReports := endSequence - b.BeginSequence + 1
+
 	if len(rawPacket) < int(reportsOffset+numReports*2) {
 		return errIncorrectNumReports
 	}
