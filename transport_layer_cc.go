@@ -306,9 +306,6 @@ const (
 // TransportLayerCC for sender-BWE
 // https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-5
 type TransportLayerCC struct {
-	// header
-	Header Header
-
 	// SSRC of sender
 	SenderSSRC uint32
 
@@ -335,16 +332,14 @@ type TransportLayerCC struct {
 }
 
 // Header returns the Header associated with this packet.
-// func (t *TransportLayerCC) Header() Header {
-// return t.Header
-// return Header{
-// Padding: true,
-// Count:   FormatTCC,
-// Type:    TypeTCCTransportSpecificFeedback,
-// // https://tools.ietf.org/html/rfc4585#page-33
-// Length: uint16((t.len() / 4) - 1),
-// }
-// }
+func (t *TransportLayerCC) Header() Header {
+	return Header{
+		Padding: t.packetLen()%4 != 0,
+		Count:   FormatTCC,
+		Type:    TypeTransportSpecificFeedback,
+		Length:  (t.Len() / 4) - 1,
+	}
+}
 
 func (t *TransportLayerCC) packetLen() uint16 {
 	n := uint16(headerLength + packetChunkOffset + len(t.PacketChunks)*2)
@@ -370,8 +365,7 @@ func (t *TransportLayerCC) Len() uint16 {
 }
 
 func (t TransportLayerCC) String() string {
-	out := fmt.Sprintf("TransportLayerCC:\n\tHeader %v\n", t.Header)
-	out += fmt.Sprintf("TransportLayerCC:\n\tSender Ssrc %d\n", t.SenderSSRC)
+	out := fmt.Sprintf("TransportLayerCC:\n\tSender Ssrc %d\n", t.SenderSSRC)
 	out += fmt.Sprintf("\tMedia Ssrc %d\n", t.MediaSSRC)
 	out += fmt.Sprintf("\tBase Sequence Number %d\n", t.BaseSequenceNumber)
 	out += fmt.Sprintf("\tStatus Count %d\n", t.PacketStatusCount)
@@ -391,7 +385,7 @@ func (t TransportLayerCC) String() string {
 
 // Marshal encodes the TransportLayerCC in binary
 func (t TransportLayerCC) Marshal() ([]byte, error) {
-	header, err := t.Header.Marshal()
+	header, err := t.Header().Marshal()
 	if err != nil {
 		return nil, err
 	}
@@ -426,9 +420,7 @@ func (t TransportLayerCC) Marshal() ([]byte, error) {
 		}
 	}
 
-	if t.Header.Padding {
-		payload[len(payload)-1] = uint8(t.Len() - t.packetLen())
-	}
+	payload[len(payload)-1] = uint8(t.Len() - t.packetLen())
 
 	return append(header, payload...), nil
 }
@@ -439,13 +431,14 @@ func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error { //nolint:gocognit
 		return errPacketTooShort
 	}
 
-	if err := t.Header.Unmarshal(rawPacket); err != nil {
+	var h Header
+	if err := h.Unmarshal(rawPacket); err != nil {
 		return err
 	}
 
 	// https://tools.ietf.org/html/rfc4585#page-33
 	// header's length + payload's length
-	totalLength := 4 * (t.Header.Length + 1)
+	totalLength := 4 * (h.Length + 1)
 
 	if totalLength < headerLength+packetChunkOffset {
 		return errPacketTooShort
@@ -455,7 +448,7 @@ func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error { //nolint:gocognit
 		return errPacketTooShort
 	}
 
-	if t.Header.Type != TypeTransportSpecificFeedback || t.Header.Count != FormatTCC {
+	if h.Type != TypeTransportSpecificFeedback || h.Count != FormatTCC {
 		return errWrongType
 	}
 

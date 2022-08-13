@@ -423,12 +423,6 @@ func TestPrint(t *testing.T) {
 		},
 		{
 			&TransportLayerCC{
-				Header: Header{
-					Padding: true,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  5,
-				},
 				SenderSSRC:         4195875351,
 				MediaSSRC:          1124282272,
 				BaseSequenceNumber: 153,
@@ -452,11 +446,6 @@ func TestPrint(t *testing.T) {
 				},
 			},
 			"rtcp.TransportLayerCC:\n" +
-				"\tHeader:\n" +
-				"\t\tPadding: true\n" +
-				"\t\tCount: 15\n" +
-				"\t\tType: [TSFB]\n" +
-				"\t\tLength: 5\n" +
 				"\tSenderSSRC: 4195875351\n" +
 				"\tMediaSSRC: 1124282272\n" +
 				"\tBaseSequenceNumber: 153\n" +

@@ -301,12 +301,6 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 				0x20, 0x1, 0x94, 0x1,
 			},
 			Want: TransportLayerCC{
-				Header: Header{
-					Padding: true,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  5,
-				},
 				SenderSSRC:         4195875351,
 				MediaSSRC:          1124282272,
 				BaseSequenceNumber: 153,
@@ -343,12 +337,6 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 				0xd0, 0x0, 0x0, 0x3,
 			},
 			Want: TransportLayerCC{
-				Header: Header{
-					Padding: true,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  6,
-				},
 				SenderSSRC:         4195875351,
 				MediaSSRC:          423483579,
 				BaseSequenceNumber: 372,
@@ -384,7 +372,7 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 		{
 			Name: "example3",
 			Data: []byte{
-				0xaf, 0xcd, 0x0, 0x7,
+				0x8f, 0xcd, 0x0, 0x7,
 				0xfa, 0x17, 0xfa, 0x17,
 				0x19, 0x3d, 0xd8, 0xbb,
 				0x1, 0x74, 0x0, 0x6,
@@ -394,12 +382,6 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 				0xd0, 0x0, 0xd0, 0x0,
 			},
 			Want: TransportLayerCC{
-				Header: Header{
-					Padding: true,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  7,
-				},
 				SenderSSRC:         4195875351,
 				MediaSSRC:          423483579,
 				BaseSequenceNumber: 372,
@@ -460,12 +442,6 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 				0x10, 0x0, 0x0, 0x3,
 			},
 			Want: TransportLayerCC{
-				Header: Header{
-					Padding: true,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  7,
-				},
 				SenderSSRC:         4195875351,
 				MediaSSRC:          423483579,
 				BaseSequenceNumber: 4,
@@ -524,12 +500,6 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 				0xc, 0x10, 0x0, 0x3,
 			},
 			Want: TransportLayerCC{
-				Header: Header{
-					Padding: true,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  6,
-				},
 				SenderSSRC:         4195875351,
 				MediaSSRC:          423483579,
 				BaseSequenceNumber: 1,
@@ -577,12 +547,6 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 				0x7b, 0x1, 0x9, 0x1,
 			},
 			Want: TransportLayerCC{
-				Header: Header{
-					Padding: true,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  7,
-				},
 				SenderSSRC:         2608133663,
 				MediaSSRC:          2473712828,
 				BaseSequenceNumber: 34108,
@@ -640,12 +604,6 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 				0x0, 0x0, 0x0, 0x0,
 			},
 			Want: TransportLayerCC{
-				Header: Header{
-					Padding: false,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  4,
-				},
 				SenderSSRC:         2596996162,
 				MediaSSRC:          0,
 				BaseSequenceNumber: 0,
@@ -680,12 +638,6 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 		{
 			Name: "example1",
 			Data: TransportLayerCC{
-				Header: Header{
-					Padding: true,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  5,
-				},
 				SenderSSRC:         4195875351,
 				MediaSSRC:          1124282272,
 				BaseSequenceNumber: 153,
@@ -721,12 +673,6 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 		{
 			Name: "example2",
 			Data: TransportLayerCC{
-				Header: Header{
-					Padding: true,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  6,
-				},
 				SenderSSRC:         4195875351,
 				MediaSSRC:          423483579,
 				BaseSequenceNumber: 372,
@@ -771,12 +717,6 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 		{
 			Name: "example3",
 			Data: TransportLayerCC{
-				Header: Header{
-					Padding: true,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  7,
-				},
 				SenderSSRC:         4195875351,
 				MediaSSRC:          423483579,
 				BaseSequenceNumber: 372,
@@ -823,7 +763,7 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 				},
 			},
 			Want: []byte{
-				0xaf, 0xcd, 0x0, 0x7,
+				0x8f, 0xcd, 0x0, 0x7,
 				0xfa, 0x17, 0xfa, 0x17,
 				0x19, 0x3d, 0xd8, 0xbb,
 				0x1, 0x74, 0x0, 0x6,
@@ -837,12 +777,6 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 		{
 			Name: "example4",
 			Data: TransportLayerCC{
-				Header: Header{
-					Padding: true,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  7,
-				},
 				SenderSSRC:         4195875351,
 				MediaSSRC:          423483579,
 				BaseSequenceNumber: 4,
@@ -902,12 +836,6 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 		{
 			Name: "example5",
 			Data: TransportLayerCC{
-				Header: Header{
-					Padding: true,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  6,
-				},
 				SenderSSRC:         4195875351,
 				MediaSSRC:          423483579,
 				BaseSequenceNumber: 1,
@@ -954,12 +882,6 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 		{
 			Name: "example6",
 			Data: TransportLayerCC{
-				Header: Header{
-					Padding: true,
-					Count:   FormatTCC,
-					Type:    TypeTransportSpecificFeedback,
-					Length:  7,
-				},
 				SenderSSRC:         4195875351,
 				MediaSSRC:          1124282272,
 				BaseSequenceNumber: 39956,
