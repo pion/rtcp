@@ -21,3 +21,6 @@ Sean DuBois <seaduboi@amazon.com>
 Sean DuBois <sean@siobud.com>
 Simone Gotti <simone.gotti@gmail.com>
 Woodrow Douglass <wdouglass@carnegierobotics.com>
+
+# List of contributors not appearing in Git history
+
