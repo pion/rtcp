@@ -20,6 +20,7 @@ Max Hawkins <maxhawkins@gmail.com>
 Sean DuBois <seaduboi@amazon.com>
 Sean DuBois <sean@siobud.com>
 Simone Gotti <simone.gotti@gmail.com>
+Steffen Vogel <post@steffenvogel.de>
 Woodrow Douglass <wdouglass@carnegierobotics.com>
 
 # List of contributors not appearing in Git history
