@@ -38,6 +38,5 @@ Encoding RTCP packets:
 	}
 	pliData, err := pkt.Marshal()
 	// ...
-
 */
 package rtcp
