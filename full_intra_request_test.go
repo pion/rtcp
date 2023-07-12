@@ -19,8 +19,8 @@ func TestFullIntraRequestUnmarshal(t *testing.T) {
 		{
 			Name: "valid",
 			Data: []byte{
-				// v=2, p=0, FMT=4, PSFB, len=3
-				0x84, 0xce, 0x00, 0x03,
+				// v=2, p=0, FMT=4, PSFB, len=4
+				0x84, 0xce, 0x00, 0x04,
 				// ssrc=0x0
 				0x00, 0x00, 0x00, 0x00,
 				// ssrc=0x4bc4fcb4
@@ -44,8 +44,8 @@ func TestFullIntraRequestUnmarshal(t *testing.T) {
 		{
 			Name: "also valid",
 			Data: []byte{
-				// v=2, p=0, FMT=4, PSFB, len=3
-				0x84, 0xce, 0x00, 0x05,
+				// v=2, p=0, FMT=4, PSFB, len=6
+				0x84, 0xce, 0x00, 0x06,
 				// ssrc=0x0
 				0x00, 0x00, 0x00, 0x00,
 				// ssrc=0x4bc4fcb4
@@ -95,8 +95,8 @@ func TestFullIntraRequestUnmarshal(t *testing.T) {
 		{
 			Name: "wrong type",
 			Data: []byte{
-				// v=2, p=0, FMT=4, RR, len=3
-				0x84, 0xc9, 0x00, 0x03,
+				// v=2, p=0, FMT=4, RR, len=4
+				0x84, 0xc9, 0x00, 0x04,
 				// ssrc=0x0
 				0x00, 0x00, 0x00, 0x00,
 				// ssrc=0x4bc4fcb4
@@ -111,8 +111,8 @@ func TestFullIntraRequestUnmarshal(t *testing.T) {
 		{
 			Name: "wrong fmt",
 			Data: []byte{
-				// v=2, p=0, FMT=2, PSFB, len=3
-				0x82, 0xce, 0x00, 0x03,
+				// v=2, p=0, FMT=2, PSFB, len=4
+				0x82, 0xce, 0x00, 0x04,
 				// ssrc=0x0
 				0x00, 0x00, 0x00, 0x00,
 				// ssrc=0x4bc4fcb4
@@ -198,18 +198,21 @@ func TestFullIntraRequestUnmarshalHeader(t *testing.T) {
 		{
 			Name: "valid header",
 			Data: []byte{
-				// v=2, p=0, FMT=1, PSFB, len=1
-				0x84, 0xce, 0x00, 0x02,
+				// v=2, p=0, FMT=1, PSFB, len=4
+				0x84, 0xce, 0x00, 0x04,
 				// ssrc=0x0
 				0x00, 0x00, 0x00, 0x00,
 				// ssrc=0x4bc4fcb4
 				0x4b, 0xc4, 0xfc, 0xb4,
+				// ssrc=0x00000000
 				0x00, 0x00, 0x00, 0x00,
+				// Seqno=0x22
+				0x22, 0x00, 0x00, 0x00,
 			},
 			Want: Header{
 				Count:  FormatFIR,
 				Type:   TypePayloadSpecificFeedback,
-				Length: 2,
+				Length: 4,
 			},
 		},
 	} {
