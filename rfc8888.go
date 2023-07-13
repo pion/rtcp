@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"math"
 )
 
 // https://www.rfc-editor.org/rfc/rfc8888.html#name-rtcp-congestion-control-fee
@@ -256,10 +257,15 @@ func (b *CCFeedbackReportBlock) unmarshal(rawPacket []byte) error {
 	if numReportsField == 0 {
 		return nil
 	}
+
+	if int(b.BeginSequence)+int(numReportsField) > math.MaxUint16 {
+		return errIncorrectNumReports
+	}
+
 	endSequence := b.BeginSequence + numReportsField
 	numReports := endSequence - b.BeginSequence + 1
 
-	if len(rawPacket) < int(reportsOffset+numReports*2) {
+	if len(rawPacket) < reportsOffset+int(numReports)*2 {
 		return errIncorrectNumReports
 	}
 	b.MetricBlocks = make([]CCFeedbackMetricBlock, numReports)
