@@ -135,6 +135,11 @@ func (p *TransportLayerNack) Unmarshal(rawPacket []byte) error {
 		return errWrongType
 	}
 
+	// The FCI field MUST contain at least one and MAY contain more than one Generic NACK
+	if 4*h.Length <= nackOffset || (4*h.Length-nackOffset)%4 != 0 {
+		return errBadLength
+	}
+
 	p.SenderSSRC = binary.BigEndian.Uint32(rawPacket[headerLength:])
 	p.MediaSSRC = binary.BigEndian.Uint32(rawPacket[headerLength+ssrcLength:])
 	for i := headerLength + nackOffset; i < (headerLength + int(h.Length*4)); i += 4 {

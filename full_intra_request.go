@@ -67,6 +67,11 @@ func (p *FullIntraRequest) Unmarshal(rawPacket []byte) error {
 		return errWrongType
 	}
 
+	// The FCI field MUST contain one or more FIR entries
+	if 4*h.Length-firOffset <= 0 || (4*h.Length)%8 != 0 {
+		return errBadLength
+	}
+
 	p.SenderSSRC = binary.BigEndian.Uint32(rawPacket[headerLength:])
 	p.MediaSSRC = binary.BigEndian.Uint32(rawPacket[headerLength+ssrcLength:])
 	for i := headerLength + firOffset; i < (headerLength + int(h.Length*4)); i += 8 {
