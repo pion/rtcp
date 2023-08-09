@@ -17,7 +17,10 @@ func FuzzUnmarshal(f *testing.F) {
 		}
 
 		for _, packet := range packets {
-			packet.Marshal()
+			_, err = packet.Marshal()
+			if err != nil {
+				return
+			}
 		}
 	})
 }

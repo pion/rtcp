@@ -124,6 +124,20 @@ func TestFullIntraRequestUnmarshal(t *testing.T) {
 			},
 			WantError: errWrongType,
 		},
+		{
+			Name: "wrong length",
+			Data: []byte{
+				// v=2, p=0, FMT=4, PSFB, len=3
+				0x84, 0xce, 0x00, 0x03,
+				// ssrc=0x0
+				0x00, 0x00, 0x00, 0x00,
+				// ssrc=0x4bc4fcb4
+				0x4b, 0xc4, 0xfc, 0xb4,
+				// ssrc=0x12345678
+				0x12, 0x34, 0x56, 0x78,
+			},
+			WantError: errBadLength,
+		},
 	} {
 		var fir FullIntraRequest
 		err := fir.Unmarshal(test.Data)

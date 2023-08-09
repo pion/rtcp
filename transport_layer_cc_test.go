@@ -4,6 +4,7 @@
 package rtcp
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -634,7 +635,7 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 			WantError: nil,
 		},
 		{
-			Name: "example3",
+			Name: "example7",
 			Data: []byte{
 				0x8f, 0xcd, 0x0, 0x4,
 				0x9a, 0xcb, 0x4, 0x42,
@@ -658,14 +659,44 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 			},
 			WantError: nil,
 		},
+		{
+			Name: "example8",
+			Data: []byte{
+				0xaf, 0xcd, 0x0, 0x5,
+				0xfa, 0x17, 0xfa, 0x17,
+				0x43, 0x3, 0x2f, 0xa0,
+				0x0, 0x99, 0x0, 0x3,
+				0x3d, 0xe8, 0x2, 0x17,
+				0x20, 0x3, 0x94, 0x1,
+			},
+			Want:      TransportLayerCC{},
+			WantError: errPacketTooShort,
+		},
+		{
+			Name: "example9",
+			Data: []byte{
+				0xaf, 0xcd, 0x0, 0x5,
+				0xfa, 0x17, 0xfa, 0x17,
+				0x43, 0x3, 0x2f, 0xa0,
+				0x0, 0x99, 0x0, 0x2,
+				0x3d, 0xe8, 0x2, 0x17,
+				0x40, 0x2, 0x94, 0x1,
+			},
+			Want:      TransportLayerCC{},
+			WantError: errPacketTooShort,
+		},
 	} {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
 			var chunk TransportLayerCC
 			err := chunk.Unmarshal(test.Data)
-			if err != nil {
-				t.Fatalf("Unmarshal err: %v", err)
+			if got, want := err, test.WantError; !errors.Is(got, want) {
+				t.Fatalf("Unmarshal %q : err = %v, want %v", test.Name, got, want)
 			}
+			if err != nil {
+				return
+			}
+
 			if got, want := chunk, test.Want; !reflect.DeepEqual(got, want) {
 				t.Fatalf("Unmarshal %q : got = %v, want %v", test.Name, got, want)
 			}

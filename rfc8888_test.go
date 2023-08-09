@@ -268,6 +268,19 @@ func TestCCFeedbackReportBlockUnmarshalMarshal(t *testing.T) {
 		assert.Error(t, err)
 		assert.ErrorIs(t, err, errIncorrectNumReports)
 	})
+
+	t.Run("overflowEndSequence", func(t *testing.T) {
+		var block CCFeedbackReportBlock
+		data := []byte{
+			0x00, 0x00, 0x00, 0x01, // SSRC
+			0xff, 0xfe, 0x00, 0x02, // begin_seq, num_reports
+			0x9F, 0xFD, 0x9F, 0xFC, // reports[0], reports[1]
+			0x00, 0x00, 0x00, 0x00, // reports[2], reports[3]
+		}
+		err := block.unmarshal(data)
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, errIncorrectNumReports)
+	})
 }
 
 func TestCCFeedbackReportUnmarshalMarshal(t *testing.T) {
