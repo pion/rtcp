@@ -136,7 +136,7 @@ func (p *TransportLayerNack) Unmarshal(rawPacket []byte) error {
 	}
 
 	// The FCI field MUST contain at least one and MAY contain more than one Generic NACK
-	if 4*h.Length <= nackOffset || (4*h.Length-nackOffset)%4 != 0 {
+	if 4*h.Length <= nackOffset {
 		return errBadLength
 	}
 

@@ -47,6 +47,18 @@ func TestTransportLayerNackUnmarshal(t *testing.T) {
 			WantError: errPacketTooShort,
 		},
 		{
+			Name: "bad length",
+			Data: []byte{
+				// TransportLayerNack
+				0x81, 0xcd, 0x0, 0x2,
+				// sender=0x902f9e2e
+				0x90, 0x2f, 0x9e, 0x2e,
+				// media=0x902f9e2e
+				0x90, 0x2f, 0x9e, 0x2e,
+			},
+			WantError: errBadLength,
+		},
+		{
 			Name: "wrong type",
 			Data: []byte{
 				// v=2, p=0, count=1, SR, len=7
