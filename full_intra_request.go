@@ -88,11 +88,12 @@ func (p *FullIntraRequest) Header() Header {
 	return Header{
 		Count:  FormatFIR,
 		Type:   TypePayloadSpecificFeedback,
-		Length: uint16((p.len() / 4) - 1),
+		Length: uint16((p.MarshalSize() / 4) - 1),
 	}
 }
 
-func (p *FullIntraRequest) len() int {
+// MarshalSize returns the size of the packet once marshaled
+func (p *FullIntraRequest) MarshalSize() int {
 	return headerLength + firOffset + len(p.FIR)*8
 }
 
