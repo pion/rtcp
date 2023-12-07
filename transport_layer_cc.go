@@ -363,13 +363,18 @@ func (t *TransportLayerCC) packetLen() uint16 {
 
 // Len return total bytes with padding
 func (t *TransportLayerCC) Len() uint16 {
+	return uint16(t.MarshalSize())
+}
+
+// MarshalSize returns the size of the packet once marshaled
+func (t *TransportLayerCC) MarshalSize() int {
 	n := t.packetLen()
 	// has padding
 	if n%4 != 0 {
 		n = (n/4 + 1) * 4
 	}
 
-	return n
+	return int(n)
 }
 
 func (t TransportLayerCC) String() string {
@@ -399,7 +404,7 @@ func (t TransportLayerCC) Marshal() ([]byte, error) {
 		return nil, err
 	}
 
-	payload := make([]byte, t.Len()-headerLength)
+	payload := make([]byte, t.MarshalSize()-headerLength)
 	binary.BigEndian.PutUint32(payload, t.SenderSSRC)
 	binary.BigEndian.PutUint32(payload[4:], t.MediaSSRC)
 	binary.BigEndian.PutUint16(payload[baseSequenceNumberOffset:], t.BaseSequenceNumber)
@@ -430,7 +435,7 @@ func (t TransportLayerCC) Marshal() ([]byte, error) {
 	}
 
 	if t.Header.Padding {
-		payload[len(payload)-1] = uint8(t.Len() - t.packetLen())
+		payload[len(payload)-1] = uint8(t.MarshalSize() - int(t.packetLen()))
 	}
 
 	return append(header, payload...), nil

@@ -545,6 +545,11 @@ func (b *UnknownReportBlock) setupBlockHeader() {
 func (b *UnknownReportBlock) unpackBlockHeader() {
 }
 
+// MarshalSize returns the size of the packet once marshaled
+func (x ExtendedReport) MarshalSize() int {
+	return wireSize(x)
+}
+
 // Marshal encodes the ExtendedReport in binary
 func (x ExtendedReport) Marshal() ([]byte, error) {
 	for _, p := range x.Reports {

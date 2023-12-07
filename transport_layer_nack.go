@@ -151,7 +151,8 @@ func (p *TransportLayerNack) Unmarshal(rawPacket []byte) error {
 	return nil
 }
 
-func (p *TransportLayerNack) len() int {
+// MarshalSize returns the size of the packet once marshaled
+func (p *TransportLayerNack) MarshalSize() int {
 	return headerLength + nackOffset + (len(p.Nacks) * 4)
 }
 
@@ -160,7 +161,7 @@ func (p *TransportLayerNack) Header() Header {
 	return Header{
 		Count:  FormatTLN,
 		Type:   TypeTransportSpecificFeedback,
-		Length: uint16((p.len() / 4) - 1),
+		Length: uint16((p.MarshalSize() / 4) - 1),
 	}
 }
 

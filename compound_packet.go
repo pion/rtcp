@@ -110,6 +110,15 @@ func (c CompoundPacket) Marshal() ([]byte, error) {
 	return Marshal(p)
 }
 
+// MarshalSize returns the size of the packet once marshaled
+func (c CompoundPacket) MarshalSize() int {
+	l := 0
+	for _, p := range c {
+		l += p.MarshalSize()
+	}
+	return l
+}
+
 // Unmarshal decodes a CompoundPacket from binary.
 func (c *CompoundPacket) Unmarshal(rawData []byte) error {
 	out := make(CompoundPacket, 0)

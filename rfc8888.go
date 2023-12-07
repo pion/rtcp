@@ -94,6 +94,11 @@ func (b CCFeedbackReport) DestinationSSRC() []uint32 {
 
 // Len returns the length of the report in bytes
 func (b *CCFeedbackReport) Len() int {
+	return b.MarshalSize()
+}
+
+// MarshalSize returns the size of the packet once marshaled
+func (b *CCFeedbackReport) MarshalSize() int {
 	n := 0
 	for _, block := range b.ReportBlocks {
 		n += block.len()
@@ -107,7 +112,7 @@ func (b *CCFeedbackReport) Header() Header {
 		Padding: false,
 		Count:   FormatCCFB,
 		Type:    TypeTransportSpecificFeedback,
-		Length:  uint16(b.Len()/4 - 1),
+		Length:  uint16(b.MarshalSize()/4 - 1),
 	}
 }
 

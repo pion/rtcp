@@ -43,3 +43,8 @@ func (r RawPacket) String() string {
 	out := fmt.Sprintf("RawPacket: %v", ([]byte)(r))
 	return out
 }
+
+// MarshalSize returns the size of the packet once marshaled
+func (r RawPacket) MarshalSize() int {
+	return len(r)
+}
