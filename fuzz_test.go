@@ -10,7 +10,7 @@ import (
 func FuzzUnmarshal(f *testing.F) {
 	f.Add([]byte{})
 
-	f.Fuzz(func(t *testing.T, data []byte) {
+	f.Fuzz(func(_ *testing.T, data []byte) {
 		packets, err := Unmarshal(data)
 		if err != nil {
 			return
