@@ -646,7 +646,8 @@ func (x *ExtendedReport) Unmarshal(b []byte) error {
 
 // DestinationSSRC returns an array of SSRC values that this packet refers to.
 func (x *ExtendedReport) DestinationSSRC() []uint32 {
-	ssrc := make([]uint32, 0)
+	ssrc := make([]uint32, 0, len(x.Reports)+1)
+	ssrc = append(ssrc, x.SenderSSRC)
 	for _, p := range x.Reports {
 		ssrc = append(ssrc, p.DestinationSSRC()...)
 	}

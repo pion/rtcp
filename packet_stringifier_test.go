@@ -117,6 +117,7 @@ func TestPrint(t *testing.T) {
 					},
 				},
 			},
+			// nolint
 			"rtcp.ExtendedReport:\n" +
 				"\tSenderSSRC: 0x1020304\n" +
 				"\tReports:\n" +
@@ -246,6 +247,7 @@ func TestPrint(t *testing.T) {
 					},
 				},
 			},
+			// nolint
 			"rtcp.FullIntraRequest:\n" +
 				"\tSenderSSRC: 0\n" +
 				"\tMediaSSRC: 1271200948\n" +
@@ -312,6 +314,7 @@ func TestPrint(t *testing.T) {
 				SenderSSRC: 0x902f9e2e,
 				MediaSSRC:  0x902f9e2e,
 			},
+			// nolint
 			"rtcp.PictureLossIndication:\n" +
 				"\tSenderSSRC: 2419039790\n" +
 				"\tMediaSSRC: 2419039790\n",

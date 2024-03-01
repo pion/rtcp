@@ -272,4 +272,14 @@ func TestDecode(t *testing.T) {
 	if p.String() != pktStringer.String() {
 		t.Errorf("(string compare) Decoded packet does not match expected packet")
 	}
+
+	var includeSenderSSRC bool
+	for _, ssrc := range p.DestinationSSRC() {
+		if ssrc == p.SenderSSRC {
+			includeSenderSSRC = true
+		}
+	}
+	if !includeSenderSSRC {
+		t.Errorf("DestinationSSRC does not include the SenderSSRC")
+	}
 }
