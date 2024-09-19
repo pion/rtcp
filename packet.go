@@ -46,11 +46,17 @@ var (
 // will be returned. Otherwise, the underlying type of the returned packet will be
 // CompoundPacket.
 func Unmarshal(rawData []byte) ([]Packet, error) {
+	// Preallocate a slice with a reasonable initial capacity
 	estimatedPackets := len(rawData) / 100 // Estimate based on average packet size
 	packets := make([]Packet, 0, estimatedPackets)
+
 	for len(rawData) != 0 {
 		p, processed, err := unmarshal(rawData)
 		if err != nil {
+			// Release already allocated packets in case of error
+			for _, packet := range packets {
+				packet.Release()
+			}
 			return nil, err
 		}
 
@@ -156,58 +162,72 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 
 // Implement the Release method for each concrete packet type
 func (p *SenderReport) Release() {
+	*p = SenderReport{} // Reset the packet
 	senderReportPool.Put(p)
 }
 
 func (p *ReceiverReport) Release() {
+	*p = ReceiverReport{} // Reset the packet
 	receiverReportPool.Put(p)
 }
 
 func (p *SourceDescription) Release() {
+	*p = SourceDescription{} // Reset the packet
 	sourceDescriptionPool.Put(p)
 }
 
 func (p *Goodbye) Release() {
+	*p = Goodbye{} // Reset the packet
 	goodbyePool.Put(p)
 }
 
 func (p *TransportLayerNack) Release() {
+	*p = TransportLayerNack{} // Reset the packet
 	transportLayerNackPool.Put(p)
 }
 
 func (p *RapidResynchronizationRequest) Release() {
+	*p = RapidResynchronizationRequest{} // Reset the packet
 	rapidResynchronizationRequestPool.Put(p)
 }
 
 func (p *TransportLayerCC) Release() {
+	*p = TransportLayerCC{} // Reset the packet
 	transportLayerCCPool.Put(p)
 }
 
 func (p *CCFeedbackReport) Release() {
+	*p = CCFeedbackReport{} // Reset the packet
 	ccFeedbackReportPool.Put(p)
 }
 
 func (p *PictureLossIndication) Release() {
+	*p = PictureLossIndication{} // Reset the packet
 	pictureLossIndicationPool.Put(p)
 }
 
 func (p *SliceLossIndication) Release() {
+	*p = SliceLossIndication{} // Reset the packet
 	sliceLossIndicationPool.Put(p)
 }
 
 func (p *ReceiverEstimatedMaximumBitrate) Release() {
+	*p = ReceiverEstimatedMaximumBitrate{} // Reset the packet
 	receiverEstimatedMaximumBitratePool.Put(p)
 }
 
 func (p *FullIntraRequest) Release() {
+	*p = FullIntraRequest{} // Reset the packet
 	fullIntraRequestPool.Put(p)
 }
 
 func (p *ExtendedReport) Release() {
+	*p = ExtendedReport{} // Reset the packet
 	extendedReportPool.Put(p)
 }
 
 func (p *ApplicationDefined) Release() {
+	*p = ApplicationDefined{} // Reset the packet
 	applicationDefinedPool.Put(p)
 }
 
@@ -219,5 +239,6 @@ func (p *CompoundPacket) Release() {
 }
 
 func (p *RawPacket) Release() {
+	*p = RawPacket{} // Reset the packet
 	rawPacketPool.Put(p)
 }
