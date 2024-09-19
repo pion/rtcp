@@ -83,6 +83,16 @@ func realPacket() []byte {
 	}
 }
 
+func BenchmarkUnmarshal(b *testing.B) {
+	packetData := realPacket()
+	for i := 0; i < b.N; i++ {
+		_, err := Unmarshal(packetData)
+		if err != nil {
+			b.Fatalf("Error unmarshalling packets: %s", err)
+		}
+	}
+}
+
 func TestUnmarshal(t *testing.T) {
 	packet, err := Unmarshal(realPacket())
 	if err != nil {
