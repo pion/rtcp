@@ -21,6 +21,7 @@ type Packet interface {
 	Release()
 }
 
+//nolint:gochecknoglobals
 var (
 	senderReportPool                    = sync.Pool{New: func() interface{} { return new(SenderReport) }}
 	receiverReportPool                  = sync.Pool{New: func() interface{} { return new(ReceiverReport) }}
@@ -158,87 +159,4 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 	err = packet.Unmarshal(inPacket)
 
 	return packet, bytesprocessed, err
-}
-
-// Implement the Release method for each concrete packet type
-func (p *SenderReport) Release() {
-	*p = SenderReport{} // Reset the packet
-	senderReportPool.Put(p)
-}
-
-func (p *ReceiverReport) Release() {
-	*p = ReceiverReport{} // Reset the packet
-	receiverReportPool.Put(p)
-}
-
-func (p *SourceDescription) Release() {
-	*p = SourceDescription{} // Reset the packet
-	sourceDescriptionPool.Put(p)
-}
-
-func (p *Goodbye) Release() {
-	*p = Goodbye{} // Reset the packet
-	goodbyePool.Put(p)
-}
-
-func (p *TransportLayerNack) Release() {
-	*p = TransportLayerNack{} // Reset the packet
-	transportLayerNackPool.Put(p)
-}
-
-func (p *RapidResynchronizationRequest) Release() {
-	*p = RapidResynchronizationRequest{} // Reset the packet
-	rapidResynchronizationRequestPool.Put(p)
-}
-
-func (p *TransportLayerCC) Release() {
-	*p = TransportLayerCC{} // Reset the packet
-	transportLayerCCPool.Put(p)
-}
-
-func (p *CCFeedbackReport) Release() {
-	*p = CCFeedbackReport{} // Reset the packet
-	ccFeedbackReportPool.Put(p)
-}
-
-func (p *PictureLossIndication) Release() {
-	*p = PictureLossIndication{} // Reset the packet
-	pictureLossIndicationPool.Put(p)
-}
-
-func (p *SliceLossIndication) Release() {
-	*p = SliceLossIndication{} // Reset the packet
-	sliceLossIndicationPool.Put(p)
-}
-
-func (p *ReceiverEstimatedMaximumBitrate) Release() {
-	*p = ReceiverEstimatedMaximumBitrate{} // Reset the packet
-	receiverEstimatedMaximumBitratePool.Put(p)
-}
-
-func (p *FullIntraRequest) Release() {
-	*p = FullIntraRequest{} // Reset the packet
-	fullIntraRequestPool.Put(p)
-}
-
-func (p *ExtendedReport) Release() {
-	*p = ExtendedReport{} // Reset the packet
-	extendedReportPool.Put(p)
-}
-
-func (p *ApplicationDefined) Release() {
-	*p = ApplicationDefined{} // Reset the packet
-	applicationDefinedPool.Put(p)
-}
-
-func (p *CompoundPacket) Release() {
-	// CompoundPacket is a slice of pointers, so we need to release each one
-	for _, packet := range *p {
-		packet.Release()
-	}
-}
-
-func (p *RawPacket) Release() {
-	*p = RawPacket{} // Reset the packet
-	rawPacketPool.Put(p)
 }

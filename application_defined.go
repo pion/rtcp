@@ -120,3 +120,9 @@ func (a *ApplicationDefined) MarshalSize() int {
 	}
 	return 12 + dataLength + paddingSize
 }
+
+// Release returns the packet to its pool and resets it
+func (p *ApplicationDefined) Release() {
+	*p = ApplicationDefined{} // Reset the packet
+	applicationDefinedPool.Put(p)
+}

@@ -366,3 +366,9 @@ func (s *SourceDescription) String() string {
 	}
 	return out
 }
+
+// Release returns the packet to its pool and resets it
+func (p *SourceDescription) Release() {
+	*p = SourceDescription{} // Reset the packet
+	sourceDescriptionPool.Put(p)
+}

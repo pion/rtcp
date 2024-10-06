@@ -558,6 +558,12 @@ func (t TransportLayerCC) DestinationSSRC() []uint32 {
 	return []uint32{t.MediaSSRC}
 }
 
+// Release returns the packet to its pool and resets it
+func (p *TransportLayerCC) Release() {
+	*p = TransportLayerCC{} // Reset the packet
+	transportLayerCCPool.Put(p)
+}
+
 func localMin(x, y uint16) uint16 {
 	if x < y {
 		return x
