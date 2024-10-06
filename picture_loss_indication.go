@@ -91,3 +91,9 @@ func (p *PictureLossIndication) String() string {
 func (p *PictureLossIndication) DestinationSSRC() []uint32 {
 	return []uint32{p.MediaSSRC}
 }
+
+// Release returns the packet to its pool and resets it
+func (p *PictureLossIndication) Release() {
+	*p = PictureLossIndication{} // Reset the packet
+	pictureLossIndicationPool.Put(p)
+}

@@ -657,3 +657,9 @@ func (x *ExtendedReport) DestinationSSRC() []uint32 {
 func (x *ExtendedReport) String() string {
 	return stringify(x)
 }
+
+// Release returns the packet to its pool and resets it
+func (p *ExtendedReport) Release() {
+	*p = ExtendedReport{} // Reset the packet
+	extendedReportPool.Put(p)
+}

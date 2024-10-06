@@ -193,3 +193,9 @@ func (r ReceiverReport) String() string {
 	out += fmt.Sprintf("\tProfile Extension Data: %v\n", r.ProfileExtensions)
 	return out
 }
+
+// Release returns the packet to its pool and resets it
+func (p *ReceiverReport) Release() {
+	*p = ReceiverReport{} // Reset the packet
+	receiverReportPool.Put(p)
+}

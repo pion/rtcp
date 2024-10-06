@@ -159,3 +159,11 @@ func (c CompoundPacket) String() string {
 	out = strings.TrimSuffix(strings.ReplaceAll(out, "\n", "\n\t"), "\t")
 	return out
 }
+
+// Release returns the packet to its pool and resets it
+func (p *CompoundPacket) Release() {
+	// CompoundPacket is a slice of pointers, so we need to release each one
+	for _, packet := range *p {
+		packet.Release()
+	}
+}

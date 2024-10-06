@@ -283,3 +283,9 @@ func (p *ReceiverEstimatedMaximumBitrate) String() string {
 func (p *ReceiverEstimatedMaximumBitrate) DestinationSSRC() []uint32 {
 	return p.SSRCs
 }
+
+// Release returns the packet to its pool and resets it
+func (p *ReceiverEstimatedMaximumBitrate) Release() {
+	*p = ReceiverEstimatedMaximumBitrate{} // Reset the packet
+	receiverEstimatedMaximumBitratePool.Put(p)
+}

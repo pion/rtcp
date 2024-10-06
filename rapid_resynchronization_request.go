@@ -92,3 +92,9 @@ func (p *RapidResynchronizationRequest) DestinationSSRC() []uint32 {
 func (p *RapidResynchronizationRequest) String() string {
 	return fmt.Sprintf("RapidResynchronizationRequest %x %x", p.SenderSSRC, p.MediaSSRC)
 }
+
+// Release returns the packet to its pool and resets it
+func (p *RapidResynchronizationRequest) Release() {
+	*p = RapidResynchronizationRequest{} // Reset the packet
+	rapidResynchronizationRequestPool.Put(p)
+}

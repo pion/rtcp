@@ -114,3 +114,9 @@ func (p *FullIntraRequest) DestinationSSRC() []uint32 {
 	}
 	return ssrcs
 }
+
+// Release returns the packet to its pool and resets it
+func (p *FullIntraRequest) Release() {
+	*p = FullIntraRequest{} // Reset the packet
+	fullIntraRequestPool.Put(p)
+}

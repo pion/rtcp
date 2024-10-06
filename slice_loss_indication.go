@@ -115,3 +115,9 @@ func (p *SliceLossIndication) String() string {
 func (p *SliceLossIndication) DestinationSSRC() []uint32 {
 	return []uint32{p.MediaSSRC}
 }
+
+// Release returns the packet to its pool and resets it
+func (p *SliceLossIndication) Release() {
+	*p = SliceLossIndication{} // Reset the packet
+	sliceLossIndicationPool.Put(p)
+}

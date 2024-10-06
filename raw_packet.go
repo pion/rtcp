@@ -48,3 +48,9 @@ func (r RawPacket) String() string {
 func (r RawPacket) MarshalSize() int {
 	return len(r)
 }
+
+// Release returns the packet to its pool and resets it
+func (p *RawPacket) Release() {
+	*p = RawPacket{} // Reset the packet
+	rawPacketPool.Put(p)
+}

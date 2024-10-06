@@ -186,6 +186,12 @@ func (b *CCFeedbackReport) Unmarshal(rawPacket []byte) error {
 	return nil
 }
 
+// Release returns the packet to its pool and resets it
+func (p *CCFeedbackReport) Release() {
+	*p = CCFeedbackReport{} // Reset the packet
+	ccFeedbackReportPool.Put(p)
+}
+
 const (
 	ssrcOffset          = 0
 	beginSequenceOffset = 4
