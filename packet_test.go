@@ -83,6 +83,21 @@ func realPacket() []byte {
 	}
 }
 
+func BenchmarkUnmarshal(b *testing.B) {
+	packetData := realPacket()
+	for i := 0; i < b.N; i++ {
+		pkts, err := Unmarshal(packetData)
+		if err != nil {
+			b.Fatalf("Error unmarshalling packets: %s", err)
+		}
+
+		for _, pkt := range pkts {
+			pkt.Release()
+		}
+
+	}
+}
+
 func TestUnmarshal(t *testing.T) {
 	packet, err := Unmarshal(realPacket())
 	if err != nil {
@@ -143,4 +158,112 @@ func TestInvalidHeaderLength(t *testing.T) {
 	if got, want := err, errPacketTooShort; !errors.Is(got, want) {
 		t.Fatalf("Unmarshal(nil) err = %v, want %v", got, want)
 	}
+}
+
+func TestPacketPool(t *testing.T) {
+	t.Run("SenderReport", func(t *testing.T) {
+		sr := senderReportPool.Get()
+		p, ok := sr.(*SenderReport)
+		assert.True(t, ok)
+
+		p.Release()
+	})
+
+	t.Run("ReceiverReport", func(t *testing.T) {
+		rr := receiverReportPool.Get()
+		p, ok := rr.(*ReceiverReport)
+		assert.True(t, ok)
+		p.Release()
+	})
+
+	t.Run("SourceDescription", func(t *testing.T) {
+		sd := sourceDescriptionPool.Get()
+		p, ok := sd.(*SourceDescription)
+		assert.True(t, ok)
+		p.Release()
+	})
+
+	t.Run("Goodbye", func(t *testing.T) {
+		gb := goodbyePool.Get()
+		p, ok := gb.(*Goodbye)
+		assert.True(t, ok)
+		p.Release()
+	})
+
+	t.Run("TransportLayerNack", func(t *testing.T) {
+		tln := transportLayerNackPool.Get()
+		p, ok := tln.(*TransportLayerNack)
+		assert.True(t, ok)
+		p.Release()
+	})
+
+	t.Run("RapidResynchronizationRequest", func(t *testing.T) {
+		rrr := rapidResynchronizationRequestPool.Get()
+		p, ok := rrr.(*RapidResynchronizationRequest)
+		assert.True(t, ok)
+		p.Release()
+	})
+
+	t.Run("TransportLayerCC", func(t *testing.T) {
+		tcc := transportLayerCCPool.Get()
+		p, ok := tcc.(*TransportLayerCC)
+		assert.True(t, ok)
+		p.Release()
+	})
+
+	t.Run("CCFeedbackReport", func(t *testing.T) {
+		ccfb := ccFeedbackReportPool.Get()
+		p, ok := ccfb.(*CCFeedbackReport)
+		assert.True(t, ok)
+		p.Release()
+	})
+
+	t.Run("PictureLossIndication", func(t *testing.T) {
+		pli := pictureLossIndicationPool.Get()
+		p, ok := pli.(*PictureLossIndication)
+		assert.True(t, ok)
+		p.Release()
+	})
+
+	t.Run("SliceLossIndication", func(t *testing.T) {
+		sli := sliceLossIndicationPool.Get()
+		p, ok := sli.(*SliceLossIndication)
+		assert.True(t, ok)
+		p.Release()
+	})
+
+	t.Run("ReceiverEstimatedMaximumBitrate", func(t *testing.T) {
+		remb := receiverEstimatedMaximumBitratePool.Get()
+		p, ok := remb.(*ReceiverEstimatedMaximumBitrate)
+		assert.True(t, ok)
+		p.Release()
+	})
+
+	t.Run("FullIntraRequest", func(t *testing.T) {
+		fir := fullIntraRequestPool.Get()
+		p, ok := fir.(*FullIntraRequest)
+		assert.True(t, ok)
+		p.Release()
+	})
+
+	t.Run("ExtendedReport", func(t *testing.T) {
+		er := extendedReportPool.Get()
+		p, ok := er.(*ExtendedReport)
+		assert.True(t, ok)
+		p.Release()
+	})
+
+	t.Run("ApplicationDefined", func(t *testing.T) {
+		ad := applicationDefinedPool.Get()
+		p, ok := ad.(*ApplicationDefined)
+		assert.True(t, ok)
+		p.Release()
+	})
+
+	t.Run("RawPacket", func(t *testing.T) {
+		rp := rawPacketPool.Get()
+		p, ok := rp.(*RawPacket)
+		assert.True(t, ok)
+		p.Release()
+	})
 }

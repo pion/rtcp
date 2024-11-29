@@ -161,3 +161,9 @@ func (g Goodbye) String() string {
 
 	return out
 }
+
+// Release returns the packet to its pool and resets it
+func (p *Goodbye) Release() {
+	*p = Goodbye{} // Reset the packet
+	goodbyePool.Put(p)
+}

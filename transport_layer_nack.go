@@ -179,3 +179,9 @@ func (p TransportLayerNack) String() string {
 func (p *TransportLayerNack) DestinationSSRC() []uint32 {
 	return []uint32{p.MediaSSRC}
 }
+
+// Release returns the packet to its pool and resets it
+func (p *TransportLayerNack) Release() {
+	*p = TransportLayerNack{} // Reset the packet
+	transportLayerNackPool.Put(p)
+}
