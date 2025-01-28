@@ -65,6 +65,20 @@ const (
 	ECNCE // 11
 )
 
+func (e ECN) String() string {
+	switch e {
+	case ECNNonECT:
+		return "Non-ECT (00)"
+	case ECNECT0:
+		return "ECT(0) (01)"
+	case ECNECT1:
+		return "ECT(1) (10)"
+	case ECNCE:
+		return "CE (11)"
+	}
+	return "invalid ECN value"
+}
+
 const (
 	reportTimestampLength = 4
 	reportBlockOffset     = 8
@@ -217,7 +231,7 @@ func (b CCFeedbackReportBlock) String() string {
 	out += fmt.Sprintf("\tReport Begin Sequence Nr %d\n", b.BeginSequence)
 	out += fmt.Sprintf("\tReport length %d\n\t", len(b.MetricBlocks))
 	for i, block := range b.MetricBlocks {
-		out += fmt.Sprintf("{nr: %d, rx: %v, ts: %v} ", b.BeginSequence+uint16(i), block.Received, block.ArrivalTimeOffset)
+		out += fmt.Sprintf("{nr: %d, rx: %v, ts: %v, ecn: %v} ", b.BeginSequence+uint16(i), block.Received, block.ArrivalTimeOffset, block.ECN)
 	}
 	out += "\n"
 	return out
