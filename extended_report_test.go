@@ -9,10 +9,10 @@ import (
 	"testing"
 )
 
-// Assert that ExtendedReport is a Packet
+// Assert that ExtendedReport is a Packet.
 var _ Packet = (*ExtendedReport)(nil)
 
-// Assert that all the extended report blocks implement the interface
+// Assert that all the extended report blocks implement the interface.
 var (
 	_ ReportBlock = (*LossRLEReportBlock)(nil)
 	_ ReportBlock = (*DuplicateRLEReportBlock)(nil)
@@ -254,13 +254,13 @@ func TestDecode(t *testing.T) {
 		p.setupBlockHeader()
 	}
 
-	p := new(ExtendedReport)
-	err := p.Unmarshal(encoded)
+	report := new(ExtendedReport)
+	err := report.Unmarshal(encoded)
 	if err != nil {
 		t.Fatalf("Error unmarshaling packet: %v", err)
 	}
 
-	if !reflect.DeepEqual(p, expected) {
+	if !reflect.DeepEqual(report, expected) {
 		t.Errorf("(deep equal) Decoded packet does not match expected packet")
 	}
 
@@ -269,13 +269,13 @@ func TestDecode(t *testing.T) {
 		t.Fatal("Failed to cast")
 	}
 
-	if p.String() != pktStringer.String() {
+	if report.String() != pktStringer.String() {
 		t.Errorf("(string compare) Decoded packet does not match expected packet")
 	}
 
 	var includeSenderSSRC bool
-	for _, ssrc := range p.DestinationSSRC() {
-		if ssrc == p.SenderSSRC {
+	for _, ssrc := range report.DestinationSSRC() {
+		if ssrc == report.SenderSSRC {
 			includeSenderSSRC = true
 		}
 	}

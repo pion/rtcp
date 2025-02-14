@@ -104,7 +104,22 @@ func TestTransportLayerCC_StatusVectorChunkUnmarshal(t *testing.T) {
 			Want: StatusVectorChunk{
 				Type:       TypeTCCStatusVectorChunk,
 				SymbolSize: TypeTCCSymbolSizeOneBit,
-				SymbolList: []uint16{TypeTCCPacketNotReceived, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived},
+				SymbolList: []uint16{
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketNotReceived,
+				},
 			},
 			WantError: nil,
 		},
@@ -115,7 +130,15 @@ func TestTransportLayerCC_StatusVectorChunkUnmarshal(t *testing.T) {
 			Want: StatusVectorChunk{
 				Type:       TypeTCCStatusVectorChunk,
 				SymbolSize: TypeTCCSymbolSizeTwoBit,
-				SymbolList: []uint16{TypeTCCPacketNotReceived, TypeTCCPacketReceivedWithoutDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived},
+				SymbolList: []uint16{
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketReceivedWithoutDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketNotReceived,
+				},
 			},
 			WantError: nil,
 		},
@@ -126,7 +149,8 @@ func TestTransportLayerCC_StatusVectorChunkUnmarshal(t *testing.T) {
 			t.Fatalf("Unmarshal err: %v", err)
 		}
 
-		if got, want := chunk, test.Want; got.Type != want.Type || got.SymbolSize != want.SymbolSize || !reflect.DeepEqual(got.SymbolList, want.SymbolList) {
+		if got, want := chunk, test.Want; got.Type != want.Type ||
+			got.SymbolSize != want.SymbolSize || !reflect.DeepEqual(got.SymbolList, want.SymbolList) {
 			t.Fatalf("Unmarshal %q : got = %v, want %v", test.Name, got, want)
 		}
 	}
@@ -145,7 +169,22 @@ func TestTransportLayerCC_StatusVectorChunkMarshal(t *testing.T) {
 			Data: StatusVectorChunk{
 				Type:       TypeTCCStatusVectorChunk,
 				SymbolSize: TypeTCCSymbolSizeOneBit,
-				SymbolList: []uint16{TypeTCCPacketNotReceived, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived},
+				SymbolList: []uint16{
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketNotReceived,
+				},
 			},
 			Want:      []byte{0x9F, 0x1C},
 			WantError: nil,
@@ -156,7 +195,15 @@ func TestTransportLayerCC_StatusVectorChunkMarshal(t *testing.T) {
 			Data: StatusVectorChunk{
 				Type:       TypeTCCStatusVectorChunk,
 				SymbolSize: TypeTCCSymbolSizeTwoBit,
-				SymbolList: []uint16{TypeTCCPacketNotReceived, TypeTCCPacketReceivedWithoutDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived},
+				SymbolList: []uint16{
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketReceivedWithoutDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketReceivedSmallDelta,
+					TypeTCCPacketNotReceived,
+					TypeTCCPacketNotReceived,
+				},
 			},
 			Want:      []byte{0xCD, 0x50},
 			WantError: nil,
@@ -287,6 +334,9 @@ func TestTransportLayerCC_RecvDeltaMarshal(t *testing.T) {
 // 0b00000000,0b10011001,0b00000000,0b00000001,
 // 0b00111101,0b11101000,0b00000010,0b00010111,
 // 0b00100000,0b00000001,0b10010100,0b00000001,
+// .
+//
+//nolint:maintidx
 func TestTransportLayerCC_Unmarshal(t *testing.T) {
 	for _, test := range []struct {
 		Name      string
@@ -363,12 +413,28 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 					&StatusVectorChunk{
 						Type:       TypeTCCStatusVectorChunk,
 						SymbolSize: TypeTCCSymbolSizeTwoBit,
-						SymbolList: []uint16{TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedLargeDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived},
+						SymbolList: []uint16{
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedLargeDelta,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+						},
 					},
 					&StatusVectorChunk{
 						Type:       TypeTCCStatusVectorChunk,
 						SymbolSize: TypeTCCSymbolSizeTwoBit,
-						SymbolList: []uint16{TypeTCCPacketReceivedWithoutDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketReceivedWithoutDelta, TypeTCCPacketReceivedWithoutDelta, TypeTCCPacketReceivedWithoutDelta, TypeTCCPacketReceivedWithoutDelta},
+						SymbolList: []uint16{
+							TypeTCCPacketReceivedWithoutDelta,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketReceivedWithoutDelta,
+							TypeTCCPacketReceivedWithoutDelta,
+							TypeTCCPacketReceivedWithoutDelta,
+							TypeTCCPacketReceivedWithoutDelta,
+						},
 					},
 				},
 				// 0b10010100
@@ -544,7 +610,22 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 					&StatusVectorChunk{
 						Type:       TypeTCCStatusVectorChunk,
 						SymbolSize: 0,
-						SymbolList: []uint16{TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived},
+						SymbolList: []uint16{
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+						},
 					},
 				},
 				RecvDeltas: []*RecvDelta{
@@ -597,7 +678,15 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 					&StatusVectorChunk{
 						Type:       TypeTCCStatusVectorChunk,
 						SymbolSize: TypeTCCSymbolSizeTwoBit,
-						SymbolList: []uint16{TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketReceivedLargeDelta},
+						SymbolList: []uint16{
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketReceivedLargeDelta,
+						},
 					},
 					&RunLengthChunk{
 						Type:               TypeTCCRunLengthChunk,
@@ -704,6 +793,7 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 	}
 }
 
+//nolint:maintidx
 func TestTransportLayerCC_Marshal(t *testing.T) {
 	for _, test := range []struct {
 		Name      string
@@ -771,12 +861,28 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 					&StatusVectorChunk{
 						Type:       TypeTCCStatusVectorChunk,
 						SymbolSize: TypeTCCSymbolSizeTwoBit,
-						SymbolList: []uint16{TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedLargeDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived},
+						SymbolList: []uint16{
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedLargeDelta,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+						},
 					},
 					&StatusVectorChunk{
 						Type:       TypeTCCStatusVectorChunk,
 						SymbolSize: TypeTCCSymbolSizeTwoBit,
-						SymbolList: []uint16{TypeTCCPacketReceivedWithoutDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketReceivedWithoutDelta, TypeTCCPacketReceivedWithoutDelta, TypeTCCPacketReceivedWithoutDelta, TypeTCCPacketReceivedWithoutDelta},
+						SymbolList: []uint16{
+							TypeTCCPacketReceivedWithoutDelta,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketReceivedWithoutDelta,
+							TypeTCCPacketReceivedWithoutDelta,
+							TypeTCCPacketReceivedWithoutDelta,
+							TypeTCCPacketReceivedWithoutDelta,
+						},
 					},
 				},
 				// 0b10010100
@@ -952,7 +1058,22 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 					&StatusVectorChunk{
 						Type:       TypeTCCStatusVectorChunk,
 						SymbolSize: TypeTCCSymbolSizeOneBit,
-						SymbolList: []uint16{TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived},
+						SymbolList: []uint16{
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+						},
 					},
 				},
 				RecvDeltas: []*RecvDelta{
@@ -1004,7 +1125,20 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 					&StatusVectorChunk{
 						Type:       TypeTCCStatusVectorChunk,
 						SymbolSize: TypeTCCSymbolSizeOneBit,
-						SymbolList: []uint16{TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketReceivedSmallDelta, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived, TypeTCCPacketNotReceived},
+						SymbolList: []uint16{
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketReceivedSmallDelta,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+							TypeTCCPacketNotReceived,
+						},
 					},
 				},
 				RecvDeltas: []*RecvDelta{

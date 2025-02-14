@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+//nolint:maintidx
 func TestPrint(t *testing.T) {
 	type Tests struct {
 		packet   Packet
@@ -380,7 +381,8 @@ func TestPrint(t *testing.T) {
 				"\t\t\tJitter: 273\n" +
 				"\t\t\tLastSenderReport: 166945842\n" +
 				"\t\t\tDelay: 150137\n" +
-				"\tProfileExtensions: [129 202 0 6 43 126 192 197 1 16 76 99 73 102 122 88 111 110 68 111 114 100 83 101 87 54 0 0]\n",
+				"\tProfileExtensions: " +
+				"[129 202 0 6 43 126 192 197 1 16 76 99 73 102 122 88 111 110 68 111 114 100 83 101 87 54 0 0]\n",
 		},
 		{
 			&SliceLossIndication{

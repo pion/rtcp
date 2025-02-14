@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// An RTCP packet from a packet dump
+// An RTCP packet from a packet dump.
 func realPacket() []byte {
 	return []byte{
 		// Receiver Report (offset=0)

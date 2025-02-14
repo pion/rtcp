@@ -16,7 +16,7 @@ func TestWrite(t *testing.T) {
 		SubB []uint8
 	}
 
-	s := struct {
+	structure := struct {
 		A uint8
 		Z uint32 `encoding:"omit"`
 		B uint16
@@ -48,14 +48,14 @@ func TestWrite(t *testing.T) {
 		0x00, 0x00, 0x00, 0x01, 1, 2, 3, 4, 0x00, 0x00, 0x00, 0x02, 5, 6, 7, 8,
 	}
 
-	size := wireSize(s)
+	size := wireSize(structure)
 	if size != len(expected) {
 		t.Fatalf("wireSize() returned unexpected value. Expected %v, got %v", len(expected), size)
 	}
 
 	raw := make([]byte, len(expected))
 	buffer := packetBuffer{bytes: raw}
-	err := buffer.write(s)
+	err := buffer.write(structure)
 	if err != nil {
 		t.Fatalf("Serialization failed. Err = %v", err)
 	}
@@ -66,7 +66,7 @@ func TestWrite(t *testing.T) {
 	// Check for overflow
 	raw = make([]byte, len(expected)-1)
 	buffer = packetBuffer{bytes: raw}
-	err = buffer.write(s)
+	err = buffer.write(structure)
 	if !errors.Is(err, errWrongMarshalSize) {
 		t.Fatalf("Serialization failed. Err = %v", err)
 	}

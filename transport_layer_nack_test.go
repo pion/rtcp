@@ -136,6 +136,8 @@ func TestTransportLayerNackRoundTrip(t *testing.T) {
 }
 
 func testNackPair(t *testing.T, s []uint16, n NackPair) {
+	t.Helper()
+
 	l := n.PacketList()
 	if !reflect.DeepEqual(l, s) {
 		t.Errorf("%v: expected %v, got %v", n, s, l)
@@ -151,11 +153,12 @@ func TestNackPair(t *testing.T) {
 }
 
 func TestNackPairRange(t *testing.T) {
-	n := NackPair{42, 2}
+	pair := NackPair{42, 2}
 
 	out := make([]uint16, 0)
-	n.Range(func(s uint16) bool {
+	pair.Range(func(s uint16) bool {
 		out = append(out, s)
+
 		return true
 	})
 	if !reflect.DeepEqual(out, []uint16{42, 44}) {
@@ -163,8 +166,9 @@ func TestNackPairRange(t *testing.T) {
 	}
 
 	out = make([]uint16, 0)
-	n.Range(func(s uint16) bool {
+	pair.Range(func(s uint16) bool {
 		out = append(out, s)
+
 		return false
 	})
 	if !reflect.DeepEqual(out, []uint16{42}) {

@@ -184,6 +184,7 @@ func tooManyReports() []ReceptionReport {
 			Delay:              7,
 		})
 	}
+
 	return tooManyReports
 }
 

@@ -26,7 +26,9 @@ func TestGetPadding(t *testing.T) {
 		{input: 500, result: 0},
 	}
 	for _, testCase := range cases {
-		assert.Equalf(getPadding(testCase.input), testCase.result, "Test case returned wrong value for input %d", testCase.input)
+		assert.Equalf(
+			getPadding(testCase.input), testCase.result, "Test case returned wrong value for input %d", testCase.input,
+		)
 	}
 }
 
@@ -66,6 +68,7 @@ func TestSetNBitsOfUint16(t *testing.T) {
 				if err.Error() != test.err {
 					t.Fatalf("setNBitsOfUint16 %q : got = %v, want %v", test.name, err, test.err)
 				}
+
 				return
 			}
 			if got != test.result {
