@@ -241,9 +241,6 @@ func (b CCFeedbackReportBlock) marshal() ([]byte, error) {
 	binary.BigEndian.PutUint16(buf[beginSequenceOffset:], b.BeginSequence)
 
 	length := uint16(len(b.MetricBlocks)) //nolint:gosec // G115
-	if length > 0 {
-		length--
-	}
 
 	binary.BigEndian.PutUint16(buf[numReportsOffset:], length)
 
@@ -265,17 +262,14 @@ func (b *CCFeedbackReportBlock) unmarshal(rawPacket []byte) error {
 	}
 	b.MediaSSRC = binary.BigEndian.Uint32(rawPacket[:beginSequenceOffset])
 	b.BeginSequence = binary.BigEndian.Uint16(rawPacket[beginSequenceOffset:numReportsOffset])
-	numReportsField := binary.BigEndian.Uint16(rawPacket[numReportsOffset:])
-	if numReportsField == 0 {
+	numReports := int(binary.BigEndian.Uint16(rawPacket[numReportsOffset:]))
+	if numReports == 0 {
 		return nil
 	}
 
-	if int(b.BeginSequence)+int(numReportsField) > math.MaxUint16 {
+	if numReports > math.MaxUint16 {
 		return errIncorrectNumReports
 	}
-
-	endSequence := b.BeginSequence + numReportsField
-	numReports := int(endSequence - b.BeginSequence + 1)
 
 	if len(rawPacket) < reportsOffset+numReports*2 {
 		return errIncorrectNumReports

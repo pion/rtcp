@@ -151,7 +151,7 @@ func TestCCFeedbackReportBlockUnmarshalMarshal(t *testing.T) {
 			Name: "ReceivedTwoOFFourBlocks",
 			Data: []byte{
 				0x00, 0x00, 0x00, 0x01, // SSRC
-				0x00, 0x02, 0x00, 0x03, // begin_seq, num_reports
+				0x00, 0x02, 0x00, 0x04, // begin_seq, num_reports
 				0x9F, 0xFD, 0x9F, 0xFC, // reports[0], reports[1]
 				0x00, 0x00, 0x00, 0x00, // reports[2], reports[3]
 			},
@@ -186,7 +186,7 @@ func TestCCFeedbackReportBlockUnmarshalMarshal(t *testing.T) {
 			Name: "ReceivedTwoOFThreeBlocksPadding",
 			Data: []byte{
 				0x00, 0x00, 0x00, 0x01, // SSRC
-				0x00, 0x02, 0x00, 0x02, // begin_seq, num_reports
+				0x00, 0x02, 0x00, 0x03, // begin_seq, num_reports
 				0x9F, 0xFD, 0x9F, 0xFC, // reports[0], reports[1]
 				0x00, 0x00, 0x00, 0x00, // reports[2], Padding
 			},
@@ -203,6 +203,41 @@ func TestCCFeedbackReportBlockUnmarshalMarshal(t *testing.T) {
 						Received:          true,
 						ECN:               0,
 						ArrivalTimeOffset: 8188,
+					},
+					{
+						Received:          false,
+						ECN:               0,
+						ArrivalTimeOffset: 0,
+					},
+				},
+			},
+		},
+		{
+			Name: "WrapAroundSequenceNumber",
+			Data: []byte{
+				0x00, 0x00, 0x00, 0x01, // SSRC
+				0xff, 0xfe, 0x00, 0x04, // begin_seq, num_reports
+				0x9F, 0xFD, 0x9F, 0xFC, // reports[0], reports[1]
+				0x00, 0x00, 0x00, 0x00, // reports[2], reports[3]
+			},
+			Want: CCFeedbackReportBlock{
+				MediaSSRC:     1,
+				BeginSequence: 65534,
+				MetricBlocks: []CCFeedbackMetricBlock{
+					{
+						Received:          true,
+						ECN:               0,
+						ArrivalTimeOffset: 8189,
+					},
+					{
+						Received:          true,
+						ECN:               0,
+						ArrivalTimeOffset: 8188,
+					},
+					{
+						Received:          false,
+						ECN:               0,
+						ArrivalTimeOffset: 0,
 					},
 					{
 						Received:          false,
@@ -270,19 +305,6 @@ func TestCCFeedbackReportBlockUnmarshalMarshal(t *testing.T) {
 		assert.ErrorIs(t, err, errIncorrectNumReports)
 	})
 
-	t.Run("overflowEndSequence", func(t *testing.T) {
-		var block CCFeedbackReportBlock
-		data := []byte{
-			0x00, 0x00, 0x00, 0x01, // SSRC
-			0xff, 0xfe, 0x00, 0x02, // begin_seq, num_reports
-			0x9F, 0xFD, 0x9F, 0xFC, // reports[0], reports[1]
-			0x00, 0x00, 0x00, 0x00, // reports[2], reports[3]
-		}
-		err := block.unmarshal(data)
-		assert.Error(t, err)
-		assert.ErrorIs(t, err, errIncorrectNumReports)
-	})
-
 	t.Run("overflowNumReports", func(t *testing.T) {
 		var block CCFeedbackReportBlock
 		data := append([]byte{
@@ -321,12 +343,12 @@ func TestCCFeedbackReportUnmarshalMarshal(t *testing.T) {
 				0x00, 0x00, 0x00, 0x01, // Sender SSRC=1
 
 				0x00, 0x00, 0x00, 0x01, // SSRC=1
-				0x00, 0x02, 0x00, 0x03, // begin_seq, num_reports
+				0x00, 0x02, 0x00, 0x04, // begin_seq, num_reports
 				0x9F, 0xFD, 0x9F, 0xFC, // reports[0], reports[1]
 				0x00, 0x00, 0x00, 0x00, // reports[2], reports[3]
 
 				0x00, 0x00, 0x00, 0x02, // Media SSRC=2
-				0x00, 0x02, 0x00, 0x02, // begin_seq=2, num_reports=3
+				0x00, 0x02, 0x00, 0x03, // begin_seq=2, num_reports=3
 				0x9F, 0xFD, 0x9F, 0xFC, // reports[0], reports[1]
 				0x00, 0x00, 0x00, 0x00, // reports[2], Padding
 
