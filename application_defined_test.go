@@ -4,9 +4,9 @@
 package rtcp
 
 import (
-	"errors"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTApplicationPacketUnmarshal(t *testing.T) {
@@ -128,27 +128,16 @@ func TestTApplicationPacketUnmarshal(t *testing.T) {
 	} {
 		var apk ApplicationDefined
 		err := apk.Unmarshal(test.Data)
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Unmarshal %q result: got = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Unmarshal %q", test.Name)
 		if err != nil {
 			continue
 		}
 
-		if got, want := apk, test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Unmarshal %q result: got %v, want %v", test.Name, got, want)
-		}
+		assert.Equalf(t, test.Want, apk, "Unmarshal %q", test.Name)
 
 		// Check SSRC is matching
-		if apk.SSRC != 0x4baae1ab {
-			t.Fatalf("SSRC %q result: got packet SSRC %x instead of %x", test.Name, apk.SSRC, 0x4baae1ab)
-		}
-		if apk.SSRC != apk.DestinationSSRC()[0] {
-			t.Fatalf(
-				"SSRC %q result: DestinationSSRC() %x doesn't match SSRC field %x",
-				test.Name, apk.DestinationSSRC()[0], apk.SSRC,
-			)
-		}
+		assert.Equalf(t, uint32(0x4baae1ab), apk.SSRC, "%q SSRC mismatch", test.Name)
+		assert.Equalf(t, uint32(0x4baae1ab), apk.DestinationSSRC()[0], "%q DestinationSSRC mismatch", test.Name)
 	}
 }
 
@@ -246,24 +235,14 @@ func TestTApplicationPacketMarshal(t *testing.T) {
 		},
 	} {
 		rawPacket, err := test.Packet.Marshal()
-
-		// Check for expected errors
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Marshal %q result: got = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Marshal %q", test.Name)
 		if err != nil {
 			continue
 		}
 
-		// Check for expected successful result
-		if got, want := rawPacket, test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Marshal %q result: got %v, want %v", test.Name, got, want)
-		}
+		assert.Equalf(t, test.Want, rawPacket, "Marshal %q", test.Name)
 
-		// Check if MarshalSize() is matching the marshaled  bytes
 		marshalSize := test.Packet.MarshalSize()
-		if marshalSize != len(rawPacket) {
-			t.Fatalf("MarshalSize %q result: got %d bytes instead of %d", test.Name, len(rawPacket), marshalSize)
-		}
+		assert.Equalf(t, marshalSize, len(rawPacket), "MarshalSize %q", test.Name)
 	}
 }

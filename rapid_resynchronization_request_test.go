@@ -4,9 +4,9 @@
 package rtcp
 
 import (
-	"errors"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var _ Packet = (*RapidResynchronizationRequest)(nil) // assert is a Packet
@@ -73,16 +73,11 @@ func TestRapidResynchronizationRequestUnmarshal(t *testing.T) {
 	} {
 		var rrr RapidResynchronizationRequest
 		err := rrr.Unmarshal(test.Data)
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Unmarshal %q rr: err = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Unmarshal %q", test.Name)
 		if err != nil {
 			continue
 		}
-
-		if got, want := rrr, test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Unmarshal %q rr: got %v, want %v", test.Name, got, want)
-		}
+		assert.Equalf(t, test.Want, rrr, "Unmarshal %q", test.Name)
 	}
 }
 
@@ -101,20 +96,13 @@ func TestRapidResynchronizationRequestRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Report.Marshal()
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Marshal %q: err = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Marshal %q", test.Name)
 		if err != nil {
 			continue
 		}
 
 		var decoded RapidResynchronizationRequest
-		if err := decoded.Unmarshal(data); err != nil {
-			t.Fatalf("Unmarshal %q: %v", test.Name, err)
-		}
-
-		if got, want := decoded, test.Report; !reflect.DeepEqual(got, want) {
-			t.Fatalf("%q rrr round trip: got %#v, want %#v", test.Name, got, want)
-		}
+		assert.NoErrorf(t, decoded.Unmarshal(data), "Unmarshal %q", test.Name)
+		assert.Equalf(t, test.Report, decoded, "%q round trip", test.Name)
 	}
 }

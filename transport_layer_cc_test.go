@@ -4,9 +4,9 @@
 package rtcp
 
 import (
-	"errors"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var _ Packet = (*TransportLayerCC)(nil) // assert is a Packet
@@ -42,13 +42,8 @@ func TestTransportLayerCC_RunLengthChunkUnmarshal(t *testing.T) {
 		},
 	} {
 		var chunk RunLengthChunk
-		err := chunk.Unmarshal(test.Data)
-		if err != nil {
-			t.Fatalf("Unmarshal err: %v", err)
-		}
-		if got, want := chunk, test.Want; got != want {
-			t.Fatalf("Unmarshal %q : got = %v, want %v", test.Name, got, want)
-		}
+		assert.NoError(t, chunk.Unmarshal(test.Data))
+		assert.Equalf(t, test.Want, chunk, "Unmarshal %q", test.Name)
 	}
 }
 
@@ -84,9 +79,7 @@ func TestTransportLayerCC_RunLengthChunkMarshal(t *testing.T) {
 	} {
 		chunk := test.Data
 		data, _ := chunk.Marshal()
-		if got, want := data, test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Unmarshal %q : got = %v, want %v", test.Name, got, want)
-		}
+		assert.Equalf(t, test.Want, data, "Marshal %q", test.Name)
 	}
 }
 
@@ -144,15 +137,10 @@ func TestTransportLayerCC_StatusVectorChunkUnmarshal(t *testing.T) {
 		},
 	} {
 		var chunk StatusVectorChunk
-		err := chunk.Unmarshal(test.Data)
-		if err != nil {
-			t.Fatalf("Unmarshal err: %v", err)
-		}
-
-		if got, want := chunk, test.Want; got.Type != want.Type ||
-			got.SymbolSize != want.SymbolSize || !reflect.DeepEqual(got.SymbolList, want.SymbolList) {
-			t.Fatalf("Unmarshal %q : got = %v, want %v", test.Name, got, want)
-		}
+		assert.NoErrorf(t, chunk.Unmarshal(test.Data), "Unmarshal %q", test.Name)
+		assert.Equalf(t, test.Want.Type, chunk.Type, "Unmarshal %q", test.Name)
+		assert.Equalf(t, test.Want.SymbolSize, chunk.SymbolSize, "Unmarshal %q", test.Name)
+		assert.Equalf(t, test.Want.SymbolList, chunk.SymbolList, "Unmarshal %q", test.Name)
 	}
 }
 
@@ -211,9 +199,7 @@ func TestTransportLayerCC_StatusVectorChunkMarshal(t *testing.T) {
 	} {
 		chunk := test.Data
 		data, _ := chunk.Marshal()
-		if got, want := data, test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Unmarshal %q : got = %v, want %v", test.Name, got, want)
-		}
+		assert.Equal(t, test.Want, data, "Unmarshal %q", test.Name)
 	}
 }
 
@@ -256,14 +242,8 @@ func TestTransportLayerCC_RecvDeltaUnmarshal(t *testing.T) {
 		},
 	} {
 		var chunk RecvDelta
-		err := chunk.Unmarshal(test.Data)
-		if err != nil {
-			t.Fatalf("Unmarshal err: %v", err)
-		}
-
-		if got, want := chunk, test.Want; got != want {
-			t.Fatalf("Unmarshal %q : got = %v, want %v", test.Name, got, want)
-		}
+		assert.NoErrorf(t, chunk.Unmarshal(test.Data), "Unmarshal %q", test.Name)
+		assert.Equalf(t, test.Want, chunk, "Unmarshal %q", test.Name)
 	}
 }
 
@@ -307,9 +287,7 @@ func TestTransportLayerCC_RecvDeltaMarshal(t *testing.T) {
 	} {
 		chunk := test.Data
 		data, _ := chunk.Marshal()
-		if got, want := data, test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Unmarshal %q : got = %v, want %v", test.Name, got, want)
-		}
+		assert.Equalf(t, test.Want, data, "Unmarshal %q", test.Name)
 	}
 }
 
@@ -779,16 +757,11 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			var chunk TransportLayerCC
 			err := chunk.Unmarshal(test.Data)
-			if got, want := err, test.WantError; !errors.Is(got, want) {
-				t.Fatalf("Unmarshal %q : err = %v, want %v", test.Name, got, want)
-			}
+			assert.ErrorIsf(t, err, test.WantError, "Unmarshal %q", test.Name)
 			if err != nil {
 				return
 			}
-
-			if got, want := chunk, test.Want; !reflect.DeepEqual(got, want) {
-				t.Fatalf("Unmarshal %q : got = %v, want %v", test.Name, got, want)
-			}
+			assert.Equalf(t, test.Want, chunk, "Unmarshal %q", test.Name)
 		})
 	}
 }
@@ -1189,12 +1162,8 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
 			bin, err := test.Data.Marshal()
-			if err != nil {
-				t.Fatalf("Marshal err: %v", err)
-			}
-			if got, want := bin, test.Want; !reflect.DeepEqual(got, want) {
-				t.Fatalf("Marshal %q : got = %v, want %v", test.Name, got, want)
-			}
+			assert.NoError(t, err)
+			assert.Equalf(t, test.Want, bin, "Marshal %q", test.Name)
 		})
 	}
 }

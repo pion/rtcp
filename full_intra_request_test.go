@@ -4,9 +4,9 @@
 package rtcp
 
 import (
-	"errors"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFullIntraRequestUnmarshal(t *testing.T) {
@@ -141,16 +141,12 @@ func TestFullIntraRequestUnmarshal(t *testing.T) {
 	} {
 		var fir FullIntraRequest
 		err := fir.Unmarshal(test.Data)
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Unmarshal %q rr: err = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Unmarshal %q rr mismatch", test.Name)
 		if err != nil {
 			continue
 		}
 
-		if got, want := fir, test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Unmarshal %q rr: got %v, want %v", test.Name, got, want)
-		}
+		assert.Equalf(t, test.Want, fir, "Unmarshal %q rr mismatch", test.Name)
 	}
 }
 
@@ -184,21 +180,14 @@ func TestFullIntraRequestRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Packet.Marshal()
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Marshal %q: err = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Marshal %q", test.Name)
 		if err != nil {
 			continue
 		}
 
 		var decoded FullIntraRequest
-		if err := decoded.Unmarshal(data); err != nil {
-			t.Fatalf("Unmarshal %q: %v", test.Name, err)
-		}
-
-		if got, want := decoded, test.Packet; !reflect.DeepEqual(got, want) {
-			t.Fatalf("%q rr round trip: got %#v, want %#v", test.Name, got, want)
-		}
+		assert.NoErrorf(t, decoded.Unmarshal(data), "Unmarshal %q", test.Name)
+		assert.Equalf(t, test.Packet, decoded, "%q rr header mismatch", test.Name)
 	}
 }
 
@@ -232,15 +221,11 @@ func TestFullIntraRequestUnmarshalHeader(t *testing.T) {
 	} {
 		var fir FullIntraRequest
 		err := fir.Unmarshal(test.Data)
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Unmarshal header %q rr: err = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Unmarshal header %q rr mismatch", test.Name)
 		if err != nil {
 			continue
 		}
 
-		if got, want := fir.Header(), test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Unmarshal header %q rr: got %v, want %v", test.Name, got, want)
-		}
+		assert.Equalf(t, test.Want, fir.Header(), "Unmarshal header %q rr mismatch", test.Name)
 	}
 }

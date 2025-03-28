@@ -5,8 +5,9 @@ package rtcp
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // Assert that ExtendedReport is a Packet.
@@ -225,17 +226,11 @@ func TestEncode(t *testing.T) {
 	expected := encodedPacket()
 	packet := testPacket()
 	rawPacket, err := packet.Marshal()
-	if err != nil {
-		t.Fatalf("Error marshaling packet: %v", err)
-	}
-	if len(rawPacket) != len(expected) {
-		t.Fatalf("Encoded message is %d bytes; expected is %d", len(rawPacket), len(expected))
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, len(expected), len(rawPacket), "Encoded message length does not match expected length")
 
 	for i := 0; i < len(rawPacket); i++ {
-		if rawPacket[i] != expected[i] {
-			t.Errorf("Byte %d of encoded packet does not match: expected 0x%02X, got 0x%02X", i, expected[i], rawPacket[i])
-		}
+		assert.Equalf(t, expected[i], rawPacket[i], "Byte %d of encoded packet does not match", i)
 	}
 }
 
@@ -246,9 +241,7 @@ func TestDecode(t *testing.T) {
 	// We need to make sure the header has been set up correctly
 	// before we test for equality
 	extendedReports, ok := expected.(*ExtendedReport)
-	if !ok {
-		t.Fatal("Failed to cast")
-	}
+	assert.True(t, ok)
 
 	for _, p := range extendedReports.Reports {
 		p.setupBlockHeader()
@@ -256,22 +249,12 @@ func TestDecode(t *testing.T) {
 
 	report := new(ExtendedReport)
 	err := report.Unmarshal(encoded)
-	if err != nil {
-		t.Fatalf("Error unmarshaling packet: %v", err)
-	}
-
-	if !reflect.DeepEqual(report, expected) {
-		t.Errorf("(deep equal) Decoded packet does not match expected packet")
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, expected, report)
 
 	pktStringer, ok := expected.(fmt.Stringer)
-	if !ok {
-		t.Fatal("Failed to cast")
-	}
-
-	if report.String() != pktStringer.String() {
-		t.Errorf("(string compare) Decoded packet does not match expected packet")
-	}
+	assert.True(t, ok)
+	assert.Equal(t, report.String(), pktStringer.String(), "Decoded packet does not match expected packet")
 
 	var includeSenderSSRC bool
 	for _, ssrc := range report.DestinationSSRC() {
@@ -279,7 +262,5 @@ func TestDecode(t *testing.T) {
 			includeSenderSSRC = true
 		}
 	}
-	if !includeSenderSSRC {
-		t.Errorf("DestinationSSRC does not include the SenderSSRC")
-	}
+	assert.True(t, includeSenderSSRC, "DestinationSSRC does not include the SenderSSRC")
 }

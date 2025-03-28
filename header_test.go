@@ -4,9 +4,9 @@
 package rtcp
 
 import (
-	"errors"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHeaderUnmarshal(t *testing.T) {
@@ -53,16 +53,12 @@ func TestHeaderUnmarshal(t *testing.T) {
 	} {
 		var h Header
 		err := h.Unmarshal(test.Data)
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Unmarshal %q header: err = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Unmarshal %q header mispmatch", test.Name)
 		if err != nil {
 			continue
 		}
 
-		if got, want := h, test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Unmarshal %q header: got %v, want %v", test.Name, got, want)
-		}
+		assert.Equalf(t, test.Want, h, "Unmarshal %q header mismatch", test.Name)
 	}
 }
 
@@ -99,20 +95,13 @@ func TestHeaderRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Header.Marshal()
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Errorf("Marshal %q: err = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Marshal %q", test.Name)
 		if err != nil {
 			continue
 		}
 
 		var decoded Header
-		if err := decoded.Unmarshal(data); err != nil {
-			t.Errorf("Unmarshal %q: %v", test.Name, err)
-		}
-
-		if got, want := decoded, test.Header; !reflect.DeepEqual(got, want) {
-			t.Errorf("%q header round trip: got %#v, want %#v", test.Name, got, want)
-		}
+		assert.NoErrorf(t, decoded.Unmarshal(data), "Unmarshal %q", test.Name)
+		assert.Equalf(t, test.Header, decoded, "%q header round trip mismatch", test.Name)
 	}
 }

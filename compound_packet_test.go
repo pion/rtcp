@@ -4,8 +4,6 @@
 package rtcp
 
 import (
-	"errors"
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -39,21 +37,14 @@ func TestBadCompound(t *testing.T) {
 
 	// this should return an error,
 	// it violates the "must start with RR or SR" rule
-	err = compound.Validate()
+	assert.ErrorIs(t, compound.Validate(), errBadFirstPacket)
+	assert.Equal(t, 2, len(compound))
 
-	if got, want := err, errBadFirstPacket; !errors.Is(got, want) {
-		t.Fatalf("Unmarshal(badcompound) err=%v, want %v", got, want)
-	}
+	_, ok := compound[0].(*Goodbye)
+	assert.True(t, ok)
 
-	if got, want := len(compound), 2; got != want {
-		t.Fatalf("Unmarshal(badcompound) len=%d, want %d", got, want)
-	}
-	if _, ok := compound[0].(*Goodbye); !ok {
-		t.Fatalf("Unmarshal(badcompound); first packet = %#v, want Goodbye", compound[0])
-	}
-	if _, ok := compound[1].(*PictureLossIndication); !ok {
-		t.Fatalf("Unmarshal(badcompound); second packet = %#v, want PictureLossIndication", compound[1])
-	}
+	_, ok = compound[1].(*PictureLossIndication)
+	assert.True(t, ok)
 }
 
 func TestValidPacket(t *testing.T) {
@@ -135,9 +126,7 @@ func TestValidPacket(t *testing.T) {
 			Err: nil,
 		},
 	} {
-		if got, want := test.Packet.Validate(), test.Err; !errors.Is(got, want) {
-			t.Fatalf("Valid(%s) = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, test.Packet.Validate(), test.Err, "Validate(%s)", test.Name)
 	}
 }
 
@@ -214,16 +203,11 @@ func TestCNAME(t *testing.T) {
 			Text: "cname",
 		},
 	} {
-		if got, want := test.Packet.Validate(), test.Err; !errors.Is(got, want) {
-			t.Fatalf("Valid(%s) = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, test.Packet.Validate(), test.Err, "Validate(%s)", test.Name)
+
 		name, err := test.Packet.CNAME()
-		if got, want := err, test.Err; !errors.Is(got, want) {
-			t.Fatalf("CNAME(%s) = %v, want %v", test.Name, got, want)
-		}
-		if got, want := name, test.Text; got != want {
-			t.Fatalf("CNAME(%s) = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.Err, "CNAME(%s)", test.Name)
+		assert.Equalf(t, test.Text, name, "CNAME(%s)", test.Name)
 	}
 }
 
@@ -254,25 +238,16 @@ func TestCompoundPacketRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Packet.Marshal()
-		if got, want := err, test.Err; !errors.Is(got, want) {
-			t.Fatalf("Marshal(%v) err = %v, want nil", test.Name, err)
-		}
+		assert.ErrorIsf(t, err, test.Err, "Marshal(%v)", test.Name)
 		if err != nil {
 			continue
 		}
 
 		var c CompoundPacket
-		if err = c.Unmarshal(data); err != nil {
-			t.Fatalf("Unmarshal(%v) err = %v, want nil", test.Name, err)
-		}
+		assert.NoErrorf(t, c.Unmarshal(data), "Unmarshal(%v)", test.Name)
 
 		data2, err := c.Marshal()
-		if err != nil {
-			t.Fatalf("Marshal(%v) err = %v, want nil", test.Name, err)
-		}
-
-		if got, want := data, data2; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Unmarshal(Marshal(%v)) = %v, want %v", test.Name, got, want)
-		}
+		assert.NoErrorf(t, err, "Marshal(%v)", test.Name)
+		assert.Equalf(t, data, data2, "Marshal(%v) mismatch", test.Name)
 	}
 }

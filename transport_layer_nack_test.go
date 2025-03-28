@@ -4,9 +4,9 @@
 package rtcp
 
 import (
-	"errors"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var _ Packet = (*TransportLayerNack)(nil) // assert is a Packet
@@ -88,16 +88,8 @@ func TestTransportLayerNackUnmarshal(t *testing.T) {
 	} {
 		var tln TransportLayerNack
 		err := tln.Unmarshal(test.Data)
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Unmarshal %q rr: err = %v, want %v", test.Name, got, want)
-		}
-		if err != nil {
-			continue
-		}
-
-		if got, want := tln, test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Unmarshal %q rr: got %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Unmarshal %q", test.Name)
+		assert.Equalf(t, test.Want, tln, "Unmarshal %q", test.Name)
 	}
 }
 
@@ -117,21 +109,11 @@ func TestTransportLayerNackRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Report.Marshal()
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Marshal %q: err = %v, want %v", test.Name, got, want)
-		}
-		if err != nil {
-			continue
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Marshal err on %q", test.Name)
 
 		var decoded TransportLayerNack
-		if err := decoded.Unmarshal(data); err != nil {
-			t.Fatalf("Unmarshal %q: %v", test.Name, err)
-		}
-
-		if got, want := decoded, test.Report; !reflect.DeepEqual(got, want) {
-			t.Fatalf("%q tln round trip: got %#v, want %#v", test.Name, got, want)
-		}
+		assert.NoErrorf(t, decoded.Unmarshal(data), "Unmarshal %q", test.Name)
+		assert.Equalf(t, test.Report, decoded, "Unmarshal %q: decoded mismatch", test.Name)
 	}
 }
 
@@ -139,9 +121,7 @@ func testNackPair(t *testing.T, s []uint16, n NackPair) {
 	t.Helper()
 
 	l := n.PacketList()
-	if !reflect.DeepEqual(l, s) {
-		t.Errorf("%v: expected %v, got %v", n, s, l)
-	}
+	assert.Equalf(t, s, l, "NackPair %v mismatch", n)
 }
 
 func TestNackPair(t *testing.T) {
@@ -161,9 +141,7 @@ func TestNackPairRange(t *testing.T) {
 
 		return true
 	})
-	if !reflect.DeepEqual(out, []uint16{42, 44}) {
-		t.Errorf("Got %v", out)
-	}
+	assert.Equal(t, []uint16{42, 44}, out)
 
 	out = make([]uint16, 0)
 	pair.Range(func(s uint16) bool {
@@ -171,9 +149,7 @@ func TestNackPairRange(t *testing.T) {
 
 		return false
 	})
-	if !reflect.DeepEqual(out, []uint16{42}) {
-		t.Errorf("Got %v", out)
-	}
+	assert.Equal(t, []uint16{42}, out)
 }
 
 func TestTransportLayerNackPairGeneration(t *testing.T) {
@@ -212,8 +188,6 @@ func TestTransportLayerNackPairGeneration(t *testing.T) {
 		},
 	} {
 		actual := NackPairsFromSequenceNumbers(test.SequenceNumbers)
-		if !reflect.DeepEqual(actual, test.Expected) {
-			t.Fatalf("%q NackPair generation mismatch: got %#v, want %#v", test.Name, actual, test.Expected)
-		}
+		assert.Equalf(t, test.Expected, actual, "%q NackPair generation mismatch", test.Name)
 	}
 }

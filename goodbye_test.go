@@ -4,9 +4,9 @@
 package rtcp
 
 import (
-	"errors"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var _ Packet = (*Goodbye)(nil) // assert is a Packet
@@ -113,16 +113,12 @@ func TestGoodbyeUnmarshal(t *testing.T) {
 	} {
 		var bye Goodbye
 		err := bye.Unmarshal(test.Data)
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Unmarshal %q bye: err = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Unmarshal %q bye mismatch", test.Name)
 		if err != nil {
 			continue
 		}
 
-		if got, want := bye, test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Unmarshal %q bye: got %v, want %v", test.Name, got, want)
-		}
+		assert.Equalf(t, test.Want, bye, "Unmarshal %q bye mismatch", test.Name)
 	}
 }
 
@@ -197,20 +193,13 @@ func TestGoodbyeRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Bye.Marshal()
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Marshal %q: err = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Marshal %q", test.Name)
 		if err != nil {
 			continue
 		}
 
 		var bye Goodbye
-		if err := bye.Unmarshal(data); err != nil {
-			t.Fatalf("Unmarshal %q: %v", test.Name, err)
-		}
-
-		if got, want := bye, test.Bye; !reflect.DeepEqual(got, want) {
-			t.Fatalf("%q sdes round trip: got %#v, want %#v", test.Name, got, want)
-		}
+		assert.NoErrorf(t, bye.Unmarshal(data), "Unmarshal %q", test.Name)
+		assert.Equalf(t, test.Bye, bye, "%q bye round trip mismatch", test.Name)
 	}
 }

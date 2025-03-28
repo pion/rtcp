@@ -4,10 +4,9 @@
 package rtcp
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWrite(t *testing.T) {
@@ -47,29 +46,19 @@ func TestWrite(t *testing.T) {
 		0x11, 0x22, 0x33, 0x44, 9, 8, 7, 6, 5, 4, 3, 2, 1,
 		0x00, 0x00, 0x00, 0x01, 1, 2, 3, 4, 0x00, 0x00, 0x00, 0x02, 5, 6, 7, 8,
 	}
-
-	size := wireSize(structure)
-	if size != len(expected) {
-		t.Fatalf("wireSize() returned unexpected value. Expected %v, got %v", len(expected), size)
-	}
+	assert.Equal(t, len(expected), wireSize(structure))
 
 	raw := make([]byte, len(expected))
 	buffer := packetBuffer{bytes: raw}
 	err := buffer.write(structure)
-	if err != nil {
-		t.Fatalf("Serialization failed. Err = %v", err)
-	}
-	if !bytes.Equal(raw, expected) {
-		t.Fatalf("Serialization failed. Wanted %v, got %v", expected, raw)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, expected, raw)
 
 	// Check for overflow
 	raw = make([]byte, len(expected)-1)
 	buffer = packetBuffer{bytes: raw}
 	err = buffer.write(structure)
-	if !errors.Is(err, errWrongMarshalSize) {
-		t.Fatalf("Serialization failed. Err = %v", err)
-	}
+	assert.ErrorIs(t, err, errWrongMarshalSize)
 }
 
 func TestReadUint8(t *testing.T) {
@@ -78,12 +67,8 @@ func TestReadUint8(t *testing.T) {
 	output := uint8(0)
 	buffer := packetBuffer{bytes: raw}
 	err := buffer.read(&output)
-	if err != nil {
-		t.Fatalf("Value parsing failed. Err = %v", err)
-	}
-	if output != expected {
-		t.Fatalf("Reading uint8 failed. Wanted %X, got %X", expected, output)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, uint8(expected), output)
 }
 
 func TestReadUint16(t *testing.T) {
@@ -92,12 +77,8 @@ func TestReadUint16(t *testing.T) {
 	output := uint16(0)
 	buffer := packetBuffer{bytes: raw}
 	err := buffer.read(&output)
-	if err != nil {
-		t.Fatalf("Value parsing failed. Err = %v", err)
-	}
-	if output != expected {
-		t.Fatalf("Reading uint16 failed. Wanted %X, got %X", expected, output)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, uint16(expected), output)
 }
 
 func TestReadUint32(t *testing.T) {
@@ -106,12 +87,8 @@ func TestReadUint32(t *testing.T) {
 	output := uint32(0)
 	buffer := packetBuffer{bytes: raw}
 	err := buffer.read(&output)
-	if err != nil {
-		t.Fatalf("Value parsing failed. Err = %v", err)
-	}
-	if output != expected {
-		t.Fatalf("Reading uint32 failed. Wanted %X, got %X", expected, output)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, uint32(expected), output)
 }
 
 func TestReadUint64(t *testing.T) {
@@ -120,12 +97,8 @@ func TestReadUint64(t *testing.T) {
 	output := uint64(0)
 	buffer := packetBuffer{bytes: raw}
 	err := buffer.read(&output)
-	if err != nil {
-		t.Fatalf("Value parsing failed. Err = %v", err)
-	}
-	if output != expected {
-		t.Fatalf("Reading uint64 failed. Wanted %X, got %X", expected, output)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, expected, output)
 }
 
 func TestReadStruct(t *testing.T) {
@@ -140,12 +113,8 @@ func TestReadStruct(t *testing.T) {
 	var output S
 	buffer := packetBuffer{bytes: raw}
 	err := buffer.read(&output)
-	if err != nil {
-		t.Fatalf("Struct parsing failed. Err = %v", err)
-	}
-	if output != expected {
-		t.Fatalf("Reading struct failed. Wanted %v, got %v", expected, output)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, expected, output)
 }
 
 func TestReadSlice(t *testing.T) {
@@ -154,12 +123,8 @@ func TestReadSlice(t *testing.T) {
 	var output []uint16
 	buffer := packetBuffer{bytes: raw}
 	err := buffer.read(&output)
-	if err != nil {
-		t.Fatalf("Slice parsing failed. Err = %v", err)
-	}
-	if fmt.Sprintf("%x", output) != fmt.Sprintf("%x", expected) {
-		t.Fatalf("Reading struct failed. Wanted %v, got %v", expected, output)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, expected, output)
 }
 
 func TestReadComplex(t *testing.T) {
@@ -202,10 +167,6 @@ func TestReadComplex(t *testing.T) {
 
 	buffer := packetBuffer{bytes: raw}
 	err := buffer.read(&output)
-	if err != nil {
-		t.Fatalf("Complex parsing failed. Err = %v", err)
-	}
-	if fmt.Sprintf("%x", output) != fmt.Sprintf("%x", expected) {
-		t.Fatalf("Reading struct failed. Wanted %v, got %v", expected, output)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, expected, output)
 }

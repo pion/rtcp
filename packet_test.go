@@ -4,7 +4,6 @@
 package rtcp
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -85,9 +84,7 @@ func realPacket() []byte {
 
 func TestUnmarshal(t *testing.T) {
 	packet, err := Unmarshal(realPacket())
-	if err != nil {
-		t.Fatalf("Error unmarshalling packets: %s", err)
-	}
+	assert.NoError(t, err)
 
 	expected := []Packet{
 		&ReceiverReport{
@@ -127,9 +124,7 @@ func TestUnmarshal(t *testing.T) {
 
 func TestUnmarshalNil(t *testing.T) {
 	_, err := Unmarshal(nil)
-	if got, want := err, errInvalidHeader; !errors.Is(got, want) {
-		t.Fatalf("Unmarshal(nil) err = %v, want %v", got, want)
-	}
+	assert.ErrorIs(t, err, errInvalidHeader)
 }
 
 func TestInvalidHeaderLength(t *testing.T) {
@@ -140,7 +135,5 @@ func TestInvalidHeaderLength(t *testing.T) {
 	}
 
 	_, err := Unmarshal(invalidPacket)
-	if got, want := err, errPacketTooShort; !errors.Is(got, want) {
-		t.Fatalf("Unmarshal(nil) err = %v, want %v", got, want)
-	}
+	assert.ErrorIs(t, err, errPacketTooShort)
 }

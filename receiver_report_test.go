@@ -4,9 +4,9 @@
 package rtcp
 
 import (
-	"errors"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var _ Packet = (*ReceiverReport)(nil) // assert is a Packet
@@ -157,16 +157,12 @@ func TestReceiverReportUnmarshal(t *testing.T) {
 	} {
 		var rr ReceiverReport
 		err := rr.Unmarshal(test.Data)
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Unmarshal %q rr: err = %#v, want %#v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Unmarshal %q", test.Name)
 		if err != nil {
 			continue
 		}
 
-		if got, want := rr, test.Want; !reflect.DeepEqual(got, want) {
-			t.Fatalf("Unmarshal %q rr: got %#v, want %#v", test.Name, got, want)
-		}
+		assert.Equalf(t, test.Want, rr, "Unmarshal %q", test.Name)
 	}
 }
 
@@ -253,20 +249,13 @@ func TestReceiverReportRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Report.Marshal()
-		if got, want := err, test.WantError; !errors.Is(got, want) {
-			t.Fatalf("Marshal %q: err = %#v, want %#v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantError, "Marshal %q", test.Name)
 		if err != nil {
 			continue
 		}
 
 		var decoded ReceiverReport
-		if err := decoded.Unmarshal(data); err != nil {
-			t.Fatalf("Unmarshal %q: %#v", test.Name, err)
-		}
-
-		if got, want := decoded, test.Report; !reflect.DeepEqual(got, want) {
-			t.Fatalf("%q rr round trip: got %#v, want %#v", test.Name, got, want)
-		}
+		assert.NoErrorf(t, decoded.Unmarshal(data), "Unmarshal %q", test.Name)
+		assert.Equalf(t, test.Report, decoded, "%s rr round trip mismatch", test.Name)
 	}
 }

@@ -5,6 +5,8 @@ package rtcp
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //nolint:maintidx
@@ -502,9 +504,6 @@ func TestPrint(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		actual := stringify(test.packet)
-		if actual != test.expected {
-			t.Fatalf("Error stringifying test %d\nExpected:\n%s\n\nGot:\n%s\n\n", i, test.expected, actual)
-		}
+		assert.Equalf(t, test.expected, stringify(test.packet), "Error stringifying test %d", i)
 	}
 }

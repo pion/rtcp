@@ -4,9 +4,9 @@
 package rtcp
 
 import (
-	"errors"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var _ Packet = (*RawPacket)(nil) // assert is a Packet
@@ -44,24 +44,18 @@ func TestRawPacketRoundTrip(t *testing.T) {
 		},
 	} {
 		data, err := test.Packet.Marshal()
-		if got, want := err, test.WantMarshalError; !errors.Is(got, want) {
-			t.Fatalf("Marshal %q: err = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantMarshalError, "Marshal %q", test.Name)
 		if err != nil {
 			continue
 		}
 
 		var decoded RawPacket
+
 		err = decoded.Unmarshal(data)
-		if got, want := err, test.WantUnmarshalError; !errors.Is(got, want) {
-			t.Fatalf("Unmarshal %q: err = %v, want %v", test.Name, got, want)
-		}
+		assert.ErrorIsf(t, err, test.WantUnmarshalError, "Unmarshal %q", test.Name)
 		if err != nil {
 			continue
 		}
-
-		if got, want := decoded, test.Packet; !reflect.DeepEqual(got, want) {
-			t.Fatalf("%q raw round trip: got %#v, want %#v", test.Name, got, want)
-		}
+		assert.Equalf(t, test.Packet, decoded, "Unmarshal %q", test.Name)
 	}
 }

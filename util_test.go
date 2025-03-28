@@ -65,15 +65,11 @@ func TestSetNBitsOfUint16(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			got, err := setNBitsOfUint16(test.source, test.size, test.index, test.value)
 			if err != nil {
-				if err.Error() != test.err {
-					t.Fatalf("setNBitsOfUint16 %q : got = %v, want %v", test.name, err, test.err)
-				}
+				assert.Equalf(t, test.err, err.Error(), "setNBitsOfUint16 %q : got = %v, want %v", test.name, err, test.err)
 
 				return
 			}
-			if got != test.result {
-				t.Fatalf("setNBitsOfUint16 %q : got = %v, want %v", test.name, got, test.result)
-			}
+			assert.Equalf(t, test.result, got, "setNBitsOfUint16 %q : got = %v, want %v", test.name, got, test.result)
 		})
 	}
 }
