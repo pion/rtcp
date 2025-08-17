@@ -48,7 +48,7 @@ const omit = "omit"
 // bytes that have been written into.
 //
 //nolint:gocognit,cyclop
-func (b *packetBuffer) write(v interface{}) error {
+func (b *packetBuffer) write(v any) error {
 	value := reflect.ValueOf(v)
 
 	// Indirect is safe to call on non-pointers, and
@@ -129,7 +129,7 @@ func (b *packetBuffer) write(v interface{}) error {
 // bytes that have already been read.
 //
 //nolint:gocognit,cyclop
-func (b *packetBuffer) read(v interface{}) error {
+func (b *packetBuffer) read(v any) error {
 	ptr := reflect.ValueOf(v)
 	if ptr.Kind() != reflect.Ptr {
 		return errBadReadParameter
@@ -232,7 +232,7 @@ func (b *packetBuffer) split(size int) packetBuffer {
 // This fuction doesn't check that Write() will succeed,
 // and may return unexpectedly large results for those
 // structures that Write() will fail on.
-func wireSize(v interface{}) int {
+func wireSize(v any) int {
 	value := reflect.ValueOf(v)
 	// Indirect is safe to call on non-pointers, and
 	// will simply return the same value in such cases

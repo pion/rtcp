@@ -37,7 +37,7 @@ func stringify(p Packet) string {
 }
 
 //nolint:gocognit,cyclop
-func formatField(name string, format string, f interface{}, indent string) string {
+func formatField(name string, format string, f any, indent string) string {
 	out := indent
 	value := reflect.ValueOf(f)
 
