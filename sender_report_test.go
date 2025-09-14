@@ -4,6 +4,7 @@
 package rtcp
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -185,12 +186,8 @@ func TestSenderReportUnmarshal(t *testing.T) {
 
 		var ssrcFound bool
 		dstSsrc := sr.DestinationSSRC()
-		for _, v := range dstSsrc {
-			if v == sr.SSRC {
-				ssrcFound = true
-
-				break
-			}
+		if slices.Contains(dstSsrc, sr.SSRC) {
+			ssrcFound = true
 		}
 
 		assert.Truef(t, ssrcFound, "Unmarshal %q sr: sr's DestinationSSRC should include it's SSRC field", test.Name)
