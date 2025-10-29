@@ -461,7 +461,7 @@ func (t TransportLayerCC) Marshal() ([]byte, error) {
 //nolint:gocognit,cyclop
 func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error {
 	if len(rawPacket) < (headerLength + ssrcLength) {
-		return errPacketTooShort
+		return errPacketTooShortFor(t)
 	}
 
 	if err := t.Header.Unmarshal(rawPacket); err != nil {
@@ -473,11 +473,11 @@ func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error {
 	totalLength := 4 * (t.Header.Length + 1)
 
 	if totalLength < headerLength+packetChunkOffset {
-		return errPacketTooShort
+		return errPacketTooShortFor(t)
 	}
 
 	if len(rawPacket) < int(totalLength) {
-		return errPacketTooShort
+		return errPacketTooShortFor(t)
 	}
 
 	if t.Header.Type != TypeTransportSpecificFeedback || t.Header.Count != FormatTCC {
@@ -495,7 +495,7 @@ func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error {
 	var processedPacketNum uint16
 	for processedPacketNum < t.PacketStatusCount {
 		if packetStatusPos+packetStatusChunkLength >= totalLength {
-			return errPacketTooShort
+			return errPacketTooShortFor(t)
 		}
 		typ := getNBitsFromByte(rawPacket[packetStatusPos : packetStatusPos+1][0], 0, 1)
 		var iPacketStatus PacketStatusChunk
@@ -548,7 +548,7 @@ func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error {
 	for _, delta := range t.RecvDeltas {
 		if delta.Type == TypeTCCPacketReceivedSmallDelta {
 			if recvDeltasPos+1 > totalLength {
-				return errPacketTooShort
+				return errPacketTooShortFor(t)
 			}
 			err := delta.Unmarshal(rawPacket[recvDeltasPos : recvDeltasPos+1])
 			if err != nil {
@@ -558,7 +558,7 @@ func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error {
 		}
 		if delta.Type == TypeTCCPacketReceivedLargeDelta {
 			if recvDeltasPos+2 > totalLength {
-				return errPacketTooShort
+				return errPacketTooShortFor(t)
 			}
 			err := delta.Unmarshal(rawPacket[recvDeltasPos : recvDeltasPos+2])
 			if err != nil {

@@ -171,7 +171,7 @@ func (r *SenderReport) Unmarshal(rawPacket []byte) error {
 	 */
 
 	if len(rawPacket) < (headerLength + srHeaderLength) {
-		return errPacketTooShort
+		return errPacketTooShortFor(r)
 	}
 
 	var header Header
@@ -195,7 +195,7 @@ func (r *SenderReport) Unmarshal(rawPacket []byte) error {
 	for i := 0; i < int(header.Count); i++ {
 		rrEnd := offset + receptionReportLength
 		if rrEnd > len(packetBody) {
-			return errPacketTooShort
+			return errPacketTooShortFor(r)
 		}
 		rrBody := packetBody[offset : offset+receptionReportLength]
 		offset = rrEnd

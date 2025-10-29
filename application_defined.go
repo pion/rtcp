@@ -85,7 +85,7 @@ func (a *ApplicationDefined) Unmarshal(rawPacket []byte) error {
 		return err
 	}
 	if len(rawPacket) < 12 {
-		return errPacketTooShort
+		return errPacketTooShortFor(a)
 	}
 
 	if int(header.Length+1)*4 != len(rawPacket) {

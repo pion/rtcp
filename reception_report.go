@@ -93,7 +93,7 @@ func (r ReceptionReport) Marshal() ([]byte, error) {
 // Unmarshal decodes the ReceptionReport from binary.
 func (r *ReceptionReport) Unmarshal(rawPacket []byte) error {
 	if len(rawPacket) < receptionReportLength {
-		return errPacketTooShort
+		return errPacketTooShortFor(r)
 	}
 
 	/*

@@ -127,7 +127,7 @@ func (r *ReceiverReport) Unmarshal(rawPacket []byte) error {
 	 */
 
 	if len(rawPacket) < (headerLength + ssrcLength) {
-		return errPacketTooShort
+		return errPacketTooShortFor(r)
 	}
 
 	var header Header

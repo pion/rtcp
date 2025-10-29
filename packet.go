@@ -3,6 +3,8 @@
 
 package rtcp
 
+import "fmt"
+
 // Packet represents an RTCP packet, a protocol used for out-of-band statistics
 // and control information for an RTP session.
 type Packet interface {
@@ -70,7 +72,7 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 
 	bytesprocessed = int(header.Length+1) * 4
 	if bytesprocessed > len(rawData) {
-		return nil, 0, errPacketTooShort
+		return nil, 0, errPacketTooShortFor(packetNameFromHeader(header))
 	}
 	inPacket := rawData[:bytesprocessed]
 
@@ -128,4 +130,49 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 	err = packet.Unmarshal(inPacket)
 
 	return packet, bytesprocessed, err
+}
+
+func packetNameFromHeader(header Header) string {
+	switch header.Type {
+	case TypeSenderReport:
+		return "SenderReport"
+	case TypeReceiverReport:
+		return "ReceiverReport"
+	case TypeSourceDescription:
+		return "SourceDescription"
+	case TypeGoodbye:
+		return "Goodbye"
+	case TypeTransportSpecificFeedback:
+		switch header.Count {
+		case FormatTLN:
+			return "TransportLayerNack"
+		case FormatRRR:
+			return "RapidResynchronizationRequest"
+		case FormatTCC:
+			return "TransportLayerCC"
+		case FormatCCFB:
+			return "CCFeedbackReport"
+		default:
+			return fmt.Sprintf("TransportSpecificFeedback(FMT=%d)", header.Count)
+		}
+	case TypePayloadSpecificFeedback:
+		switch header.Count {
+		case FormatPLI:
+			return "PictureLossIndication"
+		case FormatSLI:
+			return "SliceLossIndication"
+		case FormatREMB:
+			return "ReceiverEstimatedMaximumBitrate"
+		case FormatFIR:
+			return "FullIntraRequest"
+		default:
+			return fmt.Sprintf("PayloadSpecificFeedback(FMT=%d)", header.Count)
+		}
+	case TypeExtendedReport:
+		return "ExtendedReport"
+	case TypeApplicationDefined:
+		return "ApplicationDefined"
+	default:
+		return fmt.Sprintf("PacketType(%d)", header.Type)
+	}
 }

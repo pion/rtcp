@@ -71,7 +71,7 @@ func (p ReceiverEstimatedMaximumBitrate) MarshalTo(buf []byte) (n int, err error
 
 	size := p.MarshalSize()
 	if len(buf) < size {
-		return 0, errPacketTooShort
+		return 0, errPacketTooShortFor(p)
 	}
 
 	buf[0] = 143 // v=2, p=0, fmt=15
@@ -158,7 +158,7 @@ func (p *ReceiverEstimatedMaximumBitrate) Unmarshal(buf []byte) (err error) {
 
 	// 20 bytes is the size of the packet with no SSRCs
 	if len(buf) < 20 {
-		return errPacketTooShort
+		return errPacketTooShortFor(p)
 	}
 
 	// version  must be 2
@@ -195,7 +195,7 @@ func (p *ReceiverEstimatedMaximumBitrate) Unmarshal(buf []byte) (err error) {
 
 	// Make sure the buffer is large enough.
 	if len(buf) < size {
-		return errPacketTooShort
+		return errPacketTooShortFor(p)
 	}
 
 	// The sender SSRC is 32-bits
