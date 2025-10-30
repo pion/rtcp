@@ -78,18 +78,18 @@ func packetTypeName(packet any) string {
 		return name
 	}
 
-	t := reflect.TypeOf(packet)
-	if t == nil {
+	typ := reflect.TypeOf(packet)
+	if typ == nil {
 		return ""
 	}
 
-	for t.Kind() == reflect.Pointer {
-		t = t.Elem()
+	for typ.Kind() == reflect.Pointer {
+		typ = typ.Elem()
 	}
 
-	if t.Name() != "" {
-		return t.Name()
+	if typ.Name() != "" {
+		return typ.Name()
 	}
 
-	return t.String()
+	return typ.String()
 }

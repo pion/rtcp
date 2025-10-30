@@ -5,6 +5,29 @@ package rtcp
 
 import "fmt"
 
+var packetTypeNames = map[PacketType]string{
+	TypeSenderReport:       "SenderReport",
+	TypeReceiverReport:     "ReceiverReport",
+	TypeSourceDescription:  "SourceDescription",
+	TypeGoodbye:            "Goodbye",
+	TypeExtendedReport:     "ExtendedReport",
+	TypeApplicationDefined: "ApplicationDefined",
+}
+
+var transportSpecificFeedbackNames = map[uint8]string{
+	FormatTLN:  "TransportLayerNack",
+	FormatRRR:  "RapidResynchronizationRequest",
+	FormatTCC:  "TransportLayerCC",
+	FormatCCFB: "CCFeedbackReport",
+}
+
+var payloadSpecificFeedbackNames = map[uint8]string{
+	FormatPLI:  "PictureLossIndication",
+	FormatSLI:  "SliceLossIndication",
+	FormatREMB: "ReceiverEstimatedMaximumBitrate",
+	FormatFIR:  "FullIntraRequest",
+}
+
 // Packet represents an RTCP packet, a protocol used for out-of-band statistics
 // and control information for an RTP session.
 type Packet interface {
@@ -133,46 +156,33 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 }
 
 func packetNameFromHeader(header Header) string {
-	switch header.Type {
-	case TypeSenderReport:
-		return "SenderReport"
-	case TypeReceiverReport:
-		return "ReceiverReport"
-	case TypeSourceDescription:
-		return "SourceDescription"
-	case TypeGoodbye:
-		return "Goodbye"
-	case TypeTransportSpecificFeedback:
-		switch header.Count {
-		case FormatTLN:
-			return "TransportLayerNack"
-		case FormatRRR:
-			return "RapidResynchronizationRequest"
-		case FormatTCC:
-			return "TransportLayerCC"
-		case FormatCCFB:
-			return "CCFeedbackReport"
-		default:
-			return fmt.Sprintf("TransportSpecificFeedback(FMT=%d)", header.Count)
-		}
-	case TypePayloadSpecificFeedback:
-		switch header.Count {
-		case FormatPLI:
-			return "PictureLossIndication"
-		case FormatSLI:
-			return "SliceLossIndication"
-		case FormatREMB:
-			return "ReceiverEstimatedMaximumBitrate"
-		case FormatFIR:
-			return "FullIntraRequest"
-		default:
-			return fmt.Sprintf("PayloadSpecificFeedback(FMT=%d)", header.Count)
-		}
-	case TypeExtendedReport:
-		return "ExtendedReport"
-	case TypeApplicationDefined:
-		return "ApplicationDefined"
-	default:
-		return fmt.Sprintf("PacketType(%d)", header.Type)
+	if header.Type == TypeTransportSpecificFeedback {
+		return transportSpecificFeedbackName(header.Count)
 	}
+
+	if header.Type == TypePayloadSpecificFeedback {
+		return payloadSpecificFeedbackName(header.Count)
+	}
+
+	if name, ok := packetTypeNames[header.Type]; ok {
+		return name
+	}
+
+	return fmt.Sprintf("PacketType(%d)", header.Type)
+}
+
+func transportSpecificFeedbackName(count uint8) string {
+	if name, ok := transportSpecificFeedbackNames[count]; ok {
+		return name
+	}
+
+	return fmt.Sprintf("TransportSpecificFeedback(FMT=%d)", count)
+}
+
+func payloadSpecificFeedbackName(count uint8) string {
+	if name, ok := payloadSpecificFeedbackNames[count]; ok {
+		return name
+	}
+
+	return fmt.Sprintf("PayloadSpecificFeedback(FMT=%d)", count)
 }

@@ -61,12 +61,28 @@ func TestPacketNameFromHeader(t *testing.T) {
 			want: "TransportLayerNack",
 		},
 		{
+			name: "transport feedback fallback",
+			header: Header{
+				Type:  TypeTransportSpecificFeedback,
+				Count: 99,
+			},
+			want: "TransportSpecificFeedback(FMT=99)",
+		},
+		{
 			name: "payload specific fallback",
 			header: Header{
 				Type:  TypePayloadSpecificFeedback,
 				Count: 5,
 			},
 			want: "PayloadSpecificFeedback(FMT=5)",
+		},
+		{
+			name: "payload specific known",
+			header: Header{
+				Type:  TypePayloadSpecificFeedback,
+				Count: FormatPLI,
+			},
+			want: "PictureLossIndication",
 		},
 		{
 			name: "unknown type",
