@@ -270,7 +270,7 @@ func (r RecvDelta) Marshal() ([]byte, error) {
 	// small delta
 	if r.Type == TypeTCCPacketReceivedSmallDelta && delta >= 0 && delta <= math.MaxUint8 {
 		deltaChunk := make([]byte, 1)
-		deltaChunk[0] = byte(delta)
+		deltaChunk[0] = byte(delta) //nolint:gosec // deltaChunk is created with length 1
 
 		return deltaChunk, nil
 	}

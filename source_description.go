@@ -313,14 +313,14 @@ func (s SourceDescriptionItem) Marshal() ([]byte, error) {
 
 	rawPacket := make([]byte, sdesTypeLen+sdesOctetCountLen)
 
-	rawPacket[sdesTypeOffset] = uint8(s.Type)
+	rawPacket[sdesTypeOffset] = uint8(s.Type) //nolint:gosec // rawPacket is created with length 2
 
 	txtBytes := []byte(s.Text)
 	octetCount := len(txtBytes)
 	if octetCount > sdesMaxOctetCount {
 		return nil, errSDESTextTooLong
 	}
-	rawPacket[sdesOctetCountOffset] = uint8(octetCount)
+	rawPacket[sdesOctetCountOffset] = uint8(octetCount) //nolint:gosec // rawPacket is created with length 2
 
 	rawPacket = append(rawPacket, txtBytes...) //nolint:makezero
 

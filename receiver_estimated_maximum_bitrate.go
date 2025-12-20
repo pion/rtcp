@@ -276,7 +276,7 @@ func (p *ReceiverEstimatedMaximumBitrate) String() string {
 		powers++
 	}
 
-	unit := bitUnits[powers]
+	unit := bitUnits[powers] //nolint:gosec // powers is bounded by loop condition
 
 	return fmt.Sprintf("ReceiverEstimatedMaximumBitrate %x %.2f %s/s", p.SenderSSRC, bitrate, unit)
 }
