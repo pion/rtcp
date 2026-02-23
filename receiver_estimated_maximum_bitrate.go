@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"math"
 )
 
 // ReceiverEstimatedMaximumBitrate contains the receiver's estimated maximum bitrate.
@@ -49,7 +48,6 @@ func (p ReceiverEstimatedMaximumBitrate) MarshalSize() int {
 
 // MarshalTo serializes the packet to the given byte slice.
 func (p ReceiverEstimatedMaximumBitrate) MarshalTo(buf []byte) (n int, err error) {
-	const bitratemax = 0x3FFFFp+63
 	/*
 	    0                   1                   2                   3
 	    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -93,34 +91,10 @@ func (p ReceiverEstimatedMaximumBitrate) MarshalTo(buf []byte) (n int, err error
 	// Write the length of the ssrcs to follow at the end
 	buf[16] = byte(len(p.SSRCs))
 
-	exp := 0
-	bitrate := p.Bitrate
-
-	if bitrate >= bitratemax {
-		bitrate = bitratemax
+	err = putBitrate(p.Bitrate, buf[17:20])
+	if err != nil {
+		return 0, err
 	}
-
-	if bitrate < 0 {
-		return 0, errInvalidBitrate
-	}
-
-	for bitrate >= (1 << 18) {
-		bitrate /= 2.0
-		exp++
-	}
-
-	if exp >= (1 << 6) {
-		return 0, errInvalidBitrate
-	}
-
-	mantissa := uint(math.Floor(float64(bitrate)))
-
-	// We can't quite use the binary package because
-	// a) it's a uint24 and b) the exponent is only 6-bits
-	// Just trust me; this is big-endian encoding.
-	buf[17] = byte(exp<<2) | byte(mantissa>>16)
-	buf[18] = byte(mantissa >> 8)
-	buf[19] = byte(mantissa)
 
 	// Write the SSRCs at the very end.
 	n = 20
@@ -136,7 +110,6 @@ func (p ReceiverEstimatedMaximumBitrate) MarshalTo(buf []byte) (n int, err error
 //
 //nolint:cyclop
 func (p *ReceiverEstimatedMaximumBitrate) Unmarshal(buf []byte) (err error) {
-	const mantissamax = 0x7FFFFF
 	/*
 	    0                   1                   2                   3
 	    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -220,24 +193,7 @@ func (p *ReceiverEstimatedMaximumBitrate) Unmarshal(buf []byte) (err error) {
 		return errSSRCNumAndLengthMismatch
 	}
 
-	// Get the 6-bit exponent value.
-	exp := buf[17] >> 2
-	exp += 127 // bias for IEEE754
-	exp += 23  // IEEE754 biases the decimal to the left, abs-send-time biases it to the right
-
-	// The remaining 2-bits plus the next 16-bits are the mantissa.
-	mantissa := uint32(buf[17]&3)<<16 | uint32(buf[18])<<8 | uint32(buf[19])
-
-	if mantissa != 0 {
-		// ieee754 requires an implicit leading bit
-		for (mantissa & (mantissamax + 1)) == 0 {
-			exp--
-			mantissa *= 2
-		}
-	}
-
-	// bitrate = mantissa * 2^exp
-	p.Bitrate = math.Float32frombits((uint32(exp) << 23) | (mantissa & mantissamax))
+	p.Bitrate = loadBitrate(buf[17:20])
 
 	// Clear any existing SSRCs
 	p.SSRCs = nil
@@ -263,22 +219,8 @@ func (p *ReceiverEstimatedMaximumBitrate) Header() Header {
 
 // String prints the REMB packet in a human-readable format.
 func (p *ReceiverEstimatedMaximumBitrate) String() string {
-	// Keep a table of powers to units for fast conversion.
-	bitUnits := []string{"b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb"}
-
-	// Do some unit conversions because b/s is far too difficult to read.
-	bitrate := p.Bitrate
-	powers := 0
-
-	// Keep dividing the bitrate until it's under 1000
-	for bitrate >= 1000.0 && powers < len(bitUnits) {
-		bitrate /= 1000.0
-		powers++
-	}
-
-	unit := bitUnits[powers] //nolint:gosec // powers is bounded by loop condition
-
-	return fmt.Sprintf("ReceiverEstimatedMaximumBitrate %x %.2f %s/s", p.SenderSSRC, bitrate, unit)
+	unit := bitrateUnit(p.Bitrate)
+	return fmt.Sprintf("ReceiverEstimatedMaximumBitrate %x %.2f %s/s", p.SenderSSRC, p.Bitrate, unit)
 }
 
 // DestinationSSRC returns an array of SSRC values that this packet refers to.

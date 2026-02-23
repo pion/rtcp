@@ -97,6 +97,10 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 			packet = new(TransportLayerCC)
 		case FormatCCFB:
 			packet = new(CCFeedbackReport)
+		case FormatTMMBR:
+			packet = new(TMMBR)
+		case FormatTMMBN:
+			packet = new(TMMBN)
 		default:
 			packet = new(RawPacket)
 		}

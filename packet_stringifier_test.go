@@ -485,6 +485,24 @@ func TestPrint(t *testing.T) {
 				"\t\t\tDelta: 37000\n",
 		},
 		{
+			&TMMBR{
+				SenderSSRC: 0x902f9e2e,
+				Entries: []TMMBREntry{
+					{0x902f9e2e, 9812743},
+					{0xdeadbeef, 8435793},
+				},
+			},
+			"rtcp.TMMBR:\n" +
+				"\tSenderSSRC: 2419039790\n" +
+				"\tEntries:\n" +
+				"\t\t0:\n" +
+				"\t\t\tMediaSSRC: 2419039790\n" +
+				"\t\t\tBitrate: 9.812743e+06\n" +
+				"\t\t1:\n" +
+				"\t\t\tMediaSSRC: 3735928559\n" +
+				"\t\t\tBitrate: 8.435793e+06\n",
+		},
+		{
 			&TransportLayerNack{
 				SenderSSRC: 0x902f9e2e,
 				MediaSSRC:  0x902f9e2e,

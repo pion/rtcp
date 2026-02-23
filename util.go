@@ -3,6 +3,8 @@
 
 package rtcp
 
+import "math"
+
 // getPadding Returns the padding required to make the length a multiple of 4.
 func getPadding(packetLen int) int {
 	if packetLen%4 == 0 {
@@ -40,4 +42,75 @@ func getNBitsFromByte(b byte, begin, n uint16) uint16 {
 // get24BitFromBytes get 24bits from `[3]byte` slice.
 func get24BitsFromBytes(b []byte) uint32 {
 	return uint32(b[0])<<16 + uint32(b[1])<<8 + uint32(b[2])
+}
+
+func putBitrate(bitrate float32, buf []byte) (err error) {
+	const bitratemax = 0x3FFFFp+63
+	if bitrate >= bitratemax {
+		bitrate = bitratemax
+	}
+
+	if bitrate < 0 {
+		return errInvalidBitrate
+	}
+
+	exp := 0
+
+	for bitrate >= (1 << 18) {
+		bitrate /= 2.0
+		exp++
+	}
+
+	if exp >= (1 << 6) {
+		return errInvalidBitrate
+	}
+
+	mantissa := uint(math.Floor(float64(bitrate)))
+
+	// We can't quite use the binary package because
+	// a) it's a uint24 and b) the exponent is only 6-bits
+	// Just trust me; this is big-endian encoding.
+	buf[0] = byte(exp<<2) | byte(mantissa>>16)
+	buf[1] = byte(mantissa >> 8)
+	buf[2] = byte(mantissa)
+	return nil
+}
+
+func loadBitrate(buf []byte) float32 {
+	const mantissamax = 0x7FFFFF
+	// Get the 6-bit exponent value.
+	exp := buf[0] >> 2
+	exp += 127 // bias for IEEE754
+	exp += 23  // IEEE754 biases the decimal to the left, abs-send-time biases it to the right
+
+	// The remaining 2-bits plus the next 16-bits are the mantissa.
+	mantissa := uint32(buf[0]&3)<<16 | uint32(buf[1])<<8 | uint32(buf[2])
+
+	if mantissa != 0 {
+		// ieee754 requires an implicit leading bit
+		for (mantissa & (mantissamax + 1)) == 0 {
+			exp--
+			mantissa *= 2
+		}
+	}
+
+	// bitrate = mantissa * 2^exp
+	bitrate := math.Float32frombits((uint32(exp) << 23) | (mantissa & mantissamax))
+	return bitrate
+}
+
+func bitrateUnit(bitrate float32) string {
+	// Keep a table of powers to units for fast conversion.
+	bitUnits := []string{"b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb"}
+
+	// Do some unit conversions because b/s is far too difficult to read.
+	powers := 0
+
+	// Keep dividing the bitrate until it's under 1000
+	for bitrate >= 1000.0 && powers < len(bitUnits) {
+		bitrate /= 1000.0
+		powers++
+	}
+
+	return bitUnits[powers] //nolint:gosec // powers is bounded by loop condition
 }

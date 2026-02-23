@@ -38,6 +38,10 @@ const (
 
 	// https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-5
 	FormatTCC uint8 = 15
+	// https://www.rfc-editor.org/rfc/rfc5104.html#section-4.2.1
+	FormatTMMBR = 3
+	// https://www.rfc-editor.org/rfc/rfc5104.html#section-4.2.2
+	FormatTMMBN = 4
 )
 
 func (p PacketType) String() string {
