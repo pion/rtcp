@@ -753,7 +753,6 @@ func TestTransportLayerCC_Unmarshal(t *testing.T) {
 			WantError: errPacketTooShort,
 		},
 	} {
-		test := test
 		t.Run(test.Name, func(t *testing.T) {
 			var chunk TransportLayerCC
 			err := chunk.Unmarshal(test.Data)
@@ -1159,7 +1158,6 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 			WantError: nil,
 		},
 	} {
-		test := test
 		t.Run(test.Name, func(t *testing.T) {
 			bin, err := test.Data.Marshal()
 			assert.NoError(t, err)

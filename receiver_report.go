@@ -6,6 +6,7 @@ package rtcp
 import (
 	"encoding/binary"
 	"fmt"
+	"strings"
 )
 
 // A ReceiverReport (RR) packet provides reception quality feedback for an RTP stream.
@@ -188,12 +189,13 @@ func (r *ReceiverReport) DestinationSSRC() []uint32 {
 }
 
 func (r ReceiverReport) String() string {
-	out := fmt.Sprintf("ReceiverReport from %x\n", r.SSRC)
-	out += "\tSSRC    \tLost\tLastSequence\n"
+	var out strings.Builder
+	fmt.Fprintf(&out, "ReceiverReport from %x\n", r.SSRC)
+	out.WriteString("\tSSRC    \tLost\tLastSequence\n")
 	for _, i := range r.Reports {
-		out += fmt.Sprintf("\t%x\t%d/%d\t%d\n", i.SSRC, i.FractionLost, i.TotalLost, i.LastSequenceNumber)
+		fmt.Fprintf(&out, "\t%x\t%d/%d\t%d\n", i.SSRC, i.FractionLost, i.TotalLost, i.LastSequenceNumber)
 	}
-	out += fmt.Sprintf("\tProfile Extension Data: %v\n", r.ProfileExtensions)
+	fmt.Fprintf(&out, "\tProfile Extension Data: %v\n", r.ProfileExtensions)
 
-	return out
+	return out.String()
 }

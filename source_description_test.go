@@ -4,6 +4,7 @@
 package rtcp
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -229,13 +230,13 @@ func TestSourceDescriptionUnmarshal(t *testing.T) {
 func TestSourceDescriptionRoundTrip(t *testing.T) {
 	// a slice with enough SourceDescriptionChunks to overflow an 5-bit int
 	var tooManyChunks []SourceDescriptionChunk
-	var tooLongText string
+	var tooLongText strings.Builder
 
-	for i := 0; i < (1 << 5); i++ {
+	for range 1 << 5 {
 		tooManyChunks = append(tooManyChunks, SourceDescriptionChunk{})
 	}
-	for i := 0; i < (1 << 8); i++ {
-		tooLongText += "x"
+	for range 1 << 8 {
+		tooLongText.WriteString("x")
 	}
 
 	for _, test := range []struct {
@@ -314,7 +315,7 @@ func TestSourceDescriptionRoundTrip(t *testing.T) {
 				Chunks: []SourceDescriptionChunk{{
 					Items: []SourceDescriptionItem{{
 						Type: SDESCNAME,
-						Text: tooLongText,
+						Text: tooLongText.String(),
 					}},
 				}},
 			},

@@ -91,7 +91,11 @@ func (p ReceiverEstimatedMaximumBitrate) MarshalTo(buf []byte) (n int, err error
 	buf[15] = 'B'
 
 	// Write the length of the ssrcs to follow at the end
-	buf[16] = byte(len(p.SSRCs))
+	if len(p.SSRCs) > math.MaxUint8 {
+		return 0, errTooManySSRCs
+	}
+
+	buf[16] = byte(len(p.SSRCs)) //nolint:gosec // length validated above
 
 	exp := 0
 	bitrate := p.Bitrate
@@ -118,9 +122,9 @@ func (p ReceiverEstimatedMaximumBitrate) MarshalTo(buf []byte) (n int, err error
 	// We can't quite use the binary package because
 	// a) it's a uint24 and b) the exponent is only 6-bits
 	// Just trust me; this is big-endian encoding.
-	buf[17] = byte(exp<<2) | byte(mantissa>>16)
-	buf[18] = byte(mantissa >> 8)
-	buf[19] = byte(mantissa)
+	buf[17] = byte(exp<<2) | byte(mantissa>>16) //nolint: gosec //  mantissa is limited to 18 bits
+	buf[18] = byte(mantissa >> 8)               //nolint: gosec //  mantissa is limited to 18 bits
+	buf[19] = byte(mantissa)                    // nolint: gosec //  mantissa is limited to 18 bits
 
 	// Write the SSRCs at the very end.
 	n = 20

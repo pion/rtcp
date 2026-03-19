@@ -61,7 +61,7 @@ func (b *packetBuffer) write(v any) error {
 			return errWrongMarshalSize
 		}
 		if value.CanInterface() {
-			b.bytes[0] = byte(value.Uint())
+			b.bytes[0] = byte(value.Uint()) //nolint:gosec //  value.Kind() == reflect.Uint8 guarantees range
 		}
 		b.bytes = b.bytes[1:]
 	case reflect.Uint16:
@@ -109,7 +109,7 @@ func (b *packetBuffer) write(v any) error {
 					return err
 				}
 			} else {
-				advance := int(value.Field(i).Type().Size())
+				advance := int(value.Field(i).Type().Size()) //nolint:gosec // RTCP struct field sizes are small and controlled
 				if len(b.bytes) < advance {
 					return errWrongMarshalSize
 				}
@@ -200,7 +200,7 @@ func (b *packetBuffer) read(v any) error {
 					return err
 				}
 			} else {
-				advance := int(value.Field(i).Type().Size())
+				advance := int(value.Field(i).Type().Size()) //nolint:gosec //Size comes from type system and is bounded
 				if len(b.bytes) < advance {
 					return errWrongMarshalSize
 				}
@@ -245,7 +245,7 @@ func wireSize(v any) int {
 			if value.Index(i).CanInterface() {
 				size += wireSize(value.Index(i).Interface())
 			} else {
-				size += int(value.Index(i).Type().Size())
+				size += int(value.Index(i).Type().Size()) //nolint:gosec //  RTCP element sizes are small and bounded
 			}
 		}
 
@@ -258,12 +258,12 @@ func wireSize(v any) int {
 			if value.Field(i).CanInterface() {
 				size += wireSize(value.Field(i).Interface())
 			} else {
-				size += int(value.Field(i).Type().Size())
+				size += int(value.Field(i).Type().Size()) // nolint:gosec // Size comes from type system and is bounded
 			}
 		}
 
 	default:
-		size = int(value.Type().Size())
+		size = int(value.Type().Size()) // nolint:gosec // Size comes from type system and is bounde
 	}
 
 	return size

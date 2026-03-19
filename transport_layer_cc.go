@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 )
 
 // https://tools.ietf.org/html/draft-holmer-rmcat-transport-wide-cc-extensions-01#page-5
@@ -223,20 +224,20 @@ func (r *StatusVectorChunk) Unmarshal(rawPacket []byte) error {
 	r.SymbolSize = getNBitsFromByte(rawPacket[0], 1, 1)
 
 	if r.SymbolSize == TypeTCCSymbolSizeOneBit {
-		for i := uint16(0); i < 6; i++ {
+		for i := range uint16(6) {
 			r.SymbolList = append(r.SymbolList, getNBitsFromByte(rawPacket[0], 2+i, 1))
 		}
-		for i := uint16(0); i < 8; i++ {
+		for i := range uint16(8) {
 			r.SymbolList = append(r.SymbolList, getNBitsFromByte(rawPacket[1], i, 1))
 		}
 
 		return nil
 	}
 	if r.SymbolSize == TypeTCCSymbolSizeTwoBit {
-		for i := uint16(0); i < 3; i++ {
+		for i := range uint16(3) {
 			r.SymbolList = append(r.SymbolList, getNBitsFromByte(rawPacket[0], 2+i*2, 2))
 		}
-		for i := uint16(0); i < 4; i++ {
+		for i := range uint16(4) {
 			r.SymbolList = append(r.SymbolList, getNBitsFromByte(rawPacket[1], i*2, 2))
 		}
 
@@ -278,7 +279,7 @@ func (r RecvDelta) Marshal() ([]byte, error) {
 	// big delta
 	if r.Type == TypeTCCPacketReceivedLargeDelta && delta >= math.MinInt16 && delta <= math.MaxInt16 {
 		deltaChunk := make([]byte, 2)
-		binary.BigEndian.PutUint16(deltaChunk, uint16(delta))
+		binary.BigEndian.PutUint16(deltaChunk, uint16(delta)) //nolint:gosec  //delta is validated to fit in uint16
 
 		return deltaChunk, nil
 	}
@@ -392,24 +393,25 @@ func (t *TransportLayerCC) MarshalSize() int {
 }
 
 func (t TransportLayerCC) String() string {
-	out := fmt.Sprintf("TransportLayerCC:\n\tHeader %v\n", t.Header)
-	out += fmt.Sprintf("TransportLayerCC:\n\tSender Ssrc %d\n", t.SenderSSRC)
-	out += fmt.Sprintf("\tMedia Ssrc %d\n", t.MediaSSRC)
-	out += fmt.Sprintf("\tBase Sequence Number %d\n", t.BaseSequenceNumber)
-	out += fmt.Sprintf("\tStatus Count %d\n", t.PacketStatusCount)
-	out += fmt.Sprintf("\tReference Time %d\n", t.ReferenceTime)
-	out += fmt.Sprintf("\tFeedback Packet Count %d\n", t.FbPktCount)
-	out += "\tPacketChunks "
+	var out strings.Builder
+	fmt.Fprintf(&out, "TransportLayerCC:\n\tHeader %v\n", t.Header)
+	fmt.Fprintf(&out, "TransportLayerCC:\n\tSender Ssrc %d\n", t.SenderSSRC)
+	fmt.Fprintf(&out, "\tMedia Ssrc %d\n", t.MediaSSRC)
+	fmt.Fprintf(&out, "\tBase Sequence Number %d\n", t.BaseSequenceNumber)
+	fmt.Fprintf(&out, "\tStatus Count %d\n", t.PacketStatusCount)
+	fmt.Fprintf(&out, "\tReference Time %d\n", t.ReferenceTime)
+	fmt.Fprintf(&out, "\tFeedback Packet Count %d\n", t.FbPktCount)
+	out.WriteString("\tPacketChunks ")
 	for _, chunk := range t.PacketChunks {
-		out += fmt.Sprintf("%+v ", chunk)
+		fmt.Fprintf(&out, "%+v ", chunk)
 	}
-	out += "\n\tRecvDeltas "
+	out.WriteString("\n\tRecvDeltas ")
 	for _, delta := range t.RecvDeltas {
-		out += fmt.Sprintf("%+v ", delta)
+		fmt.Fprintf(&out, "%+v ", delta)
 	}
-	out += "\n"
+	out.WriteString("\n")
 
-	return out
+	return out.String()
 }
 
 // Marshal encodes the TransportLayerCC in binary.
@@ -511,7 +513,7 @@ func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error {
 			packetNumberToProcess := localMin(t.PacketStatusCount-processedPacketNum, packetStatus.RunLength)
 			if packetStatus.PacketStatusSymbol == TypeTCCPacketReceivedSmallDelta ||
 				packetStatus.PacketStatusSymbol == TypeTCCPacketReceivedLargeDelta {
-				for j := uint16(0); j < packetNumberToProcess; j++ {
+				for range packetNumberToProcess {
 					t.RecvDeltas = append(t.RecvDeltas, &RecvDelta{Type: packetStatus.PacketStatusSymbol})
 				}
 			}

@@ -6,6 +6,7 @@ package rtcp
 import (
 	"encoding/binary"
 	"fmt"
+	"strings"
 )
 
 // A FIREntry is a (SSRC, seqno) pair, as carried by FullIntraRequest.
@@ -99,13 +100,14 @@ func (p *FullIntraRequest) MarshalSize() int {
 }
 
 func (p *FullIntraRequest) String() string {
-	out := fmt.Sprintf("FullIntraRequest %x %x",
+	var out strings.Builder
+	fmt.Fprintf(&out, "FullIntraRequest %x %x",
 		p.SenderSSRC, p.MediaSSRC)
 	for _, e := range p.FIR {
-		out += fmt.Sprintf(" (%x %v)", e.SSRC, e.SequenceNumber)
+		fmt.Fprintf(&out, " (%x %v)", e.SSRC, e.SequenceNumber)
 	}
 
-	return out
+	return out.String()
 }
 
 // DestinationSSRC returns an array of SSRC values that this packet refers to.

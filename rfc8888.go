@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 )
 
 // https://www.rfc-editor.org/rfc/rfc8888.html#name-rtcp-congestion-control-fee
@@ -164,16 +165,17 @@ func (b CCFeedbackReport) Marshal() ([]byte, error) {
 }
 
 func (b CCFeedbackReport) String() string {
-	out := fmt.Sprintf("CCFB:\n\tHeader %v\n", b.Header())
-	out += fmt.Sprintf("CCFB:\n\tSender SSRC %d\n", b.SenderSSRC)
-	out += fmt.Sprintf("\tReport Timestamp %d\n", b.ReportTimestamp)
-	out += "\tFeedback Reports \n"
+	var out strings.Builder
+	fmt.Fprintf(&out, "CCFB:\n\tHeader %v\n", b.Header())
+	fmt.Fprintf(&out, "CCFB:\n\tSender SSRC %d\n", b.SenderSSRC)
+	fmt.Fprintf(&out, "\tReport Timestamp %d\n", b.ReportTimestamp)
+	out.WriteString("\tFeedback Reports \n")
 	for _, report := range b.ReportBlocks {
-		out += fmt.Sprintf("%v ", report)
+		fmt.Fprintf(&out, "%v ", report)
 	}
-	out += "\n"
+	out.WriteString("\n")
 
-	return out
+	return out.String()
 }
 
 // Unmarshal decodes the Congestion Control Feedback Report from binary.
@@ -237,22 +239,21 @@ func (b *CCFeedbackReportBlock) len() int {
 }
 
 func (b CCFeedbackReportBlock) String() string {
-	out := fmt.Sprintf("\tReport Block Media SSRC %d\n", b.MediaSSRC)
-	out += fmt.Sprintf("\tReport Begin Sequence Nr %d\n", b.BeginSequence)
-	out += fmt.Sprintf("\tReport length %d\n\t", len(b.MetricBlocks))
+	var out strings.Builder
+	fmt.Fprintf(&out, "\tReport Block Media SSRC %d\n", b.MediaSSRC)
+	fmt.Fprintf(&out, "\tReport Begin Sequence Nr %d\n", b.BeginSequence)
+	fmt.Fprintf(&out, "\tReport length %d\n\t", len(b.MetricBlocks))
 	for i, block := range b.MetricBlocks {
 		//nolint:gosec // G115
-		out += fmt.Sprintf(
-			"{nr: %d, rx: %v, ts: %v, ecn: %v} ",
+		fmt.Fprintf(&out, "{nr: %d, rx: %v, ts: %v, ecn: %v} ",
 			b.BeginSequence+uint16(i),
 			block.Received,
 			block.ArrivalTimeOffset,
-			block.ECN,
-		)
+			block.ECN)
 	}
-	out += "\n"
+	out.WriteString("\n")
 
-	return out
+	return out.String()
 }
 
 // marshal encodes the Congestion Control Feedback Report Block in binary.
@@ -301,7 +302,7 @@ func (b *CCFeedbackReportBlock) unmarshal(rawPacket []byte) error {
 	}
 
 	b.MetricBlocks = make([]CCFeedbackMetricBlock, numReports)
-	for i := int(0); i < numReports; i++ {
+	for i := range numReports {
 		var mb CCFeedbackMetricBlock
 		offset := reportsOffset + 2*i
 		if err := mb.unmarshal(rawPacket[offset : offset+2]); err != nil {

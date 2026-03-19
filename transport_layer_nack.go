@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+	"strings"
 )
 
 // PacketBitmap shouldn't be used like a normal integral,
@@ -171,14 +172,15 @@ func (p *TransportLayerNack) Header() Header {
 }
 
 func (p TransportLayerNack) String() string {
-	out := fmt.Sprintf("TransportLayerNack from %x\n", p.SenderSSRC)
-	out += fmt.Sprintf("\tMedia Ssrc %x\n", p.MediaSSRC)
-	out += "\tID\tLostPackets\n"
+	var out strings.Builder
+	fmt.Fprintf(&out, "TransportLayerNack from %x\n", p.SenderSSRC)
+	fmt.Fprintf(&out, "\tMedia Ssrc %x\n", p.MediaSSRC)
+	out.WriteString("\tID\tLostPackets\n")
 	for _, i := range p.Nacks {
-		out += fmt.Sprintf("\t%d\t%b\n", i.PacketID, i.LostPackets)
+		fmt.Fprintf(&out, "\t%d\t%b\n", i.PacketID, i.LostPackets)
 	}
 
-	return out
+	return out.String()
 }
 
 // DestinationSSRC returns an array of SSRC values that this packet refers to.

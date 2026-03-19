@@ -45,7 +45,7 @@ func formatField(name string, format string, f any, indent string) string {
 		return fmt.Sprintf("%s%s: <nil>\n", out, name)
 	}
 
-	isPacket := reflect.TypeOf(f).Implements(reflect.TypeOf((*Packet)(nil)).Elem())
+	isPacket := reflect.TypeOf(f).Implements(reflect.TypeFor[Packet]())
 
 	// Resolve pointers to their underlying values
 	if value.Type().Kind() == reflect.Ptr && !value.IsNil() {
