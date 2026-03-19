@@ -6,6 +6,7 @@ package rtcp
 import (
 	"encoding/binary"
 	"fmt"
+	"strings"
 )
 
 // The Goodbye packet indicates that one or more sources are no longer active.
@@ -154,11 +155,12 @@ func (g *Goodbye) DestinationSSRC() []uint32 {
 }
 
 func (g Goodbye) String() string {
-	out := "Goodbye\n"
+	var out strings.Builder
+	out.WriteString("Goodbye\n")
 	for i, s := range g.Sources {
-		out += fmt.Sprintf("\tSource %d: %x\n", i, s)
+		fmt.Fprintf(&out, "\tSource %d: %x\n", i, s)
 	}
-	out += fmt.Sprintf("\tReason: %s\n", g.Reason)
+	fmt.Fprintf(&out, "\tReason: %s\n", g.Reason)
 
-	return out
+	return out.String()
 }

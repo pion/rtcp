@@ -169,7 +169,7 @@ func TestReceiverReportUnmarshal(t *testing.T) {
 func tooManyReports() []ReceptionReport {
 	// a slice with enough ReceptionReports to overflow an 5-bit int
 	var tooManyReports []ReceptionReport
-	for i := 0; i < (1 << 5); i++ {
+	for range 1 << 5 {
 		tooManyReports = append(tooManyReports, ReceptionReport{
 			SSRC:               2,
 			FractionLost:       2,

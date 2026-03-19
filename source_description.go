@@ -6,6 +6,7 @@ package rtcp
 import (
 	"encoding/binary"
 	"fmt"
+	"strings"
 )
 
 // SDESType is the item type used in the RTCP SDES control packet.
@@ -365,10 +366,11 @@ func (s *SourceDescription) DestinationSSRC() []uint32 {
 }
 
 func (s *SourceDescription) String() string {
-	out := "Source Description:\n"
+	var out strings.Builder
+	out.WriteString("Source Description:\n")
 	for _, c := range s.Chunks {
-		out += fmt.Sprintf("\t%x: %s\n", c.Source, c.Items)
+		fmt.Fprintf(&out, "\t%x: %s\n", c.Source, c.Items)
 	}
 
-	return out
+	return out.String()
 }

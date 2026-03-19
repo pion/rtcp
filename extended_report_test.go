@@ -229,7 +229,7 @@ func TestEncode(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, len(expected), len(rawPacket), "Encoded message length does not match expected length")
 
-	for i := 0; i < len(rawPacket); i++ {
+	for i := range rawPacket {
 		assert.Equalf(t, expected[i], rawPacket[i], "Byte %d of encoded packet does not match", i)
 	}
 }

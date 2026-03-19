@@ -61,7 +61,6 @@ func TestSetNBitsOfUint16(t *testing.T) {
 			"setOneBitOutOfBounds", 32768, 2, 15, 1, 0, errInvalidSizeOrStartIndex,
 		},
 	} {
-		test := test
 		t.Run(test.name, func(t *testing.T) {
 			got, err := setNBitsOfUint16(test.source, test.size, test.index, test.value)
 			if test.expectedErr != nil {

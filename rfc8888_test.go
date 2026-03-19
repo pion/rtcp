@@ -74,7 +74,6 @@ func TestCCFeedbackMetricBlockUnmarshalMarshal(t *testing.T) {
 			},
 		},
 	} {
-		test := test
 		t.Run(fmt.Sprintf("Unmarshal-%v", test.Name), func(t *testing.T) {
 			var block CCFeedbackMetricBlock
 			err := block.unmarshal(test.Data)
@@ -112,7 +111,6 @@ func TestCCFeedbackMetricBlockUnmarshalMarshal(t *testing.T) {
 			},
 		},
 	} {
-		test := test
 		t.Run(fmt.Sprintf("Unmarshal-%v", test.Name), func(t *testing.T) {
 			var block CCFeedbackMetricBlock
 			err := block.unmarshal(test.Data)
@@ -122,7 +120,6 @@ func TestCCFeedbackMetricBlockUnmarshalMarshal(t *testing.T) {
 	}
 
 	for _, l := range []int{0, 1, 3} {
-		l := l
 		t.Run(fmt.Sprintf("shortMetricBlock-%v", l), func(t *testing.T) {
 			var block CCFeedbackMetricBlock
 			data := make([]byte, l)
@@ -248,7 +245,6 @@ func TestCCFeedbackReportBlockUnmarshalMarshal(t *testing.T) {
 			},
 		},
 	} {
-		test := test
 		t.Run(fmt.Sprintf("Unmarshal-%v", test.Name), func(t *testing.T) {
 			var block CCFeedbackReportBlock
 			err := block.unmarshal(test.Data)
@@ -409,7 +405,6 @@ func TestCCFeedbackReportUnmarshalMarshal(t *testing.T) {
 			},
 		},
 	} {
-		test := test
 		t.Run(fmt.Sprintf("Unmarshal-%v", test.Name), func(t *testing.T) {
 			pkts, err := Unmarshal(test.Data)
 			assert.NoError(t, err)

@@ -4,6 +4,7 @@
 package rtcp
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -125,13 +126,13 @@ func TestGoodbyeUnmarshal(t *testing.T) {
 func TestGoodbyeRoundTrip(t *testing.T) {
 	// a slice with enough sources to overflow an 5-bit int
 	var tooManySources []uint32
-	var tooLongText string
+	var tooLongText strings.Builder
 
-	for i := 0; i < (1 << 5); i++ {
+	for range 1 << 5 {
 		tooManySources = append(tooManySources, 0x00)
 	}
-	for i := 0; i < (1 << 8); i++ {
-		tooLongText += "x"
+	for range 1 << 8 {
+		tooLongText.WriteString("x")
 	}
 
 	for _, test := range []struct {
@@ -187,7 +188,7 @@ func TestGoodbyeRoundTrip(t *testing.T) {
 			Name: "reason too long",
 			Bye: Goodbye{
 				Sources: []uint32{},
-				Reason:  tooLongText,
+				Reason:  tooLongText.String(),
 			},
 			WantError: errReasonTooLong,
 		},
