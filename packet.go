@@ -3,6 +3,31 @@
 
 package rtcp
 
+import "fmt"
+
+var packetTypeNames = map[PacketType]string{
+	TypeSenderReport:       "SenderReport",
+	TypeReceiverReport:     "ReceiverReport",
+	TypeSourceDescription:  "SourceDescription",
+	TypeGoodbye:            "Goodbye",
+	TypeExtendedReport:     "ExtendedReport",
+	TypeApplicationDefined: "ApplicationDefined",
+}
+
+var transportSpecificFeedbackNames = map[uint8]string{
+	FormatTLN:  "TransportLayerNack",
+	FormatRRR:  "RapidResynchronizationRequest",
+	FormatTCC:  "TransportLayerCC",
+	FormatCCFB: "CCFeedbackReport",
+}
+
+var payloadSpecificFeedbackNames = map[uint8]string{
+	FormatPLI:  "PictureLossIndication",
+	FormatSLI:  "SliceLossIndication",
+	FormatREMB: "ReceiverEstimatedMaximumBitrate",
+	FormatFIR:  "FullIntraRequest",
+}
+
 // Packet represents an RTCP packet, a protocol used for out-of-band statistics
 // and control information for an RTP session.
 type Packet interface {
@@ -70,7 +95,7 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 
 	bytesprocessed = int(header.Length+1) * 4
 	if bytesprocessed > len(rawData) {
-		return nil, 0, errPacketTooShort
+		return nil, 0, errPacketTooShortFor(packetNameFromHeader(header))
 	}
 	inPacket := rawData[:bytesprocessed]
 
@@ -128,4 +153,36 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 	err = packet.Unmarshal(inPacket)
 
 	return packet, bytesprocessed, err
+}
+
+func packetNameFromHeader(header Header) string {
+	if header.Type == TypeTransportSpecificFeedback {
+		return transportSpecificFeedbackName(header.Count)
+	}
+
+	if header.Type == TypePayloadSpecificFeedback {
+		return payloadSpecificFeedbackName(header.Count)
+	}
+
+	if name, ok := packetTypeNames[header.Type]; ok {
+		return name
+	}
+
+	return fmt.Sprintf("PacketType(%d)", header.Type)
+}
+
+func transportSpecificFeedbackName(count uint8) string {
+	if name, ok := transportSpecificFeedbackNames[count]; ok {
+		return name
+	}
+
+	return fmt.Sprintf("TransportSpecificFeedback(FMT=%d)", count)
+}
+
+func payloadSpecificFeedbackName(count uint8) string {
+	if name, ok := payloadSpecificFeedbackNames[count]; ok {
+		return name
+	}
+
+	return fmt.Sprintf("PayloadSpecificFeedback(FMT=%d)", count)
 }

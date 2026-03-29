@@ -242,7 +242,7 @@ func (s *SourceDescriptionChunk) Unmarshal(rawPacket []byte) error {
 	 */
 
 	if len(rawPacket) < (sdesSourceLen + sdesTypeLen) {
-		return errPacketTooShort
+		return errPacketTooShortFor(s)
 	}
 
 	s.Source = binary.BigEndian.Uint32(rawPacket)
@@ -260,7 +260,7 @@ func (s *SourceDescriptionChunk) Unmarshal(rawPacket []byte) error {
 		i += it.Len()
 	}
 
-	return errPacketTooShort
+	return errPacketTooShortFor(s)
 }
 
 func (s SourceDescriptionChunk) len() int {
@@ -339,14 +339,14 @@ func (s *SourceDescriptionItem) Unmarshal(rawPacket []byte) error {
 	 */
 
 	if len(rawPacket) < (sdesTypeLen + sdesOctetCountLen) {
-		return errPacketTooShort
+		return errPacketTooShortFor(s)
 	}
 
 	s.Type = SDESType(rawPacket[sdesTypeOffset])
 
 	octetCount := int(rawPacket[sdesOctetCountOffset])
 	if sdesTextOffset+octetCount > len(rawPacket) {
-		return errPacketTooShort
+		return errPacketTooShortFor(s)
 	}
 
 	txtBytes := rawPacket[sdesTextOffset : sdesTextOffset+octetCount]

@@ -181,7 +181,7 @@ func (b CCFeedbackReport) String() string {
 // Unmarshal decodes the Congestion Control Feedback Report from binary.
 func (b *CCFeedbackReport) Unmarshal(rawPacket []byte) error {
 	if len(rawPacket) < headerLength+ssrcLength+reportTimestampLength {
-		return errPacketTooShort
+		return errPacketTooShortFor(b)
 	}
 
 	var h Header

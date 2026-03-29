@@ -136,4 +136,5 @@ func TestInvalidHeaderLength(t *testing.T) {
 
 	_, err := Unmarshal(invalidPacket)
 	assert.ErrorIs(t, err, errPacketTooShort)
+	assert.Contains(t, err.Error(), "ReceiverReport")
 }

@@ -52,7 +52,7 @@ func (p FullIntraRequest) Marshal() ([]byte, error) {
 // Unmarshal decodes the TransportLayerNack.
 func (p *FullIntraRequest) Unmarshal(rawPacket []byte) error {
 	if len(rawPacket) < (headerLength + ssrcLength) {
-		return errPacketTooShort
+		return errPacketTooShortFor(p)
 	}
 
 	var header Header
@@ -61,7 +61,7 @@ func (p *FullIntraRequest) Unmarshal(rawPacket []byte) error {
 	}
 
 	if len(rawPacket) < (headerLength + int(4*header.Length)) {
-		return errPacketTooShort
+		return errPacketTooShortFor(p)
 	}
 
 	if header.Type != TypePayloadSpecificFeedback || header.Count != FormatFIR {
