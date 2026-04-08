@@ -124,7 +124,7 @@ func (p TransportLayerNack) Marshal() ([]byte, error) {
 // Unmarshal decodes the TransportLayerNack from binary.
 func (p *TransportLayerNack) Unmarshal(rawPacket []byte) error {
 	if len(rawPacket) < (headerLength + ssrcLength) {
-		return errPacketTooShort
+		return errPacketTooShortFor(p)
 	}
 
 	var header Header
@@ -133,7 +133,7 @@ func (p *TransportLayerNack) Unmarshal(rawPacket []byte) error {
 	}
 
 	if len(rawPacket) < (headerLength + int(4*header.Length)) {
-		return errPacketTooShort
+		return errPacketTooShortFor(p)
 	}
 
 	if header.Type != TypeTransportSpecificFeedback || header.Count != FormatTLN {

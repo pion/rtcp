@@ -123,7 +123,7 @@ func (h Header) Marshal() ([]byte, error) {
 // Unmarshal decodes the Header from binary.
 func (h *Header) Unmarshal(rawPacket []byte) error {
 	if len(rawPacket) < headerLength {
-		return errPacketTooShort
+		return errPacketTooShortFor(h)
 	}
 
 	/*

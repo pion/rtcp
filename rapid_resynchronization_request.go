@@ -54,7 +54,7 @@ func (p RapidResynchronizationRequest) Marshal() ([]byte, error) {
 // Unmarshal decodes the RapidResynchronizationRequest from binary.
 func (p *RapidResynchronizationRequest) Unmarshal(rawPacket []byte) error {
 	if len(rawPacket) < (headerLength + (ssrcLength * 2)) {
-		return errPacketTooShort
+		return errPacketTooShortFor(p)
 	}
 
 	var h Header

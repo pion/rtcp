@@ -53,7 +53,7 @@ func (p PictureLossIndication) Marshal() ([]byte, error) {
 // Unmarshal decodes the PictureLossIndication from binary.
 func (p *PictureLossIndication) Unmarshal(rawPacket []byte) error {
 	if len(rawPacket) < (headerLength + (ssrcLength * 2)) {
-		return errPacketTooShort
+		return errPacketTooShortFor(p)
 	}
 
 	var h Header

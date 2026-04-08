@@ -3,7 +3,11 @@
 
 package rtcp
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"reflect"
+)
 
 var (
 	errWrongMarshalSize         = errors.New("rtcp: wrong marshal size")
@@ -40,3 +44,53 @@ var (
 	errAppDefinedDataTooLarge   = errors.New("rtcp: application defined data is too large")
 	errAppDefinedInvalidName    = errors.New("rtcp: application defined name must be 4 ASCII chars")
 )
+
+type packetTooShortError struct {
+	packet string
+}
+
+func (e packetTooShortError) Error() string {
+	if e.packet == "" {
+		return errPacketTooShort.Error()
+	}
+
+	return fmt.Sprintf("%s (%s)", errPacketTooShort.Error(), e.packet)
+}
+
+func (e packetTooShortError) Unwrap() error {
+	return errPacketTooShort
+}
+
+func errPacketTooShortFor(packet any) error {
+	name := packetTypeName(packet)
+	if name == "" {
+		return errPacketTooShort
+	}
+
+	return packetTooShortError{packet: name}
+}
+
+func packetTypeName(packet any) string {
+	if packet == nil {
+		return ""
+	}
+
+	if name, ok := packet.(string); ok {
+		return name
+	}
+
+	typ := reflect.TypeOf(packet)
+	if typ == nil {
+		return ""
+	}
+
+	for typ.Kind() == reflect.Pointer {
+		typ = typ.Elem()
+	}
+
+	if typ.Name() != "" {
+		return typ.Name()
+	}
+
+	return typ.String()
+}

@@ -91,14 +91,14 @@ func (g *Goodbye) Unmarshal(rawPacket []byte) error {
 	}
 
 	if getPadding(len(rawPacket)) != 0 {
-		return errPacketTooShort
+		return errPacketTooShortFor(g)
 	}
 
 	g.Sources = make([]uint32, header.Count)
 
 	reasonOffset := int(headerLength + header.Count*ssrcLength)
 	if reasonOffset > len(rawPacket) {
-		return errPacketTooShort
+		return errPacketTooShortFor(g)
 	}
 
 	for i := 0; i < int(header.Count); i++ {
@@ -112,7 +112,7 @@ func (g *Goodbye) Unmarshal(rawPacket []byte) error {
 		reasonEnd := reasonOffset + 1 + reasonLen
 
 		if reasonEnd > len(rawPacket) {
-			return errPacketTooShort
+			return errPacketTooShortFor(g)
 		}
 
 		g.Reason = string(rawPacket[reasonOffset+1 : reasonEnd])

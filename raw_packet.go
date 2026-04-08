@@ -17,7 +17,7 @@ func (r RawPacket) Marshal() ([]byte, error) {
 // Unmarshal decodes the packet from binary.
 func (r *RawPacket) Unmarshal(b []byte) error {
 	if len(b) < (headerLength) {
-		return errPacketTooShort
+		return errPacketTooShortFor(r)
 	}
 	*r = b
 
