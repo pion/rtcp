@@ -111,3 +111,16 @@ func TestSliceLossIndicationRoundTrip(t *testing.T) {
 		assert.Equalf(t, test.Report, decoded, "%q sli round trip mismatch", test.Name)
 	}
 }
+
+func TestSliceLossIndicationUnmarshalMaxLength(t *testing.T) {
+	rawPacket := make([]byte, 4*(0xFFFF+1))
+	rawPacket[0] = 0x82
+	rawPacket[1] = 0xcd
+	rawPacket[2] = 0xff
+	rawPacket[3] = 0xff
+
+	var sli SliceLossIndication
+	err := sli.Unmarshal(rawPacket)
+	assert.NoError(t, err)
+	assert.Len(t, sli.SLI, 0xFFFF-sliLength)
+}

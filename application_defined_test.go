@@ -246,3 +246,18 @@ func TestTApplicationPacketMarshal(t *testing.T) {
 		assert.Equalf(t, marshalSize, len(rawPacket), "MarshalSize %q", test.Name)
 	}
 }
+
+func TestTApplicationPacketUnmarshalMaxLength(t *testing.T) {
+	rawPacket := make([]byte, 4*(0xFFFF+1))
+	rawPacket[0] = 0x80
+	rawPacket[1] = 0xcc
+	rawPacket[2] = 0xff
+	rawPacket[3] = 0xff
+	copy(rawPacket[8:12], []byte("NAME"))
+
+	var packet ApplicationDefined
+	err := packet.Unmarshal(rawPacket)
+	assert.NoError(t, err)
+	assert.Equal(t, "NAME", packet.Name)
+	assert.Len(t, packet.Data, len(rawPacket)-12)
+}

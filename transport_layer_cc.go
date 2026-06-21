@@ -472,13 +472,13 @@ func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error {
 
 	// https://tools.ietf.org/html/rfc4585#page-33
 	// header's length + payload's length
-	totalLength := 4 * (t.Header.Length + 1)
+	totalLength := 4 * (int(t.Header.Length) + 1)
 
 	if totalLength < headerLength+packetChunkOffset {
 		return errPacketTooShort
 	}
 
-	if len(rawPacket) < int(totalLength) {
+	if len(rawPacket) < totalLength {
 		return errPacketTooShort
 	}
 
@@ -493,7 +493,7 @@ func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error {
 	t.ReferenceTime = get24BitsFromBytes(rawPacket[headerLength+referenceTimeOffset : headerLength+referenceTimeOffset+3])
 	t.FbPktCount = rawPacket[headerLength+fbPktCountOffset]
 
-	packetStatusPos := uint16(headerLength + packetChunkOffset)
+	packetStatusPos := int(headerLength + packetChunkOffset)
 	var processedPacketNum uint16
 	for processedPacketNum < t.PacketStatusCount {
 		if packetStatusPos+packetStatusChunkLength >= totalLength {

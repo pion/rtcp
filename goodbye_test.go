@@ -204,3 +204,23 @@ func TestGoodbyeRoundTrip(t *testing.T) {
 		assert.Equalf(t, test.Bye, bye, "%q bye round trip mismatch", test.Name)
 	}
 }
+
+func TestGoodbyeRoundTripMaxFieldSizes(t *testing.T) {
+	sources := make([]uint32, countMax)
+	for i := range sources {
+		sources[i] = uint32(i + 1)
+	}
+
+	bye := Goodbye{
+		Sources: sources,
+		Reason:  strings.Repeat("x", sdesMaxOctetCount),
+	}
+
+	data, err := bye.Marshal()
+	assert.NoError(t, err)
+	assert.Len(t, data, bye.MarshalSize())
+
+	var decoded Goodbye
+	assert.NoError(t, decoded.Unmarshal(data))
+	assert.Equal(t, bye, decoded)
+}

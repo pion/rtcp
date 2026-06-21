@@ -4,6 +4,7 @@
 package rtcp
 
 import (
+	"bytes"
 	"slices"
 	"testing"
 
@@ -278,4 +279,30 @@ func TestSenderReportRoundTrip(t *testing.T) {
 		assert.NoErrorf(t, decoded.Unmarshal(data), "Unmarshal %q", test.Name)
 		assert.Equalf(t, test.Report, decoded, "%q sr round trip", test.Name)
 	}
+}
+
+func TestSenderReportRoundTripMaxLength(t *testing.T) {
+	report := SenderReport{
+		SSRC:        1,
+		NTPTime:     2,
+		RTPTime:     3,
+		PacketCount: 4,
+		OctetCount:  5,
+		Reports:     make([]ReceptionReport, countMax),
+	}
+
+	for i := range report.Reports {
+		report.Reports[i] = ReceptionReport{SSRC: uint32(i + 1)}
+	}
+
+	baseSize := report.MarshalSize()
+	report.ProfileExtensions = bytes.Repeat([]byte{0xab}, 4*(0xFFFF+1)-baseSize)
+
+	data, err := report.Marshal()
+	assert.NoError(t, err)
+	assert.Len(t, data, 4*(0xFFFF+1))
+
+	var decoded SenderReport
+	assert.NoError(t, decoded.Unmarshal(data))
+	assert.Equal(t, report, decoded)
 }

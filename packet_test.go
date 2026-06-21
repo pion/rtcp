@@ -137,3 +137,19 @@ func TestInvalidHeaderLength(t *testing.T) {
 	_, err := Unmarshal(invalidPacket)
 	assert.ErrorIs(t, err, errPacketTooShort)
 }
+
+func TestUnmarshalMaxLengthRawPacket(t *testing.T) {
+	rawPacket := make([]byte, 4*(0xFFFF+1))
+	rawPacket[0] = 0x80
+	rawPacket[1] = 0xfa
+	rawPacket[2] = 0xff
+	rawPacket[3] = 0xff
+
+	packets, err := Unmarshal(rawPacket)
+	assert.NoError(t, err)
+	assert.Len(t, packets, 1)
+
+	parsed, ok := packets[0].(*RawPacket)
+	assert.True(t, ok)
+	assert.Equal(t, rawPacket, []byte(*parsed))
+}

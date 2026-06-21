@@ -259,3 +259,17 @@ func TestReceiverReportRoundTrip(t *testing.T) {
 		assert.Equalf(t, test.Report, decoded, "%s rr round trip mismatch", test.Name)
 	}
 }
+
+func TestReceiverReportUnmarshalMaxLength(t *testing.T) {
+	rawPacket := make([]byte, 4*(0xFFFF+1))
+	rawPacket[0] = 0x80 | countMax
+	rawPacket[1] = 0xc9
+	rawPacket[2] = 0xff
+	rawPacket[3] = 0xff
+
+	var rr ReceiverReport
+	err := rr.Unmarshal(rawPacket)
+	assert.NoError(t, err)
+	assert.Len(t, rr.Reports, countMax)
+	assert.Len(t, rr.ProfileExtensions, len(rawPacket)-rrReportOffset-countMax*receptionReportLength)
+}

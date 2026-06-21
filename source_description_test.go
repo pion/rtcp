@@ -340,3 +340,38 @@ func TestSourceDescriptionRoundTrip(t *testing.T) {
 		assert.Equalf(t, test.Desc, decoded, "%s sdes round trip mismatch", test.Name)
 	}
 }
+
+func TestSourceDescriptionRoundTripMaxLength(t *testing.T) {
+	const maxPacketLength = 4 * (0xFFFF + 1)
+	remainingItemBytes := maxPacketLength - headerLength - sdesSourceLen - sdesTypeLen
+	fullItemLength := sdesTypeLen + sdesOctetCountLen + sdesMaxOctetCount
+	fullItemCount := remainingItemBytes / fullItemLength
+	lastItemLength := remainingItemBytes % fullItemLength
+
+	items := make([]SourceDescriptionItem, 0, fullItemCount+1)
+	maxText := strings.Repeat("x", sdesMaxOctetCount)
+	for range fullItemCount {
+		items = append(items, SourceDescriptionItem{Type: SDESNote, Text: maxText})
+	}
+	if lastItemLength > 0 {
+		items = append(items, SourceDescriptionItem{
+			Type: SDESNote,
+			Text: strings.Repeat("y", lastItemLength-sdesTypeLen-sdesOctetCountLen),
+		})
+	}
+
+	desc := SourceDescription{
+		Chunks: []SourceDescriptionChunk{{
+			Source: 1,
+			Items:  items,
+		}},
+	}
+
+	data, err := desc.Marshal()
+	assert.NoError(t, err)
+	assert.Len(t, data, maxPacketLength)
+
+	var decoded SourceDescription
+	assert.NoError(t, decoded.Unmarshal(data))
+	assert.Equal(t, desc, decoded)
+}

@@ -68,7 +68,7 @@ func unmarshal(rawData []byte) (packet Packet, bytesprocessed int, err error) {
 		return nil, 0, err
 	}
 
-	bytesprocessed = int(header.Length+1) * 4
+	bytesprocessed = (int(header.Length) + 1) * 4
 	if bytesprocessed > len(rawData) {
 		return nil, 0, errPacketTooShort
 	}

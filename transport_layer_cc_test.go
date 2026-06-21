@@ -47,6 +47,20 @@ func TestTransportLayerCC_RunLengthChunkUnmarshal(t *testing.T) {
 	}
 }
 
+func TestTransportLayerCCUnmarshalMaxLength(t *testing.T) {
+	rawPacket := make([]byte, 4*(0xFFFF+1))
+	rawPacket[0] = 0x8f
+	rawPacket[1] = 0xcd
+	rawPacket[2] = 0xff
+	rawPacket[3] = 0xff
+
+	var packet TransportLayerCC
+	err := packet.Unmarshal(rawPacket)
+	assert.NoError(t, err)
+	assert.Equal(t, uint16(0xFFFF), packet.Header.Length)
+	assert.Zero(t, packet.PacketStatusCount)
+}
+
 func TestTransportLayerCC_RunLengthChunkMarshal(t *testing.T) {
 	for _, test := range []struct {
 		Name      string

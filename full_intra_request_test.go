@@ -229,3 +229,16 @@ func TestFullIntraRequestUnmarshalHeader(t *testing.T) {
 		assert.Equalf(t, test.Want, fir.Header(), "Unmarshal header %q rr mismatch", test.Name)
 	}
 }
+
+func TestFullIntraRequestUnmarshalMaxLength(t *testing.T) {
+	rawPacket := make([]byte, headerLength+4*0xFFFE)
+	rawPacket[0] = 0x84
+	rawPacket[1] = 0xce
+	rawPacket[2] = 0xff
+	rawPacket[3] = 0xfe
+
+	var fir FullIntraRequest
+	err := fir.Unmarshal(rawPacket)
+	assert.NoError(t, err)
+	assert.Len(t, fir.FIR, (4*0xFFFE-firOffset)/8)
+}

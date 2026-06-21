@@ -145,7 +145,7 @@ func (b CCFeedbackReport) Marshal() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	length := 4 * (header.Length + 1)
+	length := 4 * (int(header.Length) + 1)
 	buf := make([]byte, length)
 	copy(buf[:headerLength], headerBuf)
 	binary.BigEndian.PutUint32(buf[headerLength:], b.SenderSSRC)

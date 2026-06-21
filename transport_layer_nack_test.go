@@ -117,6 +117,19 @@ func TestTransportLayerNackRoundTrip(t *testing.T) {
 	}
 }
 
+func TestTransportLayerNackUnmarshalMaxLength(t *testing.T) {
+	rawPacket := make([]byte, 4*(0xFFFF+1))
+	rawPacket[0] = 0x81
+	rawPacket[1] = 0xcd
+	rawPacket[2] = 0xff
+	rawPacket[3] = 0xff
+
+	var nack TransportLayerNack
+	err := nack.Unmarshal(rawPacket)
+	assert.NoError(t, err)
+	assert.Len(t, nack.Nacks, 0xFFFF-tlnLength)
+}
+
 func testNackPair(t *testing.T, s []uint16, n NackPair) {
 	t.Helper()
 

@@ -440,3 +440,28 @@ func TestCCFeedbackOverflow(t *testing.T) {
 	}, bytes.Repeat([]byte{0, 0}, 0x7FFF)...))
 	assert.ErrorIs(t, err, errReportBlockLength)
 }
+
+func TestCCFeedbackReportMarshalMaxLength(t *testing.T) {
+	report := CCFeedbackReport{
+		SenderSSRC:      1,
+		ReportTimestamp: 2,
+		ReportBlocks:    make([]CCFeedbackReportBlock, 8),
+	}
+
+	for i := range 7 {
+		report.ReportBlocks[i] = CCFeedbackReportBlock{
+			MediaSSRC:    uint32(i + 1),
+			MetricBlocks: make([]CCFeedbackMetricBlock, maxMetricBlocks),
+		}
+	}
+	report.ReportBlocks[7] = CCFeedbackReportBlock{
+		MediaSSRC:    8,
+		MetricBlocks: make([]CCFeedbackMetricBlock, 16346),
+	}
+
+	buf, err := report.Marshal()
+	assert.NoError(t, err)
+	assert.Len(t, buf, 4*(0xFFFF+1))
+	assert.Equal(t, []byte{0x8b, 0xcd, 0xff, 0xff}, buf[:4])
+	assert.Equal(t, []byte{0x00, 0x00, 0x00, 0x02}, buf[len(buf)-4:])
+}
