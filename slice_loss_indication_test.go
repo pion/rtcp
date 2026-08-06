@@ -22,7 +22,7 @@ func TestSliceLossIndicationUnmarshal(t *testing.T) {
 			Name: "valid",
 			Data: []byte{
 				// SliceLossIndication
-				0x82, 0xcd, 0x0, 0x3,
+				0x82, 0xce, 0x0, 0x3,
 				// sender=0x902f9e2e
 				0x90, 0x2f, 0x9e, 0x2e,
 				// media=0x902f9e2e
@@ -39,7 +39,7 @@ func TestSliceLossIndicationUnmarshal(t *testing.T) {
 		{
 			Name: "short report",
 			Data: []byte{
-				0x81, 0xcd, 0x0, 0x2,
+				0x81, 0xce, 0x0, 0x2,
 				// ssrc=0x902f9e2e
 				0x90, 0x2f, 0x9e, 0x2e,
 				// report ends early
@@ -115,7 +115,7 @@ func TestSliceLossIndicationRoundTrip(t *testing.T) {
 func TestSliceLossIndicationUnmarshalMaxLength(t *testing.T) {
 	rawPacket := make([]byte, 4*(0xFFFF+1))
 	rawPacket[0] = 0x82
-	rawPacket[1] = 0xcd
+	rawPacket[1] = 0xce
 	rawPacket[2] = 0xff
 	rawPacket[3] = 0xff
 

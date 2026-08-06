@@ -76,7 +76,7 @@ func (p *SliceLossIndication) Unmarshal(rawPacket []byte) error {
 		return errPacketTooShort
 	}
 
-	if header.Type != TypeTransportSpecificFeedback || header.Count != FormatSLI {
+	if header.Type != TypePayloadSpecificFeedback || header.Count != FormatSLI {
 		return errWrongType
 	}
 
@@ -103,7 +103,7 @@ func (p *SliceLossIndication) MarshalSize() int {
 func (p *SliceLossIndication) Header() Header {
 	return Header{
 		Count:  FormatSLI,
-		Type:   TypeTransportSpecificFeedback,
+		Type:   TypePayloadSpecificFeedback,
 		Length: uint16((p.MarshalSize() / 4) - 1), //nolint:gosec // G115
 	}
 }
