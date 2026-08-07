@@ -173,6 +173,7 @@ func (s *SourceDescription) Unmarshal(rawPacket []byte) error {
 	return nil
 }
 
+//nolint:cyclop
 func appendSourceDescriptionSSRCs(dst []uint32, header Header, pkt []byte) ([]uint32, error) {
 	if header.Type != TypeSourceDescription {
 		return dst, errWrongType
@@ -203,7 +204,7 @@ func appendSourceDescriptionSSRCs(dst []uint32, header Header, pkt []byte) ([]ui
 			}
 			itemOffset += sdesTypeLen + sdesOctetCountLen + octetCount
 		}
-		if chunkLen < 0 {
+		if chunkLen < 0 || chunkLen > len(chunk) {
 			return dst, errPacketTooShort
 		}
 		i += chunkLen
