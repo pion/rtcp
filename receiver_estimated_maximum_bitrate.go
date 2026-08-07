@@ -256,6 +256,33 @@ func (p *ReceiverEstimatedMaximumBitrate) Unmarshal(buf []byte) (err error) {
 	return nil
 }
 
+func appendREMBSSRCs(dst []uint32, header Header, pkt []byte) ([]uint32, error) {
+	if header.Type != TypePayloadSpecificFeedback || header.Count != FormatREMB {
+		return dst, errWrongType
+	}
+	if len(pkt) < 20 {
+		return dst, errPacketTooShort
+	}
+
+	// The unique identifier is the discriminator: FMT 15 is generic
+	// application layer feedback, of which REMB is only one kind.
+	if !bytes.Equal(pkt[12:16], []byte{'R', 'E', 'M', 'B'}) {
+		return dst, errMissingREMBidentifier
+	}
+
+	// The byte after the 'REMB' unique identifier is the number of SSRC
+	// entries at the end.
+	num := int(pkt[16])
+	if len(pkt) != 20+4*num {
+		return dst, errSSRCNumAndLengthMismatch
+	}
+	for n := 20; n < len(pkt); n += 4 {
+		dst = append(dst, binary.BigEndian.Uint32(pkt[n:n+4]))
+	}
+
+	return dst, nil
+}
+
 // Header returns the Header associated with this packet.
 func (p *ReceiverEstimatedMaximumBitrate) Header() Header {
 	return Header{

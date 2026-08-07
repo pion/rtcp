@@ -152,6 +152,30 @@ func (r *ReceiverReport) Unmarshal(rawPacket []byte) error {
 	return nil
 }
 
+func appendReceiverReportSSRCs(dst []uint32, header Header, pkt []byte) ([]uint32, error) {
+	if header.Type != TypeReceiverReport {
+		return dst, errWrongType
+	}
+	if len(pkt) < (headerLength + ssrcLength) {
+		return dst, errPacketTooShort
+	}
+
+	reports := 0
+	for i := rrReportOffset; i < len(pkt) && reports < int(header.Count); i += receptionReportLength {
+		var rr ReceptionReport
+		if err := rr.Unmarshal(pkt[i:]); err != nil {
+			return dst, err
+		}
+		dst = append(dst, rr.SSRC)
+		reports++
+	}
+	if reports != int(header.Count) {
+		return dst, errInvalidHeader
+	}
+
+	return dst, nil
+}
+
 // MarshalSize returns the size of the packet once marshaled.
 func (r *ReceiverReport) MarshalSize() int {
 	repsLength := 0

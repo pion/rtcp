@@ -219,6 +219,35 @@ func (r *SenderReport) Unmarshal(rawPacket []byte) error {
 	return nil
 }
 
+func appendSenderReportSSRCs(dst []uint32, header Header, pkt []byte) ([]uint32, error) {
+	if header.Type != TypeSenderReport {
+		return dst, errWrongType
+	}
+	// Reception report SSRCs, then the sender's own SSRC.
+	if len(pkt) < (headerLength + srHeaderLength) {
+		return dst, errPacketTooShort
+	}
+
+	packetBody := pkt[headerLength:]
+	offset := srReportOffset
+	for i := 0; i < int(header.Count); i++ {
+		rrEnd := offset + receptionReportLength
+		if rrEnd > len(packetBody) {
+			return dst, errPacketTooShort
+		}
+		rrBody := packetBody[offset : offset+receptionReportLength]
+		offset = rrEnd
+
+		var rr ReceptionReport
+		if err := rr.Unmarshal(rrBody); err != nil {
+			return dst, err
+		}
+		dst = append(dst, rr.SSRC)
+	}
+
+	return append(dst, binary.BigEndian.Uint32(packetBody[srSSRCOffset:])), nil
+}
+
 // DestinationSSRC returns an array of SSRC values that this packet refers to.
 func (r *SenderReport) DestinationSSRC() []uint32 {
 	out := make([]uint32, len(r.Reports)+1)

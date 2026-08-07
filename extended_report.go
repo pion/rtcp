@@ -4,6 +4,7 @@
 package rtcp
 
 import (
+	"encoding/binary"
 	"fmt"
 )
 
@@ -659,6 +660,51 @@ func (x *ExtendedReport) Unmarshal(b []byte) error {
 	}
 
 	return nil
+}
+
+const (
+	xrHeaderLength   = 4
+	dlrrReportLength = 12
+)
+
+func appendXRSSRCs(dst []uint32, header Header, pkt []byte) ([]uint32, error) {
+	if header.Type != TypeExtendedReport {
+		return dst, errWrongType
+	}
+	if len(pkt) < headerLength+ssrcLength {
+		return dst, errPacketTooShort
+	}
+	// The sender's SSRC, then one SSRC per report block that refers to a
+	// source (the receiver reference time block does not); see
+	// ExtendedReport for the packet layout.
+	dst = append(dst, binary.BigEndian.Uint32(pkt[headerLength:]))
+	for offset := headerLength + ssrcLength; offset < len(pkt); {
+		if offset+xrHeaderLength > len(pkt) {
+			return dst, errPacketTooShort
+		}
+		// Each block begins with an XRHeader.
+		blockLen := (int(binary.BigEndian.Uint16(pkt[offset+2:])) + 1) * 4
+		// A block whose declared length overruns the packet is truncated at
+		// the packet end, mirroring packetBuffer.split.
+		if offset+blockLen > len(pkt) {
+			blockLen = len(pkt) - offset
+		}
+		switch pkt[offset] {
+		case LossRLEReportBlockType, DuplicateRLEReportBlockType, PacketReceiptTimesReportBlockType,
+			StatisticsSummaryReportBlockType, VoIPMetricsReportBlockType:
+			if blockLen < xrHeaderLength+ssrcLength {
+				return dst, errPacketTooShort
+			}
+			dst = append(dst, binary.BigEndian.Uint32(pkt[offset+xrHeaderLength:]))
+		case DLRRReportBlockType:
+			for sub := offset + xrHeaderLength; sub+dlrrReportLength <= offset+blockLen; sub += dlrrReportLength {
+				dst = append(dst, binary.BigEndian.Uint32(pkt[sub:]))
+			}
+		}
+		offset += blockLen
+	}
+
+	return dst, nil
 }
 
 // DestinationSSRC returns an array of SSRC values that this packet refers to.

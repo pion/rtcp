@@ -110,6 +110,17 @@ func (a *ApplicationDefined) Unmarshal(rawPacket []byte) error {
 	return nil
 }
 
+func appendApplicationDefinedSSRCs(dst []uint32, header Header, pkt []byte) ([]uint32, error) {
+	if header.Type != TypeApplicationDefined {
+		return dst, errWrongType
+	}
+	if len(pkt) < 12 {
+		return dst, errPacketTooShort
+	}
+
+	return append(dst, binary.BigEndian.Uint32(pkt[4:8])), nil
+}
+
 // MarshalSize returns the size of the packet once marshaled.
 func (a *ApplicationDefined) MarshalSize() int {
 	dataLength := len(a.Data)
