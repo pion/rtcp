@@ -274,6 +274,61 @@ func TestAppendRawPacketsCapacity(t *testing.T) {
 	assert.Equal(t, second, []byte(raws[1]))
 }
 
+// One packet for every error return reachable through the method; the corpus
+// covers only valid packets.
+func TestParseDestinationSSRCInvalid(t *testing.T) {
+	for _, test := range []struct {
+		Name string
+		Data []byte
+	}{
+		{Name: "bad version", Data: []byte{0x00, 0xc8, 0x00, 0x00}},
+		{Name: "length field mismatch", Data: []byte{0x80, 0xc8, 0x00, 0x01}},
+		{Name: "sender report too short", Data: []byte{0x80, 0xc8, 0x00, 0x01, 0, 0, 0, 0}},
+		{Name: "sender report truncated report", Data: append([]byte{0x81, 0xc8, 0x00, 0x06}, make([]byte, 24)...)},
+		{Name: "receiver report too short", Data: []byte{0x80, 0xc9, 0x00, 0x00}},
+		{Name: "receiver report truncated report", Data: append([]byte{0x81, 0xc9, 0x00, 0x02}, make([]byte, 8)...)},
+		{Name: "receiver report count mismatch", Data: []byte{0x81, 0xc9, 0x00, 0x01, 0, 0, 0, 0}},
+		{Name: "source description short chunk", Data: []byte{0x81, 0xca, 0x00, 0x01, 0, 0, 0, 0}},
+		{Name: "source description item overrun", Data: []byte{0x81, 0xca, 0x00, 0x02, 0, 0, 0, 0, 0x01, 0xc8, 0x00, 0x00}},
+		{
+			Name: "source description missing terminator",
+			Data: []byte{0x81, 0xca, 0x00, 0x02, 0, 0, 0, 0, 0x01, 0x02, 0x00, 0x00},
+		},
+		{
+			Name: "source description short item",
+			Data: []byte{0x81, 0xca, 0x00, 0x02, 0, 0, 0, 0, 0x01, 0x01, 0x00, 0x01},
+		},
+		{Name: "source description count mismatch", Data: []byte{0x82, 0xca, 0x00, 0x02, 0, 0, 0, 0, 0, 0, 0, 0}},
+		{Name: "goodbye sources overrun", Data: []byte{0x82, 0xcb, 0x00, 0x01, 0, 0, 0, 0}},
+		{Name: "application defined too short", Data: []byte{0x80, 0xcc, 0x00, 0x01, 0, 0, 0, 0}},
+		{Name: "nack too short", Data: []byte{0x81, 0xcd, 0x00, 0x01, 0, 0, 0, 0}},
+		{Name: "rrr too short", Data: []byte{0x85, 0xcd, 0x00, 0x01, 0, 0, 0, 0}},
+		{Name: "pli too short", Data: []byte{0x81, 0xce, 0x00, 0x01, 0, 0, 0, 0}},
+		{Name: "fir without entries", Data: append([]byte{0x84, 0xce, 0x00, 0x02}, make([]byte, 8)...)},
+		{Name: "remb too short", Data: append([]byte{0x8f, 0xce, 0x00, 0x03}, make([]byte, 12)...)},
+		{
+			Name: "remb wrong identifier",
+			Data: append(append([]byte{0x8f, 0xce, 0x00, 0x04}, make([]byte, 8)...), 'O', 'P', 'U', 'S', 0, 0, 0, 0),
+		},
+		{
+			Name: "remb ssrc count mismatch",
+			Data: append(append([]byte{0x8f, 0xce, 0x00, 0x04}, make([]byte, 8)...), 'R', 'E', 'M', 'B', 0x05, 0, 0, 0),
+		},
+		{Name: "ccfb too short", Data: []byte{0x8b, 0xcd, 0x00, 0x01, 0, 0, 0, 0}},
+		{Name: "ccfb metric overrun", Data: append(append([]byte{0x8b, 0xcd, 0x00, 0x03}, make([]byte, 10)...), 0xff, 0xff)},
+		{Name: "xr too short", Data: []byte{0x80, 0xcf, 0x00, 0x00}},
+		{
+			Name: "xr short rle block",
+			Data: append(append([]byte{0x80, 0xcf, 0x00, 0x02}, make([]byte, 4)...), 0x01, 0x00, 0x00, 0x00),
+		},
+	} {
+		t.Run(test.Name, func(t *testing.T) {
+			_, err := RawPacket(test.Data).ParseDestinationSSRC(nil)
+			assert.Error(t, err)
+		})
+	}
+}
+
 // The append APIs exist to be allocation-free with reused buffers; pin that
 // to zero for every packet type in the corpus.
 func TestRawPacketAllocations(t *testing.T) {
