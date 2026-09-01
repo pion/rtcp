@@ -237,7 +237,9 @@ func (r *SenderReport) MarshalSize() int {
 		repsLength += rep.len()
 	}
 
-	return headerLength + srHeaderLength + repsLength + len(r.ProfileExtensions)
+	extLength := len(r.ProfileExtensions)
+
+	return headerLength + srHeaderLength + repsLength + extLength + getPadding(extLength)
 }
 
 // Header returns the Header associated with this packet.

@@ -4,6 +4,7 @@
 package rtcp
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -152,4 +153,54 @@ func TestUnmarshalMaxLengthRawPacket(t *testing.T) {
 	parsed, ok := packets[0].(*RawPacket)
 	assert.True(t, ok)
 	assert.Equal(t, rawPacket, []byte(*parsed))
+}
+
+// Sender and receiver reports carry profile-specific extensions that are padded
+// out to a whole 32-bit word, so both the header length field and MarshalSize
+// have to account for that padding.
+func TestReportProfileExtensionsRoundTrip(t *testing.T) {
+	for _, extLength := range []int{1, 4, 5, 8, 24} {
+		extensions := bytes.Repeat([]byte{0xab}, extLength)
+		padded := append(bytes.Repeat([]byte{0xab}, extLength), make([]byte, getPadding(extLength))...)
+		reports := []ReceptionReport{{SSRC: 2}}
+
+		receiverReport := &ReceiverReport{SSRC: 1, Reports: reports, ProfileExtensions: extensions}
+		senderReport := &SenderReport{SSRC: 1, Reports: reports, ProfileExtensions: extensions}
+
+		for _, test := range []struct {
+			Name   string
+			Packet Packet
+			Header func() Header
+			Want   Packet
+		}{
+			{
+				Name:   "ReceiverReport",
+				Packet: receiverReport,
+				Header: receiverReport.Header,
+				Want:   &ReceiverReport{SSRC: 1, Reports: reports, ProfileExtensions: padded},
+			},
+			{
+				Name:   "SenderReport",
+				Packet: senderReport,
+				Header: senderReport.Header,
+				Want:   &SenderReport{SSRC: 1, Reports: reports, ProfileExtensions: padded},
+			},
+		} {
+			data, err := test.Packet.Marshal()
+			assert.NoErrorf(t, err, "Marshal %s with %d extension bytes", test.Name, extLength)
+
+			assert.Lenf(t, data, test.Packet.MarshalSize(),
+				"MarshalSize %s with %d extension bytes", test.Name, extLength)
+			assert.Equalf(t, uint16(len(data)/4-1), test.Header().Length, //nolint:gosec // G115
+				"header length %s with %d extension bytes", test.Name, extLength)
+
+			packets, err := Unmarshal(data)
+			assert.NoErrorf(t, err, "Unmarshal %s with %d extension bytes", test.Name, extLength)
+			if !assert.Lenf(t, packets, 1, "packet count %s with %d extension bytes", test.Name, extLength) {
+				continue
+			}
+			assert.Equalf(t, test.Want, packets[0],
+				"round trip %s with %d extension bytes", test.Name, extLength)
+		}
+	}
 }
