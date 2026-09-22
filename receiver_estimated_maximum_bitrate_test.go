@@ -127,4 +127,6 @@ func TestReceiverEstimatedMaximumBitrateOverflow(t *testing.T) {
 	err = packet.Unmarshal(input)
 	assert.NoError(err)
 	assert.Equal(math.Float32frombits(0x62800000), packet.Bitrate)
+
+	assert.Equal("ReceiverEstimatedMaximumBitrate 0 1.18 Zb/s", packet.String())
 }

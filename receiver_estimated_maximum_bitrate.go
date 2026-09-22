@@ -268,7 +268,7 @@ func (p *ReceiverEstimatedMaximumBitrate) Header() Header {
 // String prints the REMB packet in a human-readable format.
 func (p *ReceiverEstimatedMaximumBitrate) String() string {
 	// Keep a table of powers to units for fast conversion.
-	bitUnits := []string{"b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb"}
+	bitUnits := []string{"b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb"}
 
 	// Do some unit conversions because b/s is far too difficult to read.
 	bitrate := p.Bitrate
