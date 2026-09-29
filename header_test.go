@@ -105,3 +105,17 @@ func TestHeaderRoundTrip(t *testing.T) {
 		assert.Equalf(t, test.Header, decoded, "%q header round trip mismatch", test.Name)
 	}
 }
+
+func TestPacketTypeString(t *testing.T) {
+	for _, test := range []struct {
+		Type PacketType
+		Want string
+	}{
+		{TypeSenderReport, "SR"},
+		{TypeExtendedReport, "XR"},
+		{PacketType(65), "invalid value 65"},
+		{PacketType(0), "invalid value 0"},
+	} {
+		assert.Equal(t, test.Want, test.Type.String())
+	}
+}

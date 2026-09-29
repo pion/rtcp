@@ -49,7 +49,7 @@ func (s SDESType) String() string {
 	case SDESPrivate:
 		return "PRIV"
 	default:
-		return string(s)
+		return fmt.Sprintf("invalid value %d", uint8(s))
 	}
 }
 

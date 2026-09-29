@@ -5,6 +5,7 @@ package rtcp
 
 import (
 	"encoding/binary"
+	"fmt"
 )
 
 // PacketType specifies the type of an RTCP packet.
@@ -59,7 +60,7 @@ func (p PacketType) String() string {
 	case TypeExtendedReport:
 		return "XR"
 	default:
-		return string(p)
+		return fmt.Sprintf("invalid value %d", uint8(p))
 	}
 }
 

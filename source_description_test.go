@@ -375,3 +375,17 @@ func TestSourceDescriptionRoundTripMaxLength(t *testing.T) {
 	assert.NoError(t, decoded.Unmarshal(data))
 	assert.Equal(t, desc, decoded)
 }
+
+func TestSDESTypeString(t *testing.T) {
+	for _, test := range []struct {
+		Type SDESType
+		Want string
+	}{
+		{SDESCNAME, "CNAME"},
+		{SDESPrivate, "PRIV"},
+		{SDESType(65), "invalid value 65"},
+		{SDESType(200), "invalid value 200"},
+	} {
+		assert.Equal(t, test.Want, test.Type.String())
+	}
+}
