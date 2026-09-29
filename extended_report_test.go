@@ -264,3 +264,22 @@ func TestDecode(t *testing.T) {
 	}
 	assert.True(t, includeSenderSSRC, "DestinationSSRC does not include the SenderSSRC")
 }
+
+func TestExtendedReportMarshalSize(t *testing.T) {
+	packet := testPacket()
+	rawPacket, err := packet.Marshal()
+	assert.NoError(t, err)
+	assert.Equal(t, len(rawPacket), packet.MarshalSize())
+
+	compound := CompoundPacket{
+		&SenderReport{SSRC: 1},
+		&SourceDescription{Chunks: []SourceDescriptionChunk{{
+			Source: 1,
+			Items:  []SourceDescriptionItem{{Type: SDESCNAME, Text: "cname"}},
+		}}},
+		packet,
+	}
+	rawCompound, err := compound.Marshal()
+	assert.NoError(t, err)
+	assert.Equal(t, len(rawCompound), compound.MarshalSize())
+}
