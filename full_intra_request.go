@@ -86,6 +86,21 @@ func (p *FullIntraRequest) Unmarshal(rawPacket []byte) error {
 	return nil
 }
 
+func appendFIRSSRCs(dst []uint32, header Header, pkt []byte) ([]uint32, error) {
+	if header.Type != TypePayloadSpecificFeedback || header.Count != FormatFIR {
+		return dst, errWrongType
+	}
+	if 4*int(header.Length)-firOffset <= 0 || (4*int(header.Length))%8 != 0 {
+		return dst, errBadLength
+	}
+	for i := headerLength + firOffset; i < (headerLength + 4*int(header.Length)); i += 8 {
+		entry := pkt[i : i+8]
+		dst = append(dst, binary.BigEndian.Uint32(entry))
+	}
+
+	return dst, nil
+}
+
 // Header returns the Header associated with this packet.
 func (p *FullIntraRequest) Header() Header {
 	return Header{

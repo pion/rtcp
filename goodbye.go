@@ -121,6 +121,23 @@ func (g *Goodbye) Unmarshal(rawPacket []byte) error {
 	return nil
 }
 
+func appendGoodbyeSSRCs(dst []uint32, header Header, pkt []byte) ([]uint32, error) {
+	if header.Type != TypeGoodbye {
+		return dst, errWrongType
+	}
+	reasonOffset := int(headerLength + header.Count*ssrcLength)
+	if reasonOffset > len(pkt) {
+		return dst, errPacketTooShort
+	}
+	for i := 0; i < int(header.Count); i++ {
+		offset := headerLength + i*ssrcLength
+
+		dst = append(dst, binary.BigEndian.Uint32(pkt[offset:]))
+	}
+
+	return dst, nil
+}
+
 // Header returns the Header associated with this packet.
 func (g *Goodbye) Header() Header {
 	return Header{
