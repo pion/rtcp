@@ -140,12 +140,17 @@ func (b *CCFeedbackReport) Header() Header {
 
 // Marshal encodes the Congestion Control Feedback Report in binary.
 func (b CCFeedbackReport) Marshal() ([]byte, error) {
+	marshalSize := b.MarshalSize()
+	if (marshalSize/4-1) > math.MaxUint16 || marshalSize < headerLength {
+		return nil, errPacketTooLarge
+	}
+
 	header := b.Header()
 	headerBuf, err := header.Marshal()
 	if err != nil {
 		return nil, err
 	}
-	length := 4 * (int(header.Length) + 1)
+	length := marshalSize
 	buf := make([]byte, length)
 	copy(buf[:headerLength], headerBuf)
 	binary.BigEndian.PutUint32(buf[headerLength:], b.SenderSSRC)

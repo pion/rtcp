@@ -465,3 +465,21 @@ func TestCCFeedbackReportMarshalMaxLength(t *testing.T) {
 	assert.Equal(t, []byte{0x8b, 0xcd, 0xff, 0xff}, buf[:4])
 	assert.Equal(t, []byte{0x00, 0x00, 0x00, 0x02}, buf[len(buf)-4:])
 }
+
+func TestCCFeedbackReport_MarshalTooLarge(t *testing.T) {
+	report := CCFeedbackReport{
+		SenderSSRC:      1,
+		ReportTimestamp: 2,
+		ReportBlocks:    make([]CCFeedbackReportBlock, 8),
+	}
+	for i := range 8 {
+		report.ReportBlocks[i] = CCFeedbackReportBlock{
+			MediaSSRC:    uint32(i + 1),
+			MetricBlocks: make([]CCFeedbackMetricBlock, maxMetricBlocks),
+		}
+	}
+
+	bin, err := report.Marshal()
+	assert.ErrorIs(t, err, errPacketTooLarge)
+	assert.Nil(t, bin)
+}

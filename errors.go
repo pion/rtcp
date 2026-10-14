@@ -39,4 +39,5 @@ var (
 	errAppDefinedInvalidLength  = errors.New("rtcp: application defined type invalid length")
 	errAppDefinedDataTooLarge   = errors.New("rtcp: application defined data is too large")
 	errAppDefinedInvalidName    = errors.New("rtcp: application defined name must be 4 ASCII chars")
+	errPacketTooLarge           = errors.New("rtcp: packet is too large to fit in RTCP length field")
 )
