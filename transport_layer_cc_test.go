@@ -1179,3 +1179,37 @@ func TestTransportLayerCC_Marshal(t *testing.T) {
 		})
 	}
 }
+
+func TestTransportLayerCC_LengthOverflow(t *testing.T) {
+	packet := TransportLayerCC{
+		Header:            Header{Count: FormatTCC, Type: TypeTransportSpecificFeedback, Padding: true},
+		PacketStatusCount: 32761,
+	}
+	for remaining := packet.PacketStatusCount; remaining > 0; {
+		count := min(remaining, 8191)
+		packet.PacketChunks = append(packet.PacketChunks, &RunLengthChunk{
+			PacketStatusSymbol: TypeTCCPacketReceivedLargeDelta,
+			RunLength:          count,
+		})
+		remaining -= count
+	}
+	for range packet.PacketStatusCount {
+		packet.RecvDeltas = append(packet.RecvDeltas, &RecvDelta{
+			Type: TypeTCCPacketReceivedLargeDelta, Delta: -250,
+		})
+	}
+	packet.Header.Length = 16387
+	assert.Equal(t, 65552, packet.MarshalSize())
+	data, err := packet.Marshal()
+	assert.NoError(t, err)
+	assert.Len(t, data, 65552)
+	var decoded TransportLayerCC
+	assert.NoError(t, decoded.Unmarshal(data))
+	assert.Equal(t, packet.PacketStatusCount, decoded.PacketStatusCount)
+	assert.Equal(t, packet.RecvDeltas, decoded.RecvDeltas)
+
+	packet.PacketChunks = make([]PacketStatusChunk, (1<<18)/2)
+	data, err = packet.Marshal()
+	assert.ErrorIs(t, err, errBadLength)
+	assert.Nil(t, data)
+}
