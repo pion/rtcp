@@ -450,12 +450,13 @@ func (t TransportLayerCC) Marshal() ([]byte, error) {
 	var i int
 	for _, delta := range t.RecvDeltas {
 		b, err := delta.Marshal()
-		if err == nil {
-			copy(payload[recvDeltaOffset+i:], b)
+		if err != nil {
+			return nil, err
+		}
+		copy(payload[recvDeltaOffset+i:], b)
+		i++
+		if delta.Type == TypeTCCPacketReceivedLargeDelta {
 			i++
-			if delta.Type == TypeTCCPacketReceivedLargeDelta {
-				i++
-			}
 		}
 	}
 

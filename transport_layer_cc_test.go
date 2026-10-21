@@ -13,6 +13,40 @@ import (
 
 var _ Packet = (*TransportLayerCC)(nil) // assert is a Packet
 
+func TestTransportLayerCC_MarshalInvalidDelta(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		delta RecvDelta
+	}{
+		{"small negative", RecvDelta{Type: TypeTCCPacketReceivedSmallDelta, Delta: -250}},
+		{"small overflow", RecvDelta{Type: TypeTCCPacketReceivedSmallDelta, Delta: 256 * 250}},
+		{"large underflow", RecvDelta{Type: TypeTCCPacketReceivedLargeDelta, Delta: -32769 * 250}},
+		{"large overflow", RecvDelta{Type: TypeTCCPacketReceivedLargeDelta, Delta: 32768 * 250}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			packet := TransportLayerCC{
+				Header:            Header{Count: FormatTCC, Type: TypeTransportSpecificFeedback, Length: 5},
+				PacketStatusCount: 2,
+				PacketChunks: []PacketStatusChunk{&StatusVectorChunk{
+					SymbolSize: TypeTCCSymbolSizeTwoBit,
+					SymbolList: []uint16{TypeTCCPacketReceivedSmallDelta, test.delta.Type},
+				}},
+				RecvDeltas: []*RecvDelta{
+					{Type: TypeTCCPacketReceivedSmallDelta, Delta: 250},
+					&test.delta,
+				},
+			}
+			if test.delta.Type == TypeTCCPacketReceivedLargeDelta {
+				packet.Header.Length = 6
+				packet.Header.Padding = true
+			}
+			data, err := packet.Marshal()
+			assert.ErrorIs(t, err, errDeltaExceedLimit)
+			assert.Nil(t, data)
+		})
+	}
+}
+
 func TestTransportLayerCC_RunLengthChunkUnmarshal(t *testing.T) {
 	for _, test := range []struct {
 		Name      string
