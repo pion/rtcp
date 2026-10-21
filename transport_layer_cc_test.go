@@ -4,6 +4,8 @@
 package rtcp
 
 import (
+	"encoding/binary"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -1212,4 +1214,32 @@ func TestTransportLayerCC_LengthOverflow(t *testing.T) {
 	data, err = packet.Marshal()
 	assert.ErrorIs(t, err, errBadLength)
 	assert.Nil(t, data)
+}
+
+func TestTransportLayerCC_UnmarshalUnusedVector(t *testing.T) {
+	for _, symbol := range []uint16{0xbfff, 0xeaaa} {
+		for _, missing := range []uint16{0, 65530} {
+			t.Run(fmt.Sprintf("%x/%d", symbol, missing), func(t *testing.T) {
+				header := [20]byte{0x8f, 205, 0, 5}
+				data := header[:]
+				binary.BigEndian.PutUint16(data[14:16], missing+1)
+				for remaining := missing; remaining > 0; {
+					count := min(remaining, 8191)
+					data = binary.BigEndian.AppendUint16(data, count)
+					remaining -= count
+				}
+				data = binary.BigEndian.AppendUint16(data, symbol)
+				data = append(data, 0, 0)
+				if missing > 0 {
+					data = append(data, 0, 0)
+					data[3] = 10
+				}
+
+				var packet TransportLayerCC
+				assert.NoError(t, packet.Unmarshal(data))
+				assert.Len(t, packet.RecvDeltas, 1)
+				assert.Equal(t, missing+1, packet.PacketStatusCount)
+			})
+		}
+	}
 }

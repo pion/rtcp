@@ -533,22 +533,23 @@ func (t *TransportLayerCC) Unmarshal(rawPacket []byte) error {
 			if err != nil {
 				return err
 			}
+			packetNumberToProcess := min(int(t.PacketStatusCount-processedPacketNum), len(packetStatus.SymbolList))
 			if packetStatus.SymbolSize == TypeTCCSymbolSizeOneBit {
-				for j := 0; j < len(packetStatus.SymbolList); j++ {
+				for j := range packetNumberToProcess {
 					if packetStatus.SymbolList[j] == TypeTCCPacketReceivedSmallDelta {
 						t.RecvDeltas = append(t.RecvDeltas, &RecvDelta{Type: TypeTCCPacketReceivedSmallDelta})
 					}
 				}
 			}
 			if packetStatus.SymbolSize == TypeTCCSymbolSizeTwoBit {
-				for j := 0; j < len(packetStatus.SymbolList); j++ {
+				for j := range packetNumberToProcess {
 					if packetStatus.SymbolList[j] == TypeTCCPacketReceivedSmallDelta ||
 						packetStatus.SymbolList[j] == TypeTCCPacketReceivedLargeDelta {
 						t.RecvDeltas = append(t.RecvDeltas, &RecvDelta{Type: packetStatus.SymbolList[j]})
 					}
 				}
 			}
-			processedPacketNum += uint16(len(packetStatus.SymbolList)) //nolint:gosec // G115
+			processedPacketNum += uint16(packetNumberToProcess) //nolint:gosec // bounded by remaining packet count
 		}
 		packetStatusPos += packetStatusChunkLength
 		t.PacketChunks = append(t.PacketChunks, iPacketStatus)
